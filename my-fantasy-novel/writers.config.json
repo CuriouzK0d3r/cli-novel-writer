@@ -1,0 +1,19 @@
+{
+  "name": "The Crystal Chronicles",
+  "author": "Demo Author",
+  "created": "2025-07-29T07:36:17.930Z",
+  "version": "1.0.0",
+  "wordGoal": 75000,
+  "settings": {
+    "autoSave": true,
+    "backups": true,
+    "defaultEditor": "nano"
+  },
+  "structure": {
+    "chapters": "chapters",
+    "scenes": "scenes",
+    "characters": "characters",
+    "notes": "notes",
+    "exports": "exports"
+  }
+}

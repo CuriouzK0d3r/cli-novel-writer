@@ -1,0 +1,19 @@
+{
+  "name": "test",
+  "author": "alexisk",
+  "created": "2025-07-28T18:53:18.501Z",
+  "version": "1.0.0",
+  "wordGoal": 3000,
+  "settings": {
+    "autoSave": true,
+    "backups": true,
+    "defaultEditor": "vim"
+  },
+  "structure": {
+    "chapters": "chapters",
+    "scenes": "scenes",
+    "characters": "characters",
+    "notes": "notes",
+    "exports": "exports"
+  }
+}

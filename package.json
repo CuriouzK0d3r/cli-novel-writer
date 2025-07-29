@@ -1,0 +1,53 @@
+{
+  "name": "writers-cli",
+  "version": "1.0.0",
+  "description": "A CLI tool for writing novels with markdown support",
+  "main": "index.js",
+  "bin": {
+    "writers": "./bin/writers.js"
+  },
+  "scripts": {
+    "start": "node bin/writers.js",
+    "test": "jest",
+    "dev": "nodemon bin/writers.js",
+    "demo": "node demo.js",
+    "demo-editor": "node demo-editor.js"
+  },
+  "keywords": [
+    "writing",
+    "novel",
+    "cli",
+    "markdown",
+    "author",
+    "book"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "boxen": "^5.1.2",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.1.1",
+    "inquirer": "^8.2.6",
+    "marked": "^9.1.2",
+    "moment": "^2.29.4",
+    "ora": "^5.4.1",
+    "word-count": "^0.2.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/writers-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/writers-cli/issues"
+  },
+  "homepage": "https://github.com/yourusername/writers-cli#readme"
+}
