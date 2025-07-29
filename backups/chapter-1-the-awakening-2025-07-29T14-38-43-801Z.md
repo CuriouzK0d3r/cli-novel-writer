@@ -1,3 +1,5 @@
+# Chapter 1: The Awakening
+
 *Created: 2025-07-28*
 
 ---

@@ -174,6 +174,38 @@ class BufferEditor {
     });
 
     this.editor.focus();
+
+    // Enable mouse support on screen and editor
+    this.screen.enableMouse();
+    this.editor.enableMouse();
+
+    // Mouse click navigation
+    this.editor.on("mouse", (data) => {
+      if (
+        (data.action === "mousedown" || data.action === "click") &&
+        typeof data.x === "number" &&
+        typeof data.y === "number"
+      ) {
+        // Calculate relative coordinates inside the editor box
+        const editorLeft = this.editor.aleft || this.editor.left || 0;
+        const editorTop = this.editor.atop || this.editor.top || 0;
+        const x = data.x - editorLeft - 1; // -1 for border
+        const y = data.y - editorTop - 1; // -1 for border
+
+        // Clamp y to visible lines
+        const visibleY = Math.max(0, Math.min(y, this.editor.height - 3)); // -3 for borders and bars
+        const bufferY = this.scrollY + visibleY;
+        if (bufferY >= 0 && bufferY < this.lines.length) {
+          this.cursorY = bufferY;
+          // Clamp x to line length
+          const lineLength = this.lines[this.cursorY]
+            ? this.lines[this.cursorY].length
+            : 0;
+          this.cursorX = Math.max(0, Math.min(x + this.scrollX, lineLength));
+          this.render();
+        }
+      }
+    });
   }
 
   setupKeybindings() {

@@ -1,22 +1,31 @@
-const chalk = require('chalk');
-const inquirer = require('inquirer');
-const projectManager = require('../utils/project');
+const chalk = require("chalk");
+const inquirer = require("inquirer");
+const projectManager = require("../utils/project");
 
 async function newCommand(type, name, options) {
+  // Fix Commander.js argument shifting when [name] is omitted
+  if (typeof name === "object" && name !== null && !Array.isArray(name)) {
+    options = name;
+    name = undefined;
+  }
   try {
     // Check if in a writers project
     if (!projectManager.isWritersProject()) {
-      console.log(chalk.red('❌ Not a Writers project. Run "writers init" to initialize.'));
+      console.log(
+        chalk.red(
+          '❌ Not a Writers project. Run "writers init" to initialize.',
+        ),
+      );
       return;
     }
 
     console.log(chalk.blue.bold(`\n📝 Creating new ${type}...\n`));
 
     // Validate type
-    const validTypes = ['chapter', 'scene', 'character', 'note'];
+    const validTypes = ["chapter", "scene", "character", "note"];
     if (!validTypes.includes(type)) {
       console.log(chalk.red(`❌ Invalid type: ${type}`));
-      console.log(chalk.yellow(`Valid types: ${validTypes.join(', ')}`));
+      console.log(chalk.yellow(`Valid types: ${validTypes.join(", ")}`));
       return;
     }
 
@@ -24,49 +33,49 @@ async function newCommand(type, name, options) {
     if (!name) {
       const { itemName } = await inquirer.prompt([
         {
-          type: 'input',
-          name: 'itemName',
+          type: "input",
+          name: "itemName",
           message: `What is the name of this ${type}?`,
           validate: (input) => {
             if (input.trim().length === 0) {
               return `${type} name cannot be empty`;
             }
             return true;
-          }
-        }
+          },
+        },
       ]);
       name = itemName;
     }
 
     // Pluralize type for directory mapping
     const typeMap = {
-      'chapter': 'chapters',
-      'scene': 'scenes',
-      'character': 'characters',
-      'note': 'notes'
+      chapter: "chapters",
+      scene: "scenes",
+      character: "characters",
+      note: "notes",
     };
 
     const pluralType = typeMap[type];
 
     // Check if using template
-    let template = '';
+    let template = "";
     if (options.template) {
-      template = await getTemplate(options.template, type);
+      template = await getTemplate(options.template, type, name);
     } else {
       // Ask if user wants to use a template
       const { useTemplate } = await inquirer.prompt([
         {
-          type: 'confirm',
-          name: 'useTemplate',
+          type: "confirm",
+          name: "useTemplate",
           message: `Would you like to use a template for this ${type}?`,
-          default: true
-        }
+          default: true,
+        },
       ]);
 
       if (useTemplate) {
         const templateChoice = await selectTemplate(type);
         if (templateChoice) {
-          template = await getTemplate(templateChoice, type);
+          template = await getTemplate(templateChoice, type, name);
         }
       }
     }
@@ -80,39 +89,46 @@ async function newCommand(type, name, options) {
     // Ask if user wants to start writing immediately
     const { startWriting } = await inquirer.prompt([
       {
-        type: 'confirm',
-        name: 'startWriting',
+        type: "confirm",
+        name: "startWriting",
         message: `Would you like to start writing in this ${type} now?`,
-        default: true
-      }
+        default: true,
+      },
     ]);
 
     if (startWriting) {
-      const writeCommand = require('./write');
-      await writeCommand(result.name.toLowerCase().replace(/\s+/g, '-'));
+      const writeCommand = require("./write");
+      await writeCommand(result.name.toLowerCase().replace(/\s+/g, "-"), {});
     } else {
-      console.log(chalk.blue(`\n💡 To start writing: ${chalk.yellow(`writers write ${result.name.toLowerCase().replace(/\s+/g, '-')}`)}`));
+      console.log(
+        chalk.blue(
+          `\n💡 To start writing: ${chalk.yellow(`writers write ${result.name.toLowerCase().replace(/\s+/g, "-")}`)}`,
+        ),
+      );
     }
-
   } catch (error) {
-    if (error.message.includes('already exists')) {
+    if (error.message.includes("already exists")) {
       console.log(chalk.yellow(`⚠️  ${error.message}`));
 
       const { overwrite } = await inquirer.prompt([
         {
-          type: 'confirm',
-          name: 'overwrite',
-          message: 'Would you like to overwrite it?',
-          default: false
-        }
+          type: "confirm",
+          name: "overwrite",
+          message: "Would you like to overwrite it?",
+          default: false,
+        },
       ]);
 
       if (overwrite) {
         // TODO: Implement overwrite functionality
-        console.log(chalk.gray('Overwrite functionality coming soon. Please use a different name for now.'));
+        console.log(
+          chalk.gray(
+            "Overwrite functionality coming soon. Please use a different name for now.",
+          ),
+        );
       }
     } else {
-      console.error(chalk.red('❌ Error creating new item:'), error.message);
+      console.error(chalk.red("❌ Error creating new item:"), error.message);
     }
   }
 }
@@ -126,14 +142,11 @@ async function selectTemplate(type) {
 
   const { template } = await inquirer.prompt([
     {
-      type: 'list',
-      name: 'template',
+      type: "list",
+      name: "template",
       message: `Select a template for your ${type}:`,
-      choices: [
-        ...templates,
-        { name: 'None (use default)', value: null }
-      ]
-    }
+      choices: [...templates, { name: "None (use default)", value: null }],
+    },
   ]);
 
   return template;
@@ -142,38 +155,38 @@ async function selectTemplate(type) {
 function getAvailableTemplates(type) {
   const templates = {
     chapter: [
-      { name: 'Basic Chapter', value: 'basic' },
-      { name: 'Action Scene', value: 'action' },
-      { name: 'Dialogue Heavy', value: 'dialogue' },
-      { name: 'Flashback', value: 'flashback' }
+      { name: "Basic Chapter", value: "basic" },
+      { name: "Action Scene", value: "action" },
+      { name: "Dialogue Heavy", value: "dialogue" },
+      { name: "Flashback", value: "flashback" },
     ],
     scene: [
-      { name: 'Basic Scene', value: 'basic' },
-      { name: 'Conflict Scene', value: 'conflict' },
-      { name: 'Romance Scene', value: 'romance' },
-      { name: 'Setting Description', value: 'setting' }
+      { name: "Basic Scene", value: "basic" },
+      { name: "Conflict Scene", value: "conflict" },
+      { name: "Romance Scene", value: "romance" },
+      { name: "Setting Description", value: "setting" },
     ],
     character: [
-      { name: 'Protagonist', value: 'protagonist' },
-      { name: 'Antagonist', value: 'antagonist' },
-      { name: 'Supporting Character', value: 'supporting' },
-      { name: 'Minor Character', value: 'minor' }
+      { name: "Protagonist", value: "protagonist" },
+      { name: "Antagonist", value: "antagonist" },
+      { name: "Supporting Character", value: "supporting" },
+      { name: "Minor Character", value: "minor" },
     ],
     note: [
-      { name: 'Plot Note', value: 'plot' },
-      { name: 'Research Note', value: 'research' },
-      { name: 'World Building', value: 'worldbuilding' },
-      { name: 'Timeline', value: 'timeline' }
-    ]
+      { name: "Plot Note", value: "plot" },
+      { name: "Research Note", value: "research" },
+      { name: "World Building", value: "worldbuilding" },
+      { name: "Timeline", value: "timeline" },
+    ],
   };
 
   return templates[type] || [];
 }
 
-async function getTemplate(templateName, type) {
+async function getTemplate(templateName, type, name) {
   const templates = {
     // Chapter templates
-    'action': `# {TITLE}
+    action: `# {TITLE}
 
 *Created: {DATE}*
 
@@ -202,7 +215,7 @@ The tension in the air was palpable as...
 
 `,
 
-    'dialogue': `# {TITLE}
+    dialogue: `# {TITLE}
 
 *Created: {DATE}*
 
@@ -230,7 +243,7 @@ Character-driven chapter focused on dialogue and relationships
 
 `,
 
-    'flashback': `# {TITLE}
+    flashback: `# {TITLE}
 
 *Created: {DATE}*
 
@@ -261,7 +274,7 @@ The memory came flooding back as if it were yesterday...
 `,
 
     // Scene templates
-    'conflict': `# {TITLE}
+    conflict: `# {TITLE}
 
 *Created: {DATE}*
 
@@ -288,7 +301,7 @@ The disagreement had been simmering for weeks, but now it erupted...
 
 `,
 
-    'romance': `# {TITLE}
+    romance: `# {TITLE}
 
 *Created: {DATE}*
 
@@ -316,7 +329,7 @@ Their eyes met across the crowded room...
 
 `,
 
-    'setting': `# {TITLE}
+    setting: `# {TITLE}
 
 *Created: {DATE}*
 
@@ -351,7 +364,7 @@ The ancient city sprawled before them like a forgotten dream...
 `,
 
     // Character templates
-    'protagonist': `# {TITLE}
+    protagonist: `# {TITLE}
 
 *Created: {DATE}*
 
@@ -403,7 +416,7 @@ Character development ideas and inspirations...
 
 `,
 
-    'antagonist': `# {TITLE}
+    antagonist: `# {TITLE}
 
 *Created: {DATE}*
 
@@ -455,7 +468,7 @@ Complex motivations and development ideas...
 `,
 
     // Note templates
-    'plot': `# Plot Note: {TITLE}
+    plot: `# Plot Note: {TITLE}
 
 *Created: {DATE}*
 
@@ -499,7 +512,7 @@ Complex motivations and development ideas...
 
 `,
 
-    'research': `# Research Note: {TITLE}
+    research: `# Research Note: {TITLE}
 
 *Created: {DATE}*
 
@@ -542,7 +555,7 @@ Complex motivations and development ideas...
 
 `,
 
-    'worldbuilding': `# World Building: {TITLE}
+    worldbuilding: `# World Building: {TITLE}
 
 *Created: {DATE}*
 
@@ -586,15 +599,15 @@ Complex motivations and development ideas...
 ## Development Ideas
 
 
-`
+`,
   };
 
-  let template = templates[templateName] || '';
+  let template = templates[templateName] || "";
 
   // Replace placeholders
-  const timestamp = new Date().toISOString().split('T')[0];
+  const timestamp = new Date().toISOString().split("T")[0];
   template = template.replace(/{DATE}/g, timestamp);
-  template = template.replace(/{TITLE}/g, name || 'Untitled');
+  template = template.replace(/{TITLE}/g, name || "Untitled");
 
   return template;
 }
