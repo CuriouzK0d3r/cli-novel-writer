@@ -1,0 +1,165 @@
+# Focused Typewriter Mode Demo
+
+Welcome to the enhanced typewriter mode demonstration! This file is specifically designed to showcase the new focused window feature with dimming.
+
+## What You'll Experience
+
+When you enable typewriter mode (F9), you'll notice:
+1. Only the current line and 1 line before/after it appear bright
+2. All other lines are dimmed (dark gray) to reduce distraction
+3. The focus window moves smoothly as you navigate
+4. Your cursor stays at a comfortable position on screen
+
+## Instructions for Testing
+
+1. Press F9 to enable typewriter mode
+2. Use arrow keys to move between lines and watch the focus window
+3. Press 'i' to enter insert mode
+4. Navigate to the end of this file and start typing
+5. Notice how the dimming creates a distraction-free writing zone
+
+## Sample Content for Navigation Testing
+
+Line 1: This line should be dimmed when you're at line 10
+Line 2: This line should be dimmed when you're at line 10
+Line 3: This line should be dimmed when you're at line 10
+Line 4: This line should be dimmed when you're at line 10
+Line 5: This line should be dimmed when you're at line 10
+Line 6: This line should be dimmed when you're at line 10
+Line 7: This line should be dimmed when you're at line 10
+Line 8: This line should be dimmed when you're at line 10
+Line 9: This line should be visible when you're at line 10 (cursor-1)
+Line 10: THIS IS THE CURSOR LINE - should always be bright
+Line 11: This line should be visible when you're at line 10 (cursor+1)
+Line 12: This line should be dimmed when you're at line 10
+Line 13: This line should be dimmed when you're at line 10
+Line 14: This line should be dimmed when you're at line 10
+Line 15: This line should be dimmed when you're at line 10
+Line 16: This line should be dimmed when you're at line 10
+Line 17: This line should be dimmed when you're at line 10
+Line 18: This line should be dimmed when you're at line 10
+Line 19: This line should be dimmed when you're at line 10
+Line 20: This line should be dimmed when you're at line 10
+
+## Writing Flow Demonstration
+
+This section demonstrates how typewriter mode enhances the writing experience.
+
+### Traditional Writing Challenges:
+- Cursor drifts to bottom of screen as you type
+- Previous content remains distractingly visible
+- Eyes constantly adjust to different cursor positions
+- Hard to maintain focus on current work
+
+### Focused Typewriter Mode Solutions:
+- Cursor stays at consistent 2/3 position on screen
+- Previous content fades to gray, reducing visual noise
+- Only current work area (3 lines total) stays bright
+- Creates a natural "spotlight" effect on your writing
+
+## Test Your Writing Experience
+
+Position your cursor below this line and start typing a story, journal entry, or any content. Notice how:
+
+- The focus window follows your cursor
+- Completed text dims automatically
+- You maintain focus on current work
+- No manual scrolling needed
+- Distraction-free writing environment
+
+---
+
+## Feature Comparison
+
+### Normal Mode:
+- All text equally bright
+- Cursor position varies
+- Easy to get distracted by previous content
+- Manual scrolling required
+
+### Typewriter Mode with Focused Window:
+- Only 3 lines bright (current + 1 above + 1 below)
+- Cursor stays at optimal position
+- Previous content dimmed but still readable
+- Automatic scrolling
+- Enhanced concentration
+
+## Advanced Testing
+
+Try these scenarios to fully experience the feature:
+
+1. **Navigation Test**: Use arrow keys to move through this document
+   - Watch how the focus window slides smoothly
+   - Notice dimmed content above and below
+
+2. **Writing Test**: Go to the end and type several paragraphs
+   - See how completed text automatically dims
+   - Experience the distraction-free writing zone
+
+3. **Editing Test**: Move to middle of document and edit existing text
+   - Focus window works for editing too
+   - Easy to concentrate on specific sections
+
+4. **Toggle Test**: Press F9 to turn typewriter mode on/off
+   - Compare the difference in visual focus
+   - Normal mode shows all text equally
+
+## Configuration Notes
+
+The focused window is configurable:
+- Default: Current line ± 1 line (3 total)
+- Can be adjusted in settings
+- Saved per project in writers.config.json
+
+## Long Content for Scrolling Test
+
+Here are many lines to test the scrolling behavior. When typewriter mode is enabled, you should see the focus window move smoothly as you navigate through this content.
+
+Paragraph 1: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+
+Paragraph 2: Nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
+
+Paragraph 3: Sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.
+
+Paragraph 4: Eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.
+
+Paragraph 5: Sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.
+
+Paragraph 6: Sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis.
+
+Paragraph 7: Suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.
+
+Paragraph 8: Vel illum qui dolorem eum fugiat quo voluptas nulla pariatur. At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.
+
+Paragraph 9: Quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.
+
+Paragraph 10: Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.
+
+## Creative Writing Exercise
+
+Use this space to test the focused typewriter mode with your own writing. Try writing a short story, poem, or journal entry. Notice how the dimmed surroundings help you focus on your current thoughts without the distraction of previous content.
+
+Your writing starts here:
+
+[Position cursor here and start typing with typewriter mode enabled]
+
+---
+
+## Tips for Best Experience
+
+1. **Enable typewriter mode first** (F9) before starting to write
+2. **Use a dark terminal theme** for better contrast with dimmed text
+3. **Adjust terminal size** - larger windows provide more context
+4. **Combine with distraction-free mode** (F11) for maximum focus
+5. **Toggle off when reviewing** - normal mode better for editing existing content
+
+## Conclusion
+
+The focused typewriter mode transforms your writing experience by:
+- Creating a natural spotlight on current work
+- Reducing visual distractions from completed content
+- Maintaining optimal cursor positioning
+- Providing smooth, automatic scrolling
+- Enhancing concentration and writing flow
+
+Press F9 to toggle the mode on/off and experience the difference for yourself!

@@ -15,7 +15,7 @@ A comprehensive writing tool for novelists and short story writers with both com
 ### Powerful CLI Tools
 - **Project Initialization**: Set up structured writing projects
 - **Content Creation**: Generate chapters, characters, scenes with templates
-- **Writing Environment**: Built-in editor with distraction-free mode and typewriter mode
+- **Writing Environment**: Built-in editor with distraction-free mode and focused typewriter mode
 - **Statistics & Analytics**: Detailed word counts and progress tracking
 - **Export Options**: Multiple format support (HTML, PDF, EPUB, etc.)
 - **Backup System**: Automatic project backups
@@ -163,7 +163,7 @@ writers export pdf --output "my-novel.pdf"
 ## 🔧 Advanced Features
 
 ### Writing Features
-- **Typewriter Mode**: Keep your cursor centered while writing (toggle with F9)
+- **Focused Typewriter Mode**: Keep cursor centered with dimmed surroundings for distraction-free writing (F9)
 - **Distraction-Free Mode**: Full-screen writing environment (F11)
 - **Auto-save**: Automatic saving every 30 seconds
 - **Word Count Tracking**: Real-time statistics as you write
@@ -264,7 +264,7 @@ MIT License - see LICENSE file for details.
 ## 🎉 What's New
 
 ### Latest Version Features
-- **Typewriter Mode**: New focused writing mode that keeps cursor centered (F9)
+- **Focused Typewriter Mode**: New writing mode with cursor centering and dimmed surroundings (F9)
 - **Comprehensive GUI**: Full graphical interface with all CLI features
 - **Real-time Statistics**: Live progress tracking and analytics
 - **Enhanced Editor**: Improved writing experience with auto-save
@@ -273,7 +273,7 @@ MIT License - see LICENSE file for details.
 - **Project Management**: Complete project lifecycle support
 
 ### Recent Updates
-- Added typewriter mode for focused writing experience
+- Added focused typewriter mode with dimming for distraction-free writing
 - Added comprehensive GUI interface
 - Improved file organization system
 - Enhanced statistics and progress tracking

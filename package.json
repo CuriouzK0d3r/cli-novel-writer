@@ -16,6 +16,9 @@
     "demo-editor": "node demo-editor.js",
     "demo-gui": "node demo-gui.js",
     "test-typewriter": "node test-typewriter.js",
+    "test-focused-typewriter": "node test-focused-typewriter.js",
+    "test-focused-window": "node test-focused-window.js",
+    "test-dimming-comparison": "node test-dimming-comparison.js",
     "test-navigation": "node test-navigation.js",
     "build": "pkg --config pkg.config.json bin/writers.js"
   },

@@ -9,7 +9,8 @@
     "backups": true,
     "defaultEditor": "vim",
     "editor": {
-      "typewriterMode": false
+      "typewriterMode": false,
+      "typewriterFocusLines": 2
     }
   },
   "structure": {

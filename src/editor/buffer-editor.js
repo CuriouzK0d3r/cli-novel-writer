@@ -52,6 +52,7 @@ class BufferEditor {
     this.typewriterMode = false;
     this.typewriterTargetLine = null; // Target line position for typewriter mode
     this.lastCursorY = 0; // Track cursor movement direction
+    this.typewriterFocusLines = 1; // Number of lines before/after cursor to keep in focus
 
     // Configuration
     this.config = {
@@ -63,6 +64,7 @@ class BufferEditor {
       wrapText: false,
       typewriterMode: false,
       typewriterPosition: 0.66, // Position as ratio of screen height (0.66 = 2/3 down)
+      typewriterFocusLines: 1, // Number of lines before/after cursor to keep in focus
     };
   }
 
@@ -91,11 +93,17 @@ class BufferEditor {
             config.settings?.editor?.typewriterMode ||
             this.config.typewriterMode ||
             false;
+          this.typewriterFocusLines =
+            config.settings?.editor?.typewriterFocusLines ||
+            this.config.typewriterFocusLines ||
+            1;
         } else {
           this.typewriterMode = this.config.typewriterMode || false;
+          this.typewriterFocusLines = this.config.typewriterFocusLines || 1;
         }
       } catch (error) {
         this.typewriterMode = this.config.typewriterMode || false;
+        this.typewriterFocusLines = this.config.typewriterFocusLines || 1;
       }
 
       // Auto-save timer
@@ -745,6 +753,17 @@ class BufferEditor {
           startX + editorWidth - (this.showLineNumbers ? 5 : 0),
         );
 
+        // Check if this line should be dimmed in typewriter mode
+        const shouldDimLine =
+          this.typewriterMode &&
+          (lineIndex < this.cursorY - this.typewriterFocusLines ||
+            lineIndex > this.cursorY + this.typewriterFocusLines);
+
+        // Apply dimming to the line content if needed
+        if (shouldDimLine) {
+          lineContent = `{#333333-fg}${lineContent}{/}`;
+        }
+
         // Handle cursor rendering for this line
         const screenY = this.cursorY - this.scrollY;
         const cursorScreenX =
@@ -767,18 +786,48 @@ class BufferEditor {
 
           if (this.mode === "insert") {
             // Line cursor for insert mode - show a vertical bar at cursor position
-            lineContent = beforeCursor + `|` + afterCursor;
+            if (shouldDimLine) {
+              // Remove dimming tags and reapply around cursor
+              const cleanContent = lineContent.replace(
+                /\{#333333-fg\}|\{\/\}/g,
+                "",
+              );
+              const cleanBefore = cleanContent.substring(0, cursorPos);
+              const cleanAfter = cleanContent.substring(cursorPos);
+              lineContent = `{#333333-fg}${cleanBefore}{/}|{#333333-fg}${cleanAfter}{/}`;
+            } else {
+              lineContent = beforeCursor + `|` + afterCursor;
+            }
           } else {
             // Block cursor for navigation mode - invert the character at cursor position
-            const afterChar = lineContent.substring(cursorPos + 1);
-            lineContent =
-              beforeCursor + `{inverse}${char}{/inverse}` + afterChar;
+            if (shouldDimLine) {
+              // Remove dimming tags and reapply around cursor
+              const cleanContent = lineContent.replace(
+                /\{#333333-fg\}|\{\/\}/g,
+                "",
+              );
+              const cleanBefore = cleanContent.substring(0, cursorPos);
+              const cleanChar =
+                cursorPos < cleanContent.length ? cleanContent[cursorPos] : " ";
+              const cleanAfter = cleanContent.substring(cursorPos + 1);
+              lineContent = `{#333333-fg}${cleanBefore}{/}{inverse}${cleanChar}{/inverse}{#333333-fg}${cleanAfter}{/}`;
+            } else {
+              const afterChar = lineContent.substring(cursorPos + 1);
+              lineContent =
+                beforeCursor + `{inverse}${char}{/inverse}` + afterChar;
+            }
           }
         }
 
         line += lineContent;
       } else if (this.showLineNumbers) {
         line = "     ";
+
+        // Check if this empty line should be dimmed in typewriter mode
+        const shouldDimLine =
+          this.typewriterMode &&
+          (lineIndex < this.cursorY - this.typewriterFocusLines ||
+            lineIndex > this.cursorY + this.typewriterFocusLines);
 
         // Handle cursor on empty lines
         const screenY = this.cursorY - this.scrollY;
@@ -791,8 +840,16 @@ class BufferEditor {
           } else {
             line += "{inverse} {/inverse}";
           }
+        } else if (shouldDimLine) {
+          line += "{#333333-fg} {/}";
         }
       } else {
+        // Check if this empty line should be dimmed in typewriter mode
+        const shouldDimLine =
+          this.typewriterMode &&
+          (lineIndex < this.cursorY - this.typewriterFocusLines ||
+            lineIndex > this.cursorY + this.typewriterFocusLines);
+
         // Handle cursor on empty lines without line numbers
         const screenY = this.cursorY - this.scrollY;
         const cursorScreenX = this.cursorX - this.scrollX;
@@ -803,6 +860,8 @@ class BufferEditor {
           } else {
             line = "{inverse} {/inverse}";
           }
+        } else if (shouldDimLine) {
+          line = "{#333333-fg} {/}";
         }
       }
 
@@ -1248,6 +1307,7 @@ class BufferEditor {
           config.settings.editor = {};
         }
         config.settings.editor.typewriterMode = this.typewriterMode;
+        config.settings.editor.typewriterFocusLines = this.typewriterFocusLines;
         await projectManager.updateConfig(config);
       }
     } catch (error) {

@@ -465,7 +465,7 @@ Search and Replace:
 
 View:
   F11            Toggle distraction-free mode
-  F9             Toggle typewriter mode
+  F9             Toggle typewriter mode (focused window with dimming)
   Ctrl+W         Show document statistics
   F1             Show this help
 
@@ -476,7 +476,7 @@ Writing Features:
   - Line numbers
   - Modal editing for focused writing
   - Distraction-free writing mode
-  - Typewriter mode (keeps cursor centered while typing)
+  - Typewriter mode with focused window (dims all but current ±1 line)
   - Markdown-aware word counting
 
 Tips for Modal Editing:
