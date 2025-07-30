@@ -110,6 +110,7 @@ async function gatherProjectInfo(options) {
       "Young Adult",
       "Children's",
       "Biography",
+      "Short Stories",
       "Other",
     ],
     default: "Fiction",
@@ -157,6 +158,7 @@ ${chalk.bold("Project Details:")}
 
 ${chalk.bold("Next Steps:")}
 ${chalk.green("•")} Create your first chapter: ${chalk.yellow('writers new chapter "Chapter 1"')}
+${chalk.green("•")} Create a short story: ${chalk.yellow('writers new shortstory "Story Title"')}
 ${chalk.green("•")} Start writing: ${chalk.yellow("writers write chapter1")}
 ${chalk.green("•")} View project stats: ${chalk.yellow("writers stats")}
 ${chalk.green("•")} List all content: ${chalk.yellow("writers list")}
@@ -165,6 +167,7 @@ ${chalk.bold("Project Structure:")}
 📂 chapters/     - Your main story chapters
 📂 scenes/       - Individual scenes and drafts
 📂 characters/   - Character profiles and development
+📂 shortstories/ - Complete short stories
 📂 notes/        - Research, plot notes, and ideas
 📂 exports/      - Exported versions of your work
 

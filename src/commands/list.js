@@ -37,6 +37,7 @@ async function showCompleteList() {
     { name: "scenes", icon: "🎬", color: chalk.green },
     { name: "characters", icon: "👤", color: chalk.yellow },
     { name: "notes", icon: "📝", color: chalk.magenta },
+    { name: "shortstories", icon: "📚", color: chalk.cyan },
   ];
 
   let totalFiles = 0;
@@ -149,6 +150,8 @@ async function showFilteredList(typeFilter) {
     characters: "characters",
     note: "notes",
     notes: "notes",
+    shortstory: "shortstories",
+    shortstories: "shortstories",
   };
 
   const category = typeMap[typeFilter.toLowerCase()];
@@ -156,7 +159,9 @@ async function showFilteredList(typeFilter) {
   if (!category) {
     console.log(chalk.red(`❌ Invalid type: ${typeFilter}`));
     console.log(
-      chalk.yellow("Valid types: chapters, scenes, characters, notes"),
+      chalk.yellow(
+        "Valid types: chapters, scenes, characters, notes, shortstories",
+      ),
     );
     return;
   }
@@ -167,7 +172,7 @@ async function showFilteredList(typeFilter) {
     console.log(chalk.yellow(`No ${category} found.`));
     console.log(
       chalk.blue(
-        `Create one with: ${chalk.yellow(`writers new ${category.slice(0, -1)} "<name>"`)}`,
+        `Create one with: ${chalk.yellow(`writers new ${category === "shortstories" ? "shortstory" : category.slice(0, -1)} "<n>"`)}`,
       ),
     );
     return;
@@ -178,6 +183,7 @@ async function showFilteredList(typeFilter) {
     scenes: "🎬",
     characters: "👤",
     notes: "📝",
+    shortstories: "📚",
   }[category];
 
   const color = {
@@ -185,6 +191,7 @@ async function showFilteredList(typeFilter) {
     scenes: chalk.green,
     characters: chalk.yellow,
     notes: chalk.magenta,
+    shortstories: chalk.cyan,
   }[category];
 
   console.log(
@@ -348,8 +355,14 @@ async function showFilteredList(typeFilter) {
         name: "action",
         message: `What would you like to do with these ${category}?`,
         choices: [
-          { name: `Edit a ${category.slice(0, -1)}`, value: "edit" },
-          { name: `Create new ${category.slice(0, -1)}`, value: "new" },
+          {
+            name: `Edit a ${category === "shortstories" ? "short story" : category.slice(0, -1)}`,
+            value: "edit",
+          },
+          {
+            name: `Create new ${category === "shortstories" ? "short story" : category.slice(0, -1)}`,
+            value: "new",
+          },
           { name: "Show detailed stats", value: "stats" },
           { name: "Export list", value: "export" },
           { name: "Nothing", value: "none" },
@@ -382,7 +395,9 @@ async function handleAction(action, category, files) {
 
     case "new":
       const newCommand = require("./new");
-      await newCommand(category.slice(0, -1));
+      await newCommand(
+        category === "shortstories" ? "shortstory" : category.slice(0, -1),
+      );
       break;
 
     case "stats":

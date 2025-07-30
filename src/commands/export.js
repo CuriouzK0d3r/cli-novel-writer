@@ -111,6 +111,17 @@ async function getExportOptions(format, options) {
     });
   }
 
+  // Include short stories
+  const shortstories = await projectManager.getFiles("shortstories");
+  if (shortstories.length > 0) {
+    questions.push({
+      type: "confirm",
+      name: "includeShortStories",
+      message: "Include short stories?",
+      default: false,
+    });
+  }
+
   // Include notes
   const notes = await projectManager.getFiles("notes");
   if (notes.length > 0) {
@@ -164,6 +175,7 @@ async function getExportOptions(format, options) {
       : answers.selectedChapters || [],
     includeScenes: answers.includeScenes || false,
     includeCharacters: answers.includeCharacters || false,
+    includeShortStories: answers.includeShortStories || false,
     includeNotes: answers.includeNotes || false,
     includeTableOfContents: answers.includeTableOfContents || false,
     includeTitlePage: answers.includeTitlePage || false,
@@ -176,6 +188,7 @@ async function collectContent(exportOptions) {
     chapters: [],
     scenes: [],
     characters: [],
+    shortstories: [],
     notes: [],
   };
 
@@ -246,6 +259,30 @@ async function collectContent(exportOptions) {
       } catch (error) {
         console.warn(
           chalk.yellow(`⚠️  Could not read character: ${character.name}`),
+        );
+      }
+    }
+  }
+
+  // Collect short stories if requested
+  if (exportOptions.includeShortStories) {
+    const shortstories = await projectManager.getFiles("shortstories");
+    for (const shortstory of shortstories) {
+      try {
+        const fileContent = await fs.readFile(shortstory.path, "utf8");
+        const { metadata, content: mainContent } =
+          markdownUtils.extractFrontMatter(fileContent);
+
+        content.shortstories.push({
+          name: shortstory.name,
+          path: shortstory.path,
+          content: mainContent,
+          metadata,
+          words: markdownUtils.countWords(fileContent),
+        });
+      } catch (error) {
+        console.warn(
+          chalk.yellow(`⚠️  Could not read short story: ${shortstory.name}`),
         );
       }
     }
@@ -404,6 +441,9 @@ function generateHtmlExport(content, exportOptions, config) {
     if (content.characters.length > 0) {
       html += `<li><a href="#characters">Characters</a></li>`;
     }
+    if (content.shortstories.length > 0) {
+      html += `<li><a href="#shortstories">Short Stories</a></li>`;
+    }
     if (content.notes.length > 0) {
       html += `<li><a href="#notes">Notes</a></li>`;
     }
@@ -441,16 +481,36 @@ function generateHtmlExport(content, exportOptions, config) {
   }
 
   // Characters
+  // Characters section
   if (content.characters.length > 0) {
     html += `
     <div class="section" id="characters">
-        <h1 class="section-title">Characters</h1>`;
+        <h2 class="section-title">Characters</h2>`;
 
     content.characters.forEach((character) => {
+      const characterHtml = markdownUtils.renderToHtml(character.content);
       html += `
         <div class="chapter">
-            <h2 class="chapter-title">${character.name}</h2>
-            ${markdownUtils.renderToHtml(character.content)}
+            <h3 class="chapter-title">${character.name}</h3>
+            ${characterHtml}
+        </div>`;
+    });
+
+    html += `</div>`;
+  }
+
+  // Short stories section
+  if (content.shortstories.length > 0) {
+    html += `
+    <div class="section" id="shortstories">
+        <h2 class="section-title">Short Stories</h2>`;
+
+    content.shortstories.forEach((shortstory) => {
+      const shortstoryHtml = markdownUtils.renderToHtml(shortstory.content);
+      html += `
+        <div class="chapter">
+            <h3 class="chapter-title">${shortstory.name}</h3>
+            ${shortstoryHtml}
         </div>`;
     });
 
@@ -513,6 +573,9 @@ function generateMarkdownExport(content, exportOptions, config) {
     if (content.characters.length > 0) {
       markdown += `- [Characters](#characters)\n`;
     }
+    if (content.shortstories.length > 0) {
+      markdown += `- [Short Stories](#short-stories)\n`;
+    }
     if (content.notes.length > 0) {
       markdown += `- [Notes](#notes)\n`;
     }
@@ -543,6 +606,16 @@ function generateMarkdownExport(content, exportOptions, config) {
     content.characters.forEach((character) => {
       markdown += `## ${character.name}\n\n`;
       markdown += character.content + "\n\n";
+    });
+    markdown += "---\n\n";
+  }
+
+  // Short Stories
+  if (content.shortstories.length > 0) {
+    markdown += `# Short Stories\n\n`;
+    content.shortstories.forEach((shortstory) => {
+      markdown += `## ${shortstory.name}\n\n`;
+      markdown += shortstory.content + "\n\n";
     });
     markdown += "---\n\n";
   }
@@ -603,6 +676,18 @@ function generateTextExport(content, exportOptions, config) {
     text += `${"-".repeat(60)}\n\n`;
   }
 
+  // Short Stories
+  if (content.shortstories.length > 0) {
+    text += `SHORT STORIES\n`;
+    text += `${"=".repeat(13)}\n\n`;
+    content.shortstories.forEach((shortstory) => {
+      text += `${shortstory.name}\n`;
+      text += `${"-".repeat(shortstory.name.length)}\n\n`;
+      text += markdownUtils.stripMarkdown(shortstory.content) + "\n\n";
+    });
+    text += `${"-".repeat(60)}\n\n`;
+  }
+
   // Notes
   if (content.notes.length > 0) {
     text += `NOTES\n`;
@@ -630,10 +715,12 @@ function generateJsonExport(content, exportOptions, config) {
       totalChapters: content.chapters.length,
       totalScenes: content.scenes.length,
       totalCharacters: content.characters.length,
+      totalShortStories: content.shortstories.length,
       totalNotes: content.notes.length,
       totalWords:
         content.chapters.reduce((sum, c) => sum + c.words, 0) +
-        content.scenes.reduce((sum, s) => sum + s.words, 0),
+        content.scenes.reduce((sum, s) => sum + s.words, 0) +
+        content.shortstories.reduce((sum, s) => sum + s.words, 0),
     },
     content: {
       chapters: content.chapters.map((chapter) => ({
@@ -652,6 +739,12 @@ function generateJsonExport(content, exportOptions, config) {
         name: character.name,
         content: character.content,
         metadata: character.metadata,
+      })),
+      shortstories: content.shortstories.map((shortstory) => ({
+        name: shortstory.name,
+        content: shortstory.content,
+        metadata: shortstory.metadata,
+        words: shortstory.words,
       })),
       notes: content.notes.map((note) => ({
         name: note.name,

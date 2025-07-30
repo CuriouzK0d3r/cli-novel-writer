@@ -22,7 +22,7 @@ async function newCommand(type, name, options) {
     console.log(chalk.blue.bold(`\n📝 Creating new ${type}...\n`));
 
     // Validate type
-    const validTypes = ["chapter", "scene", "character", "note"];
+    const validTypes = ["chapter", "scene", "character", "note", "shortstory"];
     if (!validTypes.includes(type)) {
       console.log(chalk.red(`❌ Invalid type: ${type}`));
       console.log(chalk.yellow(`Valid types: ${validTypes.join(", ")}`));
@@ -53,6 +53,7 @@ async function newCommand(type, name, options) {
       scene: "scenes",
       character: "characters",
       note: "notes",
+      shortstory: "shortstories",
     };
 
     const pluralType = typeMap[type];
@@ -177,6 +178,14 @@ function getAvailableTemplates(type) {
       { name: "Research Note", value: "research" },
       { name: "World Building", value: "worldbuilding" },
       { name: "Timeline", value: "timeline" },
+    ],
+    shortstory: [
+      { name: "Basic Short Story", value: "basic" },
+      { name: "Character Study", value: "character-study" },
+      { name: "Twist Ending", value: "twist" },
+      { name: "Flash Fiction", value: "flash" },
+      { name: "Literary Fiction", value: "literary" },
+      { name: "Genre Story", value: "genre" },
     ],
   };
 
@@ -509,6 +518,242 @@ Complex motivations and development ideas...
 
 ## Additional Notes
 
+
+`,
+
+    // Short story templates
+    "character-study": `# {TITLE}
+
+*Created: {DATE}*
+
+---
+
+## Story Information
+- **Genre:** Character Study
+- **Target Length:** 2,000-5,000 words
+- **Theme:** Character development and internal journey
+- **Setting:**
+
+## Character Focus
+**Main Character:**
+- **Name:**
+- **Age:**
+- **Background:**
+- **Internal Conflict:**
+- **What they want:**
+- **What they need:**
+
+## Story Structure
+- **Opening:** Introduce character in their normal world
+- **Inciting Incident:** Something disrupts their routine
+- **Internal Journey:** Character grapples with change/realization
+- **Revelation:** Character discovers something about themselves
+- **Resolution:** How the character has changed
+
+## Key Scenes
+1. **Character Introduction:** Show who they are
+2. **Moment of Change:** The turning point
+3. **Internal Struggle:** Character wrestling with decisions
+4. **Resolution:** New understanding or acceptance
+
+---
+
+## Story Content
+
+She had always believed that routine was safety...
+
+`,
+
+    twist: `# {TITLE}
+
+*Created: {DATE}*
+
+---
+
+## Story Information
+- **Genre:** Twist/Surprise Ending
+- **Target Length:** 1,500-3,000 words
+- **Theme:**
+- **Setting:**
+
+## Twist Planning
+**The Reveal:** What is the surprise?
+
+**Misdirection:** How do you lead readers away from the truth?
+
+**Clues:** What hints do you plant? (subtle enough to miss first time)
+-
+-
+-
+
+**Foreshadowing:** What seems innocent but gains new meaning after the twist?
+-
+-
+-
+
+## Story Structure
+- **Setup:** Establish the "normal" situation
+- **Misdirection:** Plant false clues
+- **Build Tension:** Increase stakes
+- **The Twist:** The revelation
+- **Recontextualization:** Show how everything changes
+
+## Revision Notes
+- Check that clues are present but not obvious
+- Ensure twist is fair (readers could figure it out)
+- Make sure story works even knowing the twist
+
+---
+
+## Story Content
+
+Everything seemed perfectly ordinary that Tuesday morning...
+
+`,
+
+    flash: `# {TITLE}
+
+*Created: {DATE}*
+
+---
+
+## Story Information
+- **Genre:** Flash Fiction
+- **Target Length:** 100-1,000 words
+- **Theme:**
+- **Setting:**
+
+## Flash Fiction Focus
+**Single Moment:** What specific moment are you capturing?
+
+**Emotional Core:** What feeling drives this piece?
+
+**Compression:** What's the essence that must be preserved?
+
+## Structure (Very Tight)
+- **Opening:** Drop reader directly into the moment
+- **Development:** Minimal but essential details
+- **Impact:** Strong emotional or intellectual punch
+- **Ending:** Resonant final image or thought
+
+## Constraints
+- Every word must earn its place
+- Start as close to the end as possible
+- One central image or metaphor
+- Leave room for reader interpretation
+
+---
+
+## Story Content
+
+The photograph fell from the book like a pressed flower...
+
+`,
+
+    literary: `# {TITLE}
+
+*Created: {DATE}*
+
+---
+
+## Story Information
+- **Genre:** Literary Fiction
+- **Target Length:** 3,000-7,000 words
+- **Theme:**
+- **Setting:**
+
+## Literary Elements
+**Central Theme:** What universal human experience are you exploring?
+
+**Symbolism:** What objects/images carry deeper meaning?
+-
+-
+-
+
+**Style:** What narrative voice and tone serve the story?
+
+**Language:** What specific word choices enhance meaning?
+
+## Character Development
+**Protagonist:**
+- **External journey:**
+- **Internal journey:**
+- **Character arc:**
+
+**Supporting Characters:** How do they illuminate the protagonist?
+
+## Story Structure
+- **Opening:** Establish voice and mood
+- **Rising Action:** Develop character and theme
+- **Climax:** Moment of truth or realization
+- **Resolution:** Changed understanding
+
+## Themes to Explore
+- Relationships and connection
+- Identity and belonging
+- Memory and time
+- Love and loss
+- Meaning and purpose
+
+---
+
+## Story Content
+
+In the amber light of late afternoon, she understood...
+
+`,
+
+    genre: `# {TITLE}
+
+*Created: {DATE}*
+
+---
+
+## Story Information
+- **Genre:**
+- **Subgenre:**
+- **Target Length:** 3,000-6,000 words
+- **Setting:**
+
+## Genre Elements
+**Tropes to Use:**
+-
+-
+-
+
+**Tropes to Subvert:**
+-
+-
+-
+
+**World Building:** What makes this world unique?
+
+**Genre Expectations:** What do readers expect? How will you deliver/surprise?
+
+## Plot Structure
+- **Hook:** Grab attention with genre-appropriate opening
+- **World Establishment:** Show the rules of this world
+- **Conflict:** Central problem that fits the genre
+- **Escalation:** Raise stakes according to genre conventions
+- **Climax:** Satisfying genre payoff
+- **Resolution:** Tie up loose ends appropriately
+
+## Research/Consistency
+**Genre Rules:**
+-
+-
+-
+
+**Technical Details to Get Right:**
+-
+-
+-
+
+---
+
+## Story Content
+
+The signal came from deep space at exactly 3:33 AM...
 
 `,
 

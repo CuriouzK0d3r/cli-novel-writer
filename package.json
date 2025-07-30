@@ -1,7 +1,7 @@
 {
   "name": "writers-cli",
   "version": "1.0.0",
-  "description": "A CLI tool for writing novels with markdown support",
+  "description": "A CLI tool for writing novels and short stories with markdown support",
   "main": "index.js",
   "bin": {
     "writers": "./bin/writers.js"
@@ -17,10 +17,12 @@
   "keywords": [
     "writing",
     "novel",
+    "short-story",
     "cli",
     "markdown",
     "author",
-    "book"
+    "book",
+    "fiction"
   ],
   "author": "Your Name",
   "license": "MIT",

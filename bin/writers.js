@@ -18,7 +18,9 @@ const program = new Command();
 // Configure the CLI
 program
   .name("writers")
-  .description("A CLI tool for writing novels with markdown support")
+  .description(
+    "A CLI tool for writing novels and short stories with markdown support",
+  )
   .version(packageJson.version);
 
 // Add banner
@@ -31,22 +33,26 @@ program.addHelpText(
 | |  | | | |_| | | |_| |  / ___ \  | |\  | | |\  |  ___) || |\  |  ___) | ___) || |___| |
 |_|  |_| |____/   \____| /_/   \_\ |_| \_| |_| \_| |____/ |_| \_| |____/ |____/ |_____|_|
 
-${chalk.magenta("        ✦✦✦  Welcome to your CLI Novel Adventure!  ✦✦✦")}
+${chalk.magenta("    ✦✦✦  Welcome to your CLI Writing Adventure!  ✦✦✦")}
+${chalk.gray("          For novels, short stories, and more...")}
 `),
 );
 
 // Register commands
 program
   .command("init")
-  .description("Initialize a new novel project")
-  .option("-n, --name <name>", "Project name")
+  .description("Initialize a new writing project")
+  .option("-n, --name <n>", "Project name")
   .option("-a, --author <author>", "Author name")
   .action(initCommand);
 
 program
   .command("new")
-  .description("Create a new chapter or scene")
-  .argument("<type>", "Type of content (chapter, scene, character)")
+  .description("Create new content")
+  .argument(
+    "<type>",
+    "Type of content (chapter, scene, character, shortstory, note)",
+  )
   .argument("[name]", "Name of the new content")
   .option("-t, --template <template>", "Use a specific template")
   .action(newCommand);
@@ -87,8 +93,11 @@ program
 
 program
   .command("list")
-  .description("List all chapters, scenes, and characters")
-  .option("-t, --type <type>", "Filter by type (chapters, scenes, characters)")
+  .description("List all content")
+  .option(
+    "-t, --type <type>",
+    "Filter by type (chapters, scenes, characters, shortstories, notes)",
+  )
   .action(listCommand);
 
 // Handle unknown commands

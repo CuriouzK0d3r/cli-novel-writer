@@ -98,7 +98,13 @@ async function selectFileToEdit() {
   const allFiles = [];
 
   // Get files from all categories
-  const categories = ["chapters", "scenes", "characters", "notes"];
+  const categories = [
+    "chapters",
+    "scenes",
+    "characters",
+    "shortstories",
+    "notes",
+  ];
 
   for (const category of categories) {
     const files = await projectManager.getFiles(category);
@@ -135,7 +141,13 @@ async function selectFileToEdit() {
 }
 
 async function findFile(target) {
-  const categories = ["chapters", "scenes", "characters", "notes"];
+  const categories = [
+    "chapters",
+    "scenes",
+    "characters",
+    "shortstories",
+    "notes",
+  ];
 
   // Try exact match first
   for (const category of categories) {
@@ -163,11 +175,11 @@ async function findFile(target) {
   }
 
   // Try with common prefixes
-  const prefixes = ["chapter", "scene", "character"];
+  const prefixes = ["chapter", "scene", "character", "shortstory"];
   for (const prefix of prefixes) {
     if (target.startsWith(prefix)) {
       const name = target.substring(prefix.length).replace(/^\d+/, "").trim();
-      const category = prefix + "s";
+      const category = prefix === "shortstory" ? "shortstories" : prefix + "s";
       const files = await projectManager.getFiles(category);
 
       const file = files.find((f) =>

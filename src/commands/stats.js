@@ -72,6 +72,7 @@ ${chalk.bold("📁 Content Summary")}
 ${chalk.bold("Chapters:")} ${stats.files.chapters}
 ${chalk.bold("Scenes:")} ${stats.files.scenes}
 ${chalk.bold("Characters:")} ${stats.files.characters}
+${chalk.bold("Short Stories:")} ${stats.files.shortstories}
 ${chalk.bold("Notes:")} ${stats.files.notes}
 `;
 

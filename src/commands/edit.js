@@ -67,7 +67,13 @@ ${chalk.magenta("        ✦✦✦  Welcome to your CLI Novel Adventure!  ✦✦
  * Find file by name or partial match
  */
 async function findFile(target) {
-  const categories = ["chapters", "scenes", "characters", "notes"];
+  const categories = [
+    "chapters",
+    "scenes",
+    "characters",
+    "shortstories",
+    "notes",
+  ];
 
   // Try exact match first
   for (const category of categories) {
@@ -126,6 +132,7 @@ async function selectFileToEdit() {
     { name: "chapters", icon: "📖", color: "blue" },
     { name: "scenes", icon: "🎬", color: "green" },
     { name: "characters", icon: "👤", color: "yellow" },
+    { name: "shortstories", icon: "📚", color: "cyan" },
     { name: "notes", icon: "📝", color: "magenta" },
   ];
 
@@ -187,6 +194,7 @@ async function createNewFileDialog() {
         { name: "📖 Chapter", value: "chapter" },
         { name: "🎬 Scene", value: "scene" },
         { name: "👤 Character", value: "character" },
+        { name: "📚 Short Story", value: "shortstory" },
         { name: "📝 Note", value: "note" },
       ],
     },
@@ -208,8 +216,10 @@ async function createNewFileDialog() {
   try {
     // Create the file using the existing new command logic
     const newCommand = require("./new");
+    const pluralType =
+      answers.type === "shortstory" ? "shortstories" : answers.type + "s";
     const result = await projectManager.createFile(
-      answers.type + "s", // Pluralize
+      pluralType,
       answers.name,
       "", // No template for now
     );
