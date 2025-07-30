@@ -103,18 +103,34 @@ async function selectFileToEdit() {
     "scenes",
     "characters",
     "shortstories",
+    "stories",
+    "drafts",
+    "submission-ready",
+    "exercises",
+    "prompts",
     "notes",
   ];
 
   for (const category of categories) {
-    const files = await projectManager.getFiles(category);
-    for (const file of files) {
-      allFiles.push({
-        name: `${chalk.cyan(category.slice(0, -1))}: ${file.name}`,
-        value: file.name,
-        path: file.path,
-        category,
-      });
+    try {
+      const files = await getFilesFromDirectory(category);
+      for (const file of files) {
+        const categoryLabel =
+          category === "submission-ready"
+            ? "ready"
+            : category === "shortstories"
+              ? "short story"
+              : category.slice(0, -1);
+        allFiles.push({
+          name: `${chalk.cyan(categoryLabel)}: ${file.name}`,
+          value: file.name,
+          path: file.path,
+          category,
+        });
+      }
+    } catch (error) {
+      // Directory might not exist, skip it
+      continue;
     }
   }
 
@@ -146,53 +162,110 @@ async function findFile(target) {
     "scenes",
     "characters",
     "shortstories",
+    "stories",
+    "drafts",
+    "submission-ready",
+    "exercises",
+    "prompts",
     "notes",
   ];
 
   // Try exact match first
   for (const category of categories) {
-    const files = await projectManager.getFiles(category);
+    try {
+      const files = await getFilesFromDirectory(category);
 
-    // Try exact name match
-    let file = files.find(
-      (f) => f.name === target || f.name.toLowerCase() === target.toLowerCase(),
-    );
-
-    if (file) {
-      return { ...file, category };
-    }
-
-    // Try partial match
-    file = files.find(
-      (f) =>
-        f.name.toLowerCase().includes(target.toLowerCase()) ||
-        projectManager.sanitizeFileName(f.name) === target,
-    );
-
-    if (file) {
-      return { ...file, category };
-    }
-  }
-
-  // Try with common prefixes
-  const prefixes = ["chapter", "scene", "character", "shortstory"];
-  for (const prefix of prefixes) {
-    if (target.startsWith(prefix)) {
-      const name = target.substring(prefix.length).replace(/^\d+/, "").trim();
-      const category = prefix === "shortstory" ? "shortstories" : prefix + "s";
-      const files = await projectManager.getFiles(category);
-
-      const file = files.find((f) =>
-        f.name.toLowerCase().includes(name.toLowerCase()),
+      // Try exact name match
+      let file = files.find(
+        (f) =>
+          f.name === target || f.name.toLowerCase() === target.toLowerCase(),
       );
 
       if (file) {
         return { ...file, category };
       }
+
+      // Try partial match
+      file = files.find(
+        (f) =>
+          f.name.toLowerCase().includes(target.toLowerCase()) ||
+          projectManager.sanitizeFileName(f.name) === target,
+      );
+
+      if (file) {
+        return { ...file, category };
+      }
+    } catch (error) {
+      // Directory might not exist, continue to next
+      continue;
+    }
+  }
+
+  // Try with common prefixes
+  const prefixes = [
+    "chapter",
+    "scene",
+    "character",
+    "shortstory",
+    "story",
+    "draft",
+    "exercise",
+    "prompt",
+  ];
+  for (const prefix of prefixes) {
+    if (target.startsWith(prefix)) {
+      const name = target.substring(prefix.length).replace(/^\d+/, "").trim();
+      const category =
+        prefix === "shortstory"
+          ? "shortstories"
+          : prefix === "story"
+            ? "stories"
+            : prefix + "s";
+
+      try {
+        const files = await getFilesFromDirectory(category);
+        const file = files.find((f) =>
+          f.name.toLowerCase().includes(name.toLowerCase()),
+        );
+
+        if (file) {
+          return { ...file, category };
+        }
+      } catch (error) {
+        // Directory might not exist, continue
+        continue;
+      }
     }
   }
 
   return null;
+}
+
+/**
+ * Get files from directory (handles both project manager and direct file system access)
+ */
+async function getFilesFromDirectory(category) {
+  // First try the project manager
+  try {
+    return await projectManager.getFiles(category);
+  } catch (error) {
+    // If that fails, try direct file system access for enhanced directories
+    const fs = require("fs").promises;
+    const path = require("path");
+
+    try {
+      const files = await fs.readdir(category);
+      const markdownFiles = files.filter((file) => file.endsWith(".md"));
+
+      return markdownFiles.map((file) => ({
+        name: path.basename(file, ".md"),
+        path: path.join(category, file),
+        fullName: file,
+      }));
+    } catch (fsError) {
+      return [];
+    }
+  }
 }
 
 async function createBackup(filePath) {

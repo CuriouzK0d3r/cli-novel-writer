@@ -11,6 +11,11 @@ class ProjectManager {
       characters: "characters",
       notes: "notes",
       shortstories: "shortstories",
+      stories: "stories",
+      drafts: "drafts",
+      "submission-ready": "submission-ready",
+      exercises: "exercises",
+      prompts: "prompts",
       exports: "exports",
     };
   }
@@ -132,8 +137,8 @@ Use \`writers stats\` to track your progress toward your ${config.wordGoal.toLoc
    * Get all files of a specific type
    */
   async getFiles(type) {
-    const dir = this.projectStructure[type];
-    if (!dir || !(await fs.pathExists(dir))) {
+    const dir = this.projectStructure[type] || type;
+    if (!(await fs.pathExists(dir))) {
       return [];
     }
 
@@ -150,18 +155,18 @@ Use \`writers stats\` to track your progress toward your ${config.wordGoal.toLoc
             isDirectory: stats.isDirectory(),
             size: stats.size,
             modified: stats.mtime,
-            created: stats.birthtime
+            created: stats.birthtime,
           };
         } catch (error) {
           console.error(`Error getting stats for ${filePath}:`, error);
           return null;
         }
-      })
+      }),
     );
 
     // Filter out any null entries and directories, and sort by name
     return fileStats
-      .filter(file => file && !file.isDirectory)
+      .filter((file) => file && !file.isDirectory)
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -169,10 +174,7 @@ Use \`writers stats\` to track your progress toward your ${config.wordGoal.toLoc
    * Create a new file with template
    */
   async createFile(type, name, template = "") {
-    const dir = this.projectStructure[type];
-    if (!dir) {
-      throw new Error(`Unknown file type: ${type}`);
-    }
+    const dir = this.projectStructure[type] || type;
 
     await fs.ensureDir(dir);
     const fileName = `${this.sanitizeFileName(name)}.md`;
@@ -278,6 +280,7 @@ Additional notes and development ideas...
 `;
 
       case "shortstories":
+      case "stories":
         return `# ${name}
 
 *Created: ${timestamp}*
@@ -289,6 +292,7 @@ Additional notes and development ideas...
 - **Target Length:** (words)
 - **Theme:**
 - **Setting:**
+- **Status:** Planning
 
 ## Summary
 Brief one-sentence summary of the story.
@@ -311,6 +315,79 @@ Story ideas, themes, and development notes...
 ## Story Content
 
 Write your short story here...
+
+`;
+
+      case "drafts":
+        return `# ${name} - Draft
+
+*Created: ${timestamp}*
+
+---
+
+## Draft Information
+- **Version:** 1.0
+- **Status:** Drafting
+- **Target Length:**
+- **Genre:**
+
+## Draft Notes
+[What are you focusing on in this draft?]
+
+## Story Content
+
+Write your draft here...
+
+`;
+
+      case "exercises":
+        return `# Writing Exercise: ${name}
+
+*Created: ${timestamp}*
+
+---
+
+## Exercise Information
+- **Skill Focus:** [What are you practicing?]
+- **Time Limit:** [How long to spend?]
+- **Success Criteria:** [How will you know you succeeded?]
+
+## Exercise Content
+
+[Begin your writing exercise here...]
+
+## Reflection
+[What did you learn from this exercise?]
+
+`;
+
+      case "prompts":
+        return `# Prompt Response: ${name}
+
+*Created: ${timestamp}*
+
+---
+
+## Prompt Information
+- **Original Prompt:** [Write the prompt here]
+- **Time Limit:**
+- **Target Length:**
+
+## Response
+
+[Write your response here...]
+
+`;
+
+      case "submission-ready":
+        return `# ${name}
+
+*Created: ${timestamp}*
+*Status: Submission Ready*
+
+---
+
+Write your polished story here...
 
 `;
 
@@ -363,29 +440,34 @@ Write your short story here...
     for (const [type, dir] of Object.entries(this.projectStructure)) {
       if (type === "exports") continue;
 
-      const files = await this.getFiles(type);
-      stats.files[type] = files.length;
+      try {
+        const files = await this.getFiles(type);
+        stats.files[type] = files.length;
 
-      for (const file of files) {
-        try {
-          const content = await fs.readFile(file.path, "utf8");
-          const words = this.countWords(content);
-          const characters = content.length;
+        for (const file of files) {
+          try {
+            const content = await fs.readFile(file.path, "utf8");
+            const words = this.countWords(content);
+            const characters = content.length;
 
-          stats.totalWords += words;
-          stats.totalCharacters += characters;
+            stats.totalWords += words;
+            stats.totalCharacters += characters;
 
-          if (type === "chapters") {
-            stats.chapters.push({
-              name: file.name,
-              words,
-              characters,
-              path: file.path,
-            });
+            if (type === "chapters") {
+              stats.chapters.push({
+                name: file.name,
+                words,
+                characters,
+                path: file.path,
+              });
+            }
+          } catch (error) {
+            console.warn(chalk.yellow(`Warning: Could not read ${file.path}`));
           }
-        } catch (error) {
-          console.warn(chalk.yellow(`Warning: Could not read ${file.path}`));
         }
+      } catch (error) {
+        // Directory might not exist, initialize with 0
+        stats.files[type] = 0;
       }
     }
 
@@ -445,24 +527,30 @@ Write your short story here...
     const stats = await this.getProjectStats();
     const structure = {};
 
+    // Copy project structure as JSON
     for (const [type, dir] of Object.entries(this.projectStructure)) {
       if (type === "exports") continue;
 
-      const files = await this.getFiles(type);
-      structure[type] = [];
+      try {
+        const files = await this.getFiles(type);
+        structure[type] = [];
 
-      for (const file of files) {
-        try {
-          const content = await fs.readFile(file.path, "utf8");
-          structure[type].push({
-            name: file.name,
-            path: file.path,
-            words: this.countWords(content),
-            content: content,
-          });
-        } catch (error) {
-          console.warn(chalk.yellow(`Warning: Could not read ${file.path}`));
+        for (const file of files) {
+          try {
+            const content = await fs.readFile(file.path, "utf8");
+            structure[type].push({
+              name: file.name,
+              path: file.path,
+              words: this.countWords(content),
+              content: content,
+            });
+          } catch (error) {
+            console.warn(chalk.yellow(`Warning: Could not read ${file.path}`));
+          }
         }
+      } catch (error) {
+        // Directory might not exist, initialize empty array
+        structure[type] = [];
       }
     }
 

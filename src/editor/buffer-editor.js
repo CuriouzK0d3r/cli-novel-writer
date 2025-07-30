@@ -1,8 +1,10 @@
 const blessed = require("blessed");
-const fs = require("fs-extra");
+const fs = require("fs").promises;
 const path = require("path");
 const markdownUtils = require("../utils/markdown");
 const EditorDialogs = require("./dialogs");
+const Clipboard = require("./clipboard");
+const { ThemeManager } = require("./themes");
 
 class BufferEditor {
   constructor() {
@@ -54,6 +56,12 @@ class BufferEditor {
     this.lastCursorY = 0; // Track cursor movement direction
     this.typewriterFocusLines = 1; // Number of lines before/after cursor to keep in focus
 
+    // Text selection state
+    this.selecting = false;
+    this.selectionStart = { x: 0, y: 0 };
+    this.selectionEnd = { x: 0, y: 0 };
+    this.clipboard = new Clipboard();
+
     // Configuration
     this.config = {
       autoSave: true,
@@ -66,6 +74,9 @@ class BufferEditor {
       typewriterPosition: 0.66, // Position as ratio of screen height (0.66 = 2/3 down)
       typewriterFocusLines: 1, // Number of lines before/after cursor to keep in focus
     };
+
+    // Theme system
+    this.themeManager = new ThemeManager();
   }
 
   async launch(filePath = null) {
@@ -124,16 +135,8 @@ class BufferEditor {
   }
 
   createScreen() {
-    this.screen = blessed.screen({
-      smartCSR: true,
-      title: "Novel Editor",
-      cursor: {
-        artificial: false,
-        shape: "line",
-        blink: false,
-      },
-      debug: false,
-    });
+    const screenConfig = this.themeManager.getScreenConfig();
+    this.screen = blessed.screen(screenConfig);
 
     this.screen.on("resize", () => {
       this.render();
@@ -141,6 +144,8 @@ class BufferEditor {
   }
 
   createInterface() {
+    const styles = this.themeManager.getComponentStyles();
+
     // Main editor area
     this.editor = blessed.box({
       parent: this.screen,
@@ -148,17 +153,8 @@ class BufferEditor {
       left: 0,
       right: 0,
       bottom: 3,
-      border: {
-        type: "line",
-        fg: "blue",
-      },
-      style: {
-        fg: "white",
-        bg: "black",
-        focus: {
-          border: { fg: "green" },
-        },
-      },
+      border: styles.editor.border,
+      style: styles.editor,
       keys: true,
       mouse: true,
       scrollable: false,
@@ -173,10 +169,7 @@ class BufferEditor {
       left: 0,
       right: 0,
       height: 1,
-      style: {
-        fg: "white",
-        bg: "blue",
-      },
+      style: styles.statusBar,
     });
 
     // Info bar
@@ -186,10 +179,7 @@ class BufferEditor {
       left: 0,
       right: 0,
       height: 1,
-      style: {
-        fg: "yellow",
-        bg: "black",
-      },
+      style: styles.infoBar,
     });
 
     // Help bar
@@ -199,12 +189,9 @@ class BufferEditor {
       left: 0,
       right: 0,
       height: 1,
-      style: {
-        fg: "cyan",
-        bg: "black",
-      },
+      style: styles.helpBar,
       content:
-        " ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go to Line  ^W Word Count  F1 Help",
+        " ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go to Line  ^W Word Count  F1 Help  F2 Theme",
     });
 
     this.editor.focus();
@@ -256,6 +243,9 @@ class BufferEditor {
     this.screen.key(["C-z"], () => this.undo());
     this.screen.key(["C-y"], () => this.redo());
     this.screen.key(["C-a"], () => this.selectAll());
+    this.screen.key(["C-c"], () => this.copySelection());
+    this.screen.key(["C-v"], () => this.pasteFromClipboard());
+    this.screen.key(["C-x"], () => this.cutSelection());
 
     // Search (work in both modes)
     this.screen.key(["C-f"], () => this.showFindDialog());
@@ -265,6 +255,7 @@ class BufferEditor {
     // View (work in both modes)
     this.screen.key(["C-w"], () => this.showWordCountDialog());
     this.screen.key(["f1"], () => this.showHelp());
+    this.screen.key(["f2"], () => this.switchTheme());
     this.screen.key(["f11"], () => this.toggleDistractionFree());
     this.screen.key(["f9"], async () => await this.toggleTypewriterMode());
 
@@ -293,28 +284,28 @@ class BufferEditor {
             case "w":
             case "k":
             case "up":
-              this.moveCursor(0, -1);
+              this.moveCursor(0, -1, key.shift);
               return;
             case "a":
             case "h":
             case "left":
-              this.moveCursor(-1, 0);
+              this.moveCursor(-1, 0, key.shift);
               return;
             case "s":
             case "j":
             case "down":
-              this.moveCursor(0, 1);
+              this.moveCursor(0, 1, key.shift);
               return;
             case "d":
             case "l":
             case "right":
-              this.moveCursor(1, 0);
+              this.moveCursor(1, 0, key.shift);
               return;
             case "home":
-              this.moveCursorToLineStart();
+              this.moveCursorToLineStart(key.shift);
               return;
             case "end":
-              this.moveCursorToLineEnd();
+              this.moveCursorToLineEnd(key.shift);
               return;
             case "pageup":
               this.pageUp();
@@ -328,16 +319,16 @@ class BufferEditor {
           if (key.ctrl) {
             switch (key.name) {
               case "left":
-                this.moveWordLeft();
+                this.moveWordLeft(key.shift);
                 return;
               case "right":
-                this.moveWordRight();
+                this.moveWordRight(key.shift);
                 return;
               case "home":
-                this.moveCursorToDocStart();
+                this.moveCursorToDocStart(key.shift);
                 return;
               case "end":
-                this.moveCursorToDocEnd();
+                this.moveCursorToDocEnd(key.shift);
                 return;
             }
           }
@@ -348,22 +339,22 @@ class BufferEditor {
           // Movement keys
           switch (key.name) {
             case "up":
-              this.moveCursor(0, -1);
+              this.moveCursor(0, -1, key.shift);
               return;
             case "down":
-              this.moveCursor(0, 1);
+              this.moveCursor(0, 1, key.shift);
               return;
             case "left":
-              this.moveCursor(-1, 0);
+              this.moveCursor(-1, 0, key.shift);
               return;
             case "right":
-              this.moveCursor(1, 0);
+              this.moveCursor(1, 0, key.shift);
               return;
             case "home":
-              this.moveCursorToLineStart();
+              this.moveCursorToLineStart(key.shift);
               return;
             case "end":
-              this.moveCursorToLineEnd();
+              this.moveCursorToLineEnd(key.shift);
               return;
             case "pageup":
               this.pageUp();
@@ -389,16 +380,16 @@ class BufferEditor {
           if (key.ctrl) {
             switch (key.name) {
               case "left":
-                this.moveWordLeft();
+                this.moveWordLeft(key.shift);
                 return;
               case "right":
-                this.moveWordRight();
+                this.moveWordRight(key.shift);
                 return;
               case "home":
-                this.moveCursorToDocStart();
+                this.moveCursorToDocStart(key.shift);
                 return;
               case "end":
-                this.moveCursorToDocEnd();
+                this.moveCursorToDocEnd(key.shift);
                 return;
             }
           }
@@ -447,7 +438,13 @@ class BufferEditor {
     return ch.length === 1 && ch.charCodeAt(0) >= 32;
   }
 
-  moveCursor(deltaX, deltaY) {
+  moveCursor(deltaX, deltaY, extend = false) {
+    if (extend && !this.selecting) {
+      this.startSelection();
+    } else if (!extend) {
+      this.clearSelection();
+    }
+
     const newY = Math.max(
       0,
       Math.min(this.lines.length - 1, this.cursorY + deltaY),
@@ -465,6 +462,9 @@ class BufferEditor {
       if (newX < 0 && newY > 0) {
         this.cursorY = newY - 1;
         this.cursorX = this.lines[this.cursorY].length;
+        if (extend) {
+          this.updateSelection();
+        }
         this.ensureCursorVisible();
         this.render();
         return;
@@ -474,6 +474,9 @@ class BufferEditor {
       ) {
         this.cursorY = newY + 1;
         this.cursorX = 0;
+        if (extend) {
+          this.updateSelection();
+        }
         this.ensureCursorVisible();
         this.render();
         return;
@@ -485,15 +488,25 @@ class BufferEditor {
     this.cursorX = newX;
     this.cursorY = newY;
 
+    if (extend) {
+      this.updateSelection();
+    }
+
     this.resetCursorBlink();
     this.ensureCursorVisible();
     this.render();
   }
 
-  moveWordLeft() {
+  moveWordLeft(extend = false) {
+    if (extend && !this.selecting) {
+      this.startSelection();
+    } else if (!extend) {
+      this.clearSelection();
+    }
+
     if (this.cursorX === 0 && this.cursorY > 0) {
-      this.moveCursor(0, -1);
-      this.moveCursorToLineEnd();
+      this.moveCursor(0, -1, extend);
+      this.moveCursorToLineEnd(extend);
       return;
     }
 
@@ -507,56 +520,113 @@ class BufferEditor {
     while (x >= 0 && !/\s/.test(line[x])) x--;
 
     this.cursorX = Math.max(0, x + 1);
+
+    if (extend) {
+      this.updateSelection();
+    }
+
     this.ensureCursorVisible();
     this.render();
   }
 
-  moveWordRight() {
+  moveWordRight(extend = false) {
+    if (extend && !this.selecting) {
+      this.startSelection();
+    } else if (!extend) {
+      this.clearSelection();
+    }
+
     const line = this.lines[this.cursorY];
 
     if (this.cursorX === line.length && this.cursorY < this.lines.length - 1) {
-      this.moveCursor(0, 1);
-      this.moveCursorToLineStart();
+      this.moveCursor(0, 1, extend);
+      this.moveCursorToLineStart(extend);
       return;
     }
 
     let x = this.cursorX;
 
-    // Skip current word
-    while (x < line.length && !/\s/.test(line[x])) x++;
-
     // Skip whitespace
     while (x < line.length && /\s/.test(line[x])) x++;
 
+    // Skip word characters
+    while (x < line.length && !/\s/.test(line[x])) x++;
+
     this.cursorX = Math.min(line.length, x);
+
+    if (extend) {
+      this.updateSelection();
+    }
+
     this.ensureCursorVisible();
     this.render();
   }
 
-  moveCursorToLineStart() {
+  moveCursorToLineStart(extend = false) {
+    if (extend && !this.selecting) {
+      this.startSelection();
+    } else if (!extend) {
+      this.clearSelection();
+    }
+
     this.cursorX = 0;
-    this.ensureCursorVisible();
+
+    if (extend) {
+      this.updateSelection();
+    }
+
     this.render();
   }
 
-  moveCursorToLineEnd() {
+  moveCursorToLineEnd(extend = false) {
+    if (extend && !this.selecting) {
+      this.startSelection();
+    } else if (!extend) {
+      this.clearSelection();
+    }
+
     this.cursorX = this.lines[this.cursorY].length;
-    this.ensureCursorVisible();
+
+    if (extend) {
+      this.updateSelection();
+    }
+
     this.render();
   }
 
-  moveCursorToDocStart() {
+  moveCursorToDocStart(extend = false) {
+    if (extend && !this.selecting) {
+      this.startSelection();
+    } else if (!extend) {
+      this.clearSelection();
+    }
+
     this.cursorX = 0;
     this.cursorY = 0;
-    this.scrollX = 0;
     this.scrollY = 0;
+    this.scrollX = 0;
+
+    if (extend) {
+      this.updateSelection();
+    }
+
     this.render();
   }
 
-  moveCursorToDocEnd() {
+  moveCursorToDocEnd(extend = false) {
+    if (extend && !this.selecting) {
+      this.startSelection();
+    } else if (!extend) {
+      this.clearSelection();
+    }
+
     this.cursorY = this.lines.length - 1;
     this.cursorX = this.lines[this.cursorY].length;
-    this.ensureCursorVisible();
+
+    if (extend) {
+      this.updateSelection();
+    }
+
     this.render();
   }
 
@@ -753,6 +823,21 @@ class BufferEditor {
           startX + editorWidth - (this.showLineNumbers ? 5 : 0),
         );
 
+        // Apply syntax highlighting first
+        lineContent = this.themeManager.applySyntaxHighlighting(
+          lineContent,
+          "markdown",
+        );
+
+        // Apply text selection highlighting
+        if (this.hasSelection()) {
+          lineContent = this.applySelectionHighlight(
+            lineContent,
+            lineIndex,
+            startX,
+          );
+        }
+
         // Check if this line should be dimmed in typewriter mode
         const shouldDimLine =
           this.typewriterMode &&
@@ -761,7 +846,7 @@ class BufferEditor {
 
         // Apply dimming to the line content if needed
         if (shouldDimLine) {
-          lineContent = `{#333333-fg}${lineContent}{/}`;
+          lineContent = this.themeManager.formatText(lineContent, "dimmed");
         }
 
         // Handle cursor rendering for this line
@@ -785,37 +870,14 @@ class BufferEditor {
           const afterCursor = lineContent.substring(cursorPos);
 
           if (this.mode === "insert") {
-            // Line cursor for insert mode - show a vertical bar at cursor position
-            if (shouldDimLine) {
-              // Remove dimming tags and reapply around cursor
-              const cleanContent = lineContent.replace(
-                /\{#333333-fg\}|\{\/\}/g,
-                "",
-              );
-              const cleanBefore = cleanContent.substring(0, cursorPos);
-              const cleanAfter = cleanContent.substring(cursorPos);
-              lineContent = `{#333333-fg}${cleanBefore}{/}|{#333333-fg}${cleanAfter}{/}`;
-            } else {
-              lineContent = beforeCursor + `|` + afterCursor;
-            }
+            // Line cursor for insert mode - use theme cursor
+            const cursor = this.themeManager.getCursor("insert");
+            lineContent = beforeCursor + cursor + afterCursor;
           } else {
-            // Block cursor for navigation mode - invert the character at cursor position
-            if (shouldDimLine) {
-              // Remove dimming tags and reapply around cursor
-              const cleanContent = lineContent.replace(
-                /\{#333333-fg\}|\{\/\}/g,
-                "",
-              );
-              const cleanBefore = cleanContent.substring(0, cursorPos);
-              const cleanChar =
-                cursorPos < cleanContent.length ? cleanContent[cursorPos] : " ";
-              const cleanAfter = cleanContent.substring(cursorPos + 1);
-              lineContent = `{#333333-fg}${cleanBefore}{/}{inverse}${cleanChar}{/inverse}{#333333-fg}${cleanAfter}{/}`;
-            } else {
-              const afterChar = lineContent.substring(cursorPos + 1);
-              lineContent =
-                beforeCursor + `{inverse}${char}{/inverse}` + afterChar;
-            }
+            // Block cursor for navigation mode - use theme cursor
+            const cursor = this.themeManager.getCursor("normal", char);
+            const afterChar = lineContent.substring(cursorPos + 1);
+            lineContent = beforeCursor + cursor + afterChar;
           }
         }
 
@@ -835,13 +897,10 @@ class BufferEditor {
           this.cursorX - this.scrollX + (this.showLineNumbers ? 5 : 0);
 
         if (i === screenY && this.cursorVisible && cursorScreenX === 5) {
-          if (this.mode === "insert") {
-            line += "{inverse}|{/inverse}";
-          } else {
-            line += "{inverse} {/inverse}";
-          }
+          const cursor = this.themeManager.getCursor(this.mode);
+          line += cursor;
         } else if (shouldDimLine) {
-          line += "{#333333-fg} {/}";
+          line += this.themeManager.formatText(" ", "dimmed");
         }
       } else {
         // Check if this empty line should be dimmed in typewriter mode
@@ -855,13 +914,10 @@ class BufferEditor {
         const cursorScreenX = this.cursorX - this.scrollX;
 
         if (i === screenY && this.cursorVisible && cursorScreenX === 0) {
-          if (this.mode === "insert") {
-            line = "{inverse}|{/inverse}";
-          } else {
-            line = "{inverse} {/inverse}";
-          }
+          const cursor = this.themeManager.getCursor(this.mode);
+          line = cursor;
         } else if (shouldDimLine) {
-          line = "{#333333-fg} {/}";
+          line = this.themeManager.formatText(" ", "dimmed");
         }
       }
 
@@ -1021,42 +1077,33 @@ class BufferEditor {
   }
 
   updateStatus() {
-    const fileName = this.currentFile
-      ? path.basename(this.currentFile)
-      : "Untitled";
-    const dirtyFlag = this.isDirty ? "*" : "";
+    const fileName = this.currentFile ? path.basename(this.currentFile) : null;
     const content = this.lines.join("\n");
+    const wordCount = this.config.showWordCount
+      ? markdownUtils.countWords(content)
+      : null;
 
-    let status = ` ${fileName}${dirtyFlag}`;
+    // Create editor state object for themed status bar
+    const editorState = {
+      mode: this.mode,
+      line: this.cursorY + 1,
+      col: this.cursorX + 1,
+      filename: fileName,
+      modified: this.isDirty,
+      wordCount: wordCount,
+      totalLines: this.lines.length,
+      typewriterMode: this.typewriterMode,
+    };
 
-    // Show current mode
-    const modeText = this.mode === "navigation" ? "NAV" : "INS";
-    status += ` | Mode: ${modeText}`;
-
-    if (this.config.showWordCount) {
-      const wordCount = markdownUtils.countWords(content);
-      status += ` | Words: ${wordCount}`;
-    }
-
-    if (this.config.showReadingTime) {
-      const readingTime = markdownUtils.estimateReadingTime(content);
-      status += ` | Reading: ${readingTime}`;
-    }
-
-    status += ` | Line: ${this.cursorY + 1}, Col: ${this.cursorX + 1}`;
-    status += ` | Lines: ${this.lines.length}`;
-
-    // Show typewriter mode status
-    if (this.typewriterMode) {
-      status += ` | TYPEWRITER`;
-    }
-
-    this.statusBar.setContent(status);
+    // Get themed status bar content
+    const status = this.themeManager.getStatusBarContent(editorState);
+    this.statusBar.setContent(` ${status}`);
     this.screen.render();
   }
 
-  showMessage(message) {
-    this.infoBar.setContent(` ${message}`);
+  showMessage(message, type = "info") {
+    const themedMessage = this.themeManager.formatText(message, type);
+    this.infoBar.setContent(` ${themedMessage}`);
     this.screen.render();
 
     setTimeout(() => {
@@ -1066,12 +1113,11 @@ class BufferEditor {
   }
 
   showError(message) {
-    this.infoBar.style.fg = "red";
-    this.infoBar.setContent(` ERROR: ${message}`);
+    const themedMessage = this.themeManager.formatText(message, "error");
+    this.infoBar.setContent(` ERROR: ${themedMessage}`);
     this.screen.render();
 
     setTimeout(() => {
-      this.infoBar.style.fg = "yellow";
       this.infoBar.setContent("");
       this.screen.render();
     }, 5000);
@@ -1264,7 +1310,20 @@ class BufferEditor {
   }
 
   selectAll() {
-    this.showMessage("Select all - implementation needed");
+    if (this.lines.length === 0) {
+      this.showMessage("No text to select");
+      return;
+    }
+
+    this.selecting = true;
+    this.selectionStart = { x: 0, y: 0 };
+    this.selectionEnd = {
+      x: this.lines[this.lines.length - 1].length,
+      y: this.lines.length - 1,
+    };
+
+    this.render();
+    this.showMessage("All text selected");
   }
 
   toggleDistractionFree() {
@@ -1399,6 +1458,279 @@ class BufferEditor {
    */
   getMode() {
     return this.mode;
+  }
+
+  // Text selection methods
+  startSelection() {
+    this.selecting = true;
+    this.selectionStart = { x: this.cursorX, y: this.cursorY };
+    this.selectionEnd = { x: this.cursorX, y: this.cursorY };
+  }
+
+  updateSelection() {
+    if (this.selecting) {
+      this.selectionEnd = { x: this.cursorX, y: this.cursorY };
+    }
+  }
+
+  clearSelection() {
+    this.selecting = false;
+    this.selectionStart = { x: 0, y: 0 };
+    this.selectionEnd = { x: 0, y: 0 };
+  }
+
+  hasSelection() {
+    return (
+      this.selecting &&
+      (this.selectionStart.x !== this.selectionEnd.x ||
+        this.selectionStart.y !== this.selectionEnd.y)
+    );
+  }
+
+  getSelectedText() {
+    if (!this.hasSelection()) {
+      return "";
+    }
+
+    let start = this.selectionStart;
+    let end = this.selectionEnd;
+
+    // Ensure start comes before end
+    if (start.y > end.y || (start.y === end.y && start.x > end.x)) {
+      [start, end] = [end, start];
+    }
+
+    if (start.y === end.y) {
+      // Single line selection
+      return this.lines[start.y].substring(start.x, end.x);
+    } else {
+      // Multi-line selection
+      let result = [];
+
+      // First line
+      result.push(this.lines[start.y].substring(start.x));
+
+      // Middle lines
+      for (let i = start.y + 1; i < end.y; i++) {
+        result.push(this.lines[i]);
+      }
+
+      // Last line
+      result.push(this.lines[end.y].substring(0, end.x));
+
+      return result.join("\n");
+    }
+  }
+
+  deleteSelection() {
+    if (!this.hasSelection()) {
+      return;
+    }
+
+    this.pushUndo();
+
+    let start = this.selectionStart;
+    let end = this.selectionEnd;
+
+    // Ensure start comes before end
+    if (start.y > end.y || (start.y === end.y && start.x > end.x)) {
+      [start, end] = [end, start];
+    }
+
+    if (start.y === end.y) {
+      // Single line deletion
+      const line = this.lines[start.y];
+      this.lines[start.y] = line.substring(0, start.x) + line.substring(end.x);
+    } else {
+      // Multi-line deletion
+      const startLine = this.lines[start.y].substring(0, start.x);
+      const endLine = this.lines[end.y].substring(end.x);
+
+      // Remove lines in between
+      this.lines.splice(start.y, end.y - start.y + 1, startLine + endLine);
+    }
+
+    this.cursorX = start.x;
+    this.cursorY = start.y;
+    this.clearSelection();
+    this.markDirty();
+  }
+
+  async copySelection() {
+    if (!this.hasSelection()) {
+      // If no selection, copy current line
+      const currentLine = this.lines[this.cursorY];
+      try {
+        await this.clipboard.copyToSystem(currentLine);
+        this.showMessage("Current line copied to clipboard");
+      } catch (error) {
+        this.clipboard.setInternal(currentLine);
+        this.showMessage("Current line copied to internal clipboard");
+      }
+      return;
+    }
+
+    const selectedText = this.getSelectedText();
+    try {
+      await this.clipboard.copyToSystem(selectedText);
+      this.showMessage(`${selectedText.length} characters copied to clipboard`);
+    } catch (error) {
+      this.clipboard.setInternal(selectedText);
+      this.showMessage(
+        `${selectedText.length} characters copied to internal clipboard`,
+      );
+    }
+  }
+
+  async pasteFromClipboard() {
+    try {
+      const text = await this.clipboard.pasteFromSystem();
+      if (text) {
+        this.insertText(text);
+        this.showMessage("Text pasted from clipboard");
+      } else {
+        this.showMessage("Clipboard is empty");
+      }
+    } catch (error) {
+      const text = this.clipboard.getInternal();
+      if (text) {
+        this.insertText(text);
+        this.showMessage("Text pasted from internal clipboard");
+      } else {
+        this.showMessage("No text to paste");
+      }
+    }
+  }
+
+  async cutSelection() {
+    if (this.hasSelection()) {
+      await this.copySelection();
+      this.deleteSelection();
+      this.render();
+      this.showMessage("Selection cut to clipboard");
+    } else {
+      // Cut current line if no selection
+      const currentLine = this.lines[this.cursorY];
+      try {
+        await this.clipboard.copyToSystem(currentLine);
+        this.pushUndo();
+        this.lines.splice(this.cursorY, 1);
+        if (this.lines.length === 0) {
+          this.lines = [""];
+        }
+        if (this.cursorY >= this.lines.length) {
+          this.cursorY = this.lines.length - 1;
+        }
+        this.cursorX = Math.min(this.cursorX, this.lines[this.cursorY].length);
+        this.markDirty();
+        this.render();
+        this.showMessage("Current line cut to clipboard");
+      } catch (error) {
+        this.showMessage("Failed to cut line");
+      }
+    }
+  }
+
+  insertText(text) {
+    if (!text) return;
+
+    // If there's a selection, delete it first
+    if (this.hasSelection()) {
+      this.deleteSelection();
+    }
+
+    this.pushUndo();
+
+    const lines = text.split("\n");
+    const currentLine = this.lines[this.cursorY];
+    const before = currentLine.substring(0, this.cursorX);
+    const after = currentLine.substring(this.cursorX);
+
+    if (lines.length === 1) {
+      // Single line paste
+      this.lines[this.cursorY] = before + lines[0] + after;
+      this.cursorX += lines[0].length;
+    } else {
+      // Multi-line paste
+      this.lines[this.cursorY] = before + lines[0];
+
+      // Insert middle lines
+      for (let i = 1; i < lines.length - 1; i++) {
+        this.lines.splice(this.cursorY + i, 0, lines[i]);
+      }
+
+      // Insert last line
+      this.lines.splice(
+        this.cursorY + lines.length - 1,
+        0,
+        lines[lines.length - 1] + after,
+      );
+
+      this.cursorY += lines.length - 1;
+      this.cursorX = lines[lines.length - 1].length;
+    }
+
+    this.markDirty();
+    this.render();
+  }
+
+  // Helper method to apply selection highlighting to a line
+  applySelectionHighlight(lineContent, lineIndex, startX) {
+    let start = this.selectionStart;
+    let end = this.selectionEnd;
+
+    // Ensure start comes before end
+    if (start.y > end.y || (start.y === end.y && start.x > end.x)) {
+      [start, end] = [end, start];
+    }
+
+    // Check if this line is within the selection
+    if (lineIndex < start.y || lineIndex > end.y) {
+      return lineContent; // No selection on this line
+    }
+
+    let selStart = 0;
+    let selEnd = lineContent.length;
+
+    if (lineIndex === start.y) {
+      selStart = Math.max(0, start.x - startX);
+    }
+
+    if (lineIndex === end.y) {
+      selEnd = Math.min(lineContent.length, end.x - startX);
+    }
+
+    // Ensure selection bounds are valid
+    selStart = Math.max(0, Math.min(lineContent.length, selStart));
+    selEnd = Math.max(selStart, Math.min(lineContent.length, selEnd));
+
+    if (selStart >= selEnd) {
+      return lineContent; // No valid selection range
+    }
+
+    // Apply highlighting
+    const before = lineContent.substring(0, selStart);
+    const selected = lineContent.substring(selStart, selEnd);
+    const after = lineContent.substring(selEnd);
+
+    return before + this.themeManager.formatText(selected, "selection") + after;
+  }
+
+  /**
+   * Switch to next theme
+   */
+  switchTheme() {
+    const newTheme = this.themeManager.nextTheme();
+
+    // Recreate interface with new theme
+    this.screen.destroy();
+    this.createScreen();
+    this.createInterface();
+    this.setupKeybindings();
+
+    // Show theme change message
+    this.showMessage(`Switched to ${newTheme.displayName}`);
+    this.render();
   }
 }
 

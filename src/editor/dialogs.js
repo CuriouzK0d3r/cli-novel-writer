@@ -409,7 +409,16 @@ Current Position:
       });
 
       const helpText = `
-NOVEL EDITOR - MODAL EDITING HELP
+WRITERS CLI EDITOR - BEAUTIFUL THEMED WRITING
+
+🎨 THEMES:
+The editor features beautiful themes for optimal writing:
+  🌙 Dark Theme    - Modern dark colors, easy on the eyes
+  ☀️ Light Theme   - Clean bright interface for daylight
+  🎨 Base Theme    - Simple classic appearance
+
+Theme Controls:
+  F2             Switch between themes instantly
 
 MODES:
 The editor has two modes (shown in status bar):
@@ -457,19 +466,30 @@ Edit Operations:
   Ctrl+Z         Undo
   Ctrl+Y         Redo
   Ctrl+A         Select all
+  Ctrl+C         Copy selection (or current line if no selection)
+  Ctrl+V         Paste from clipboard
+  Ctrl+X         Cut selection (or current line if no selection)
+
+Text Selection:
+  Shift+Arrow    Extend selection with arrow keys
+  Shift+Home/End Extend selection to line start/end
+  Shift+Ctrl+Arrow Extend selection by word
+  Shift+Ctrl+Home/End Extend selection to document start/end
 
 Search and Replace:
   Ctrl+F         Find text
   Ctrl+R         Find and replace
   Ctrl+G         Go to line number
 
-View:
+View & Themes:
+  F2             🎨 Switch theme (Dark/Light/Base)
   F11            Toggle distraction-free mode
   F9             Toggle typewriter mode (focused window with dimming)
   Ctrl+W         Show document statistics
   F1             Show this help
 
 Writing Features:
+  - 🎨 Beautiful dark & light themes with syntax highlighting
   - Real-time word count in status bar
   - Reading time estimation
   - Auto-save every 30 seconds
@@ -477,7 +497,8 @@ Writing Features:
   - Modal editing for focused writing
   - Distraction-free writing mode
   - Typewriter mode with focused window (dims all but current ±1 line)
-  - Markdown-aware word counting
+  - Markdown-aware word counting and syntax highlighting
+  - Professional status bars with theme integration
 
 Tips for Modal Editing:
   - Start in Navigation mode for browsing

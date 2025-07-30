@@ -6,6 +6,7 @@ const packageJson = require("../package.json");
 
 // Import commands
 const initCommand = require("../src/commands/init");
+const initShortStoryCommand = require("../src/commands/init-shortstory");
 const newCommand = require("../src/commands/new");
 const writeCommand = require("../src/commands/write");
 const editCommand = require("../src/commands/edit");
@@ -13,6 +14,8 @@ const statsCommand = require("../src/commands/stats");
 const exportCommand = require("../src/commands/export");
 const listCommand = require("../src/commands/list");
 const guiCommand = require("../src/commands/gui");
+const storyCommand = require("../src/commands/story");
+const workflowCommand = require("../src/commands/workflow");
 
 const program = new Command();
 
@@ -46,6 +49,13 @@ program
   .option("-n, --name <n>", "Project name")
   .option("-a, --author <author>", "Author name")
   .action(initCommand);
+
+program
+  .command("init-shortstory")
+  .description("Initialize a new short story project")
+  .option("-n, --name <n>", "Project name")
+  .option("-a, --author <author>", "Author name")
+  .action(initShortStoryCommand);
 
 program
   .command("new")
@@ -105,6 +115,40 @@ program
     "Filter by type (chapters, scenes, characters, shortstories, notes)",
   )
   .action(listCommand);
+
+program
+  .command("story")
+  .description("Advanced short story management")
+  .argument(
+    "<action>",
+    "Action to perform (list, status, move, copy, archive, submit, stats, search, tags, notes)",
+  )
+  .argument("[story-name]", "Name of the story (required for most actions)")
+  .option(
+    "--status <status>",
+    "Filter by status (planning, drafting, revising, complete, submitted, published)",
+  )
+  .option("--genre <genre>", "Filter by genre")
+  .option("--tag <tag>", "Filter by tag")
+  .option("--sort <field>", "Sort by field (name, length, status, modified)")
+  .option("--detailed", "Show detailed view")
+  .option("--to <destination>", "Destination directory for move action")
+  .option("--as <name>", "New name for copy action")
+  .option("--add <value>", "Add tags or notes")
+  .option("--remove <value>", "Remove tags")
+  .action(storyCommand);
+
+program
+  .command("workflow")
+  .description("Automated writing workflows")
+  .argument(
+    "<type>",
+    "Workflow type (daily, submission, revision, collection, prompt, sprint, publish, backup)",
+  )
+  .option("--goal <goal>", "Set a specific goal for the session")
+  .option("--time <minutes>", "Set time limit in minutes")
+  .option("--words <count>", "Set word count target")
+  .action(workflowCommand);
 
 // Handle unknown commands
 program.on("command:*", () => {
