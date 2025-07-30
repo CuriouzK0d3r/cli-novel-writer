@@ -33,6 +33,7 @@
     "marked": "^9.1.2",
     "moment": "^2.29.4",
     "ora": "^5.4.1",
+    "pkg": "^5.8.1",
     "word-count": "^0.2.2"
   },
   "devDependencies": {
