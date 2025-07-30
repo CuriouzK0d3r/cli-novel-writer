@@ -11,7 +11,8 @@
     "test": "jest",
     "dev": "nodemon bin/writers.js",
     "demo": "node demo.js",
-    "demo-editor": "node demo-editor.js"
+    "demo-editor": "node demo-editor.js",
+    "build": "pkg --config pkg.config.json bin/writers.js"
   },
   "keywords": [
     "writing",

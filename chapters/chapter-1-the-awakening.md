@@ -1,7 +1,7 @@
 *Created: 2025-07-28*
-
+dsafadfa a fad f af 
 ---
-
+fdsf ds
 ## Summary
 Lyrad discovers her magical abilities when ancient crystals react to her presence.
 
@@ -25,4 +25,4 @@ She was a Crystalwright, one of the legendary magic users her grandmother had to
 
 But if she could see the crystal magic, that meant the old legends were true. The Dark Convergence was coming, and the realm would need its Crystalwrights more than ever.
 
-Little did Lyra know that in the capital city, shadows were already moving, and her discovery had not gone unnoticejjsskknnddffnnddsskknnffkkddssssffddss
+Little did Lyra know that in the capital city, shadows were already moving, and her discovery had not gone unnoticed.

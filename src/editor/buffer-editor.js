@@ -678,11 +678,20 @@ class BufferEditor {
           const cursorPos = cursorScreenX - (this.showLineNumbers ? 5 : 0);
           const char =
             cursorPos < lineContent.length ? lineContent[cursorPos] : " ";
-          // Create cursor by inverting the character at cursor position
+
+          // Different cursor styles for different modes
           const beforeCursor = lineContent.substring(0, cursorPos);
-          const afterCursor = lineContent.substring(cursorPos + 1);
-          lineContent =
-            beforeCursor + `{inverse}${char}{/inverse}` + afterCursor;
+          const afterCursor = lineContent.substring(cursorPos);
+
+          if (this.mode === "insert") {
+            // Line cursor for insert mode - show a vertical bar at cursor position
+            lineContent = beforeCursor + `|` + afterCursor;
+          } else {
+            // Block cursor for navigation mode - invert the character at cursor position
+            const afterChar = lineContent.substring(cursorPos + 1);
+            lineContent =
+              beforeCursor + `{inverse}${char}{/inverse}` + afterChar;
+          }
         }
 
         line += lineContent;
@@ -695,7 +704,11 @@ class BufferEditor {
           this.cursorX - this.scrollX + (this.showLineNumbers ? 5 : 0);
 
         if (i === screenY && this.cursorVisible && cursorScreenX === 5) {
-          line += "{inverse} {/inverse}";
+          if (this.mode === "insert") {
+            line += "{inverse}|{/inverse}";
+          } else {
+            line += "{inverse} {/inverse}";
+          }
         }
       } else {
         // Handle cursor on empty lines without line numbers
@@ -703,7 +716,11 @@ class BufferEditor {
         const cursorScreenX = this.cursorX - this.scrollX;
 
         if (i === screenY && this.cursorVisible && cursorScreenX === 0) {
-          line = "{inverse} {/inverse}";
+          if (this.mode === "insert") {
+            line = "{inverse}|{/inverse}";
+          } else {
+            line = "{inverse} {/inverse}";
+          }
         }
       }
 
