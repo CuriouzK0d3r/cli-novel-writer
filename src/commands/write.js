@@ -49,13 +49,13 @@ async function writeCommand(target, options) {
           name: "editorChoice",
           message: "Which editor would you like to use?",
           choices: [
-            { name: "📝 Writers Editor (built-in)", value: "writers-editor" },
+            { name: "📝 Novel Editor (built-in)", value: "novel-editor" },
             { name: "📄 Nano (simple)", value: "nano" },
             { name: "⚡ Vim (advanced)", value: "vim" },
             { name: "🆚 VS Code (if installed)", value: "code" },
             { name: "🖥️  System default", value: "default" },
           ],
-          default: "writers-editor",
+          default: "novel-editor",
         },
       ]);
       editor = editorChoice;
@@ -76,7 +76,7 @@ async function writeCommand(target, options) {
     const initialWords = markdownUtils.countWords(initialContent);
 
     // Open in editor
-    if (editor === "writers-editor") {
+    if (editor === "novel-editor" || editor === "writers-editor") {
       await openInBuiltInEditor(fileInfo.path, initialWords);
     } else {
       await openInEditor(fileInfo.path, editor);
@@ -281,7 +281,7 @@ async function openInEditor(filePath, editor) {
 
 async function openInBuiltInEditor(filePath, initialWords) {
   try {
-    console.log(chalk.blue("🚀 Launching Writers Editor..."));
+    console.log(chalk.blue("🚀 Launching Novel Editor..."));
     console.log(chalk.gray("Press F1 for help once the editor loads\n"));
 
     // Small delay to let user read the message

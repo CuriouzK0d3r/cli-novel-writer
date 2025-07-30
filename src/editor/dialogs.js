@@ -403,13 +403,13 @@ Current Position:
   showHelpDialog() {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
-        label: " Writers Editor Help ",
+        label: " Novel Editor Help ",
         width: 80,
         height: "90%",
       });
 
       const helpText = `
-WRITERS EDITOR - MODAL EDITING HELP
+NOVEL EDITOR - MODAL EDITING HELP
 
 MODES:
 The editor has two modes (shown in status bar):

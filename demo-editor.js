@@ -1,19 +1,23 @@
 #!/usr/bin/env node
 
-const chalk = require('chalk');
-const fs = require('fs-extra');
-const path = require('path');
-const WritersEditor = require('./src/editor');
+const chalk = require("chalk");
+const fs = require("fs-extra");
+const path = require("path");
+const WritersEditor = require("./src/editor");
 
 async function runDemo() {
-  console.log(chalk.bold.blue(`
+  console.log(
+    chalk.bold.blue(`
 ╔══════════════════════════════════════════════════════════════╗
-║                     Writers Editor Demo                     ║
+║                     Novel Editor Demo                       ║
 ║              Terminal-based editor for writers              ║
 ╚══════════════════════════════════════════════════════════════╝
-`));
+`),
+  );
 
-  console.log(chalk.yellow('This demo will showcase the Writers Editor features.\n'));
+  console.log(
+    chalk.yellow("This demo will showcase the Novel Editor features.\n"),
+  );
 
   // Create a temporary demo file
   const demoContent = `# The Mysterious Case of the Missing Manuscript
@@ -68,22 +72,24 @@ Instead, the machine seemed to have a mind of its own:
 *Current Progress: This is just the beginning...*
 `;
 
-  const demoFile = path.join(__dirname, 'demo-chapter.md');
+  const demoFile = path.join(__dirname, "demo-chapter.md");
 
   try {
     await fs.writeFile(demoFile, demoContent);
 
-    console.log(chalk.green('✅ Created demo file: demo-chapter.md'));
-    console.log(chalk.blue('\n🚀 Launching Writers Editor...'));
-    console.log(chalk.gray('The editor will open with a sample chapter loaded.'));
-    console.log(chalk.gray('Try these features while in the editor:'));
-    console.log(chalk.yellow('  • Press F1 for help'));
-    console.log(chalk.yellow('  • Press Ctrl+W for word count details'));
-    console.log(chalk.yellow('  • Press F11 for distraction-free mode'));
-    console.log(chalk.yellow('  • Press Ctrl+F to search for text'));
-    console.log(chalk.yellow('  • Press Ctrl+X to exit when done'));
+    console.log(chalk.green("✅ Created demo file: demo-chapter.md"));
+    console.log(chalk.blue("\n🚀 Launching Novel Editor..."));
+    console.log(
+      chalk.gray("The editor will open with a sample chapter loaded."),
+    );
+    console.log(chalk.gray("Try these features while in the editor:"));
+    console.log(chalk.yellow("  • Press F1 for help"));
+    console.log(chalk.yellow("  • Press Ctrl+W for word count details"));
+    console.log(chalk.yellow("  • Press F11 for distraction-free mode"));
+    console.log(chalk.yellow("  • Press Ctrl+F to search for text"));
+    console.log(chalk.yellow("  • Press Ctrl+X to exit when done"));
 
-    console.log(chalk.gray('\nPress Enter to continue...'));
+    console.log(chalk.gray("\nPress Enter to continue..."));
     await waitForEnter();
 
     // Launch the editor
@@ -91,26 +97,25 @@ Instead, the machine seemed to have a mind of its own:
     await editor.launch(demoFile);
 
     // Cleanup
-    console.log(chalk.blue('\n👋 Thanks for trying the Writers Editor!'));
+    console.log(chalk.blue("\n👋 Thanks for trying the Novel Editor!"));
 
-    const { cleanup } = await require('inquirer').prompt([
+    const { cleanup } = await require("inquirer").prompt([
       {
-        type: 'confirm',
-        name: 'cleanup',
-        message: 'Would you like to delete the demo file?',
-        default: true
-      }
+        type: "confirm",
+        name: "cleanup",
+        message: "Would you like to delete the demo file?",
+        default: true,
+      },
     ]);
 
     if (cleanup) {
       await fs.remove(demoFile);
-      console.log(chalk.green('✅ Demo file cleaned up.'));
+      console.log(chalk.green("✅ Demo file cleaned up."));
     } else {
       console.log(chalk.blue(`📁 Demo file saved at: ${demoFile}`));
     }
-
   } catch (error) {
-    console.error(chalk.red('❌ Demo failed:'), error.message);
+    console.error(chalk.red("❌ Demo failed:"), error.message);
 
     // Cleanup on error
     try {
@@ -125,8 +130,9 @@ function waitForEnter() {
   return new Promise((resolve) => {
     process.stdin.setRawMode(true);
     process.stdin.resume();
-    process.stdin.on('data', (data) => {
-      if (data[0] === 13) { // Enter key
+    process.stdin.on("data", (data) => {
+      if (data[0] === 13) {
+        // Enter key
         process.stdin.setRawMode(false);
         process.stdin.pause();
         resolve();
@@ -136,13 +142,13 @@ function waitForEnter() {
 }
 
 // Handle script interruption
-process.on('SIGINT', async () => {
-  console.log(chalk.yellow('\n\n⚠️  Demo interrupted. Cleaning up...'));
+process.on("SIGINT", async () => {
+  console.log(chalk.yellow("\n\n⚠️  Demo interrupted. Cleaning up..."));
 
   try {
-    const demoFile = path.join(__dirname, 'demo-chapter.md');
+    const demoFile = path.join(__dirname, "demo-chapter.md");
     await fs.remove(demoFile);
-    console.log(chalk.green('✅ Cleanup completed.'));
+    console.log(chalk.green("✅ Cleanup completed."));
   } catch (error) {
     // Ignore cleanup errors
   }
@@ -152,8 +158,8 @@ process.on('SIGINT', async () => {
 
 // Run the demo
 if (require.main === module) {
-  runDemo().catch(error => {
-    console.error(chalk.red('❌ Error running demo:'), error.message);
+  runDemo().catch((error) => {
+    console.error(chalk.red("❌ Error running demo:"), error.message);
     process.exit(1);
   });
 }

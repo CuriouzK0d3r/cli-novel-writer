@@ -55,7 +55,10 @@ program
   .command("write")
   .description("Open a chapter or scene for writing (external editor)")
   .argument("[target]", "Chapter or scene to write (e.g., chapter1, scene2)")
-  .option("-e, --editor <editor>", "Preferred editor (nano, vim, code)")
+  .option(
+    "-e, --editor <editor>",
+    "Preferred editor (novel-editor, nano, vim, code)",
+  )
   .action(writeCommand);
 
 program

@@ -95,7 +95,7 @@ class BufferEditor {
   createScreen() {
     this.screen = blessed.screen({
       smartCSR: true,
-      title: "Writers Editor",
+      title: "Novel Editor",
       cursor: {
         artificial: false,
         shape: "line",

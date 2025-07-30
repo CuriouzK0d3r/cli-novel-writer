@@ -1,9 +1,9 @@
-const blessed = require('blessed');
-const fs = require('fs-extra');
-const path = require('path');
-const chalk = require('chalk');
-const markdownUtils = require('../utils/markdown');
-const projectManager = require('../utils/project');
+const blessed = require("blessed");
+const fs = require("fs-extra");
+const path = require("path");
+const chalk = require("chalk");
+const markdownUtils = require("../utils/markdown");
+const projectManager = require("../utils/project");
 
 class WritersTextEditor {
   constructor() {
@@ -11,11 +11,11 @@ class WritersTextEditor {
     this.editor = null;
     this.statusBar = null;
     this.currentFile = null;
-    this.originalContent = '';
+    this.originalContent = "";
     this.isDirty = false;
     this.wordCount = 0;
     this.characterCount = 0;
-    this.readingTime = '';
+    this.readingTime = "";
 
     // Editor state
     this.undoStack = [];
@@ -26,13 +26,13 @@ class WritersTextEditor {
 
     // Configuration
     this.config = {
-      theme: 'dark',
+      theme: "dark",
       autoSave: true,
       autoSaveInterval: 30000, // 30 seconds
       showWordCount: true,
       showReadingTime: true,
       wrapText: true,
-      tabSize: 2
+      tabSize: 2,
     };
   }
 
@@ -48,7 +48,7 @@ class WritersTextEditor {
       if (filePath) {
         await this.openFile(filePath);
       } else {
-        this.editor.setValue('');
+        this.editor.setValue("");
         this.updateStatus();
       }
 
@@ -62,9 +62,8 @@ class WritersTextEditor {
           }
         }, this.config.autoSaveInterval);
       }
-
     } catch (error) {
-      console.error('Error launching editor:', error.message);
+      console.error("Error launching editor:", error.message);
       process.exit(1);
     }
   }
@@ -75,18 +74,18 @@ class WritersTextEditor {
   createScreen() {
     this.screen = blessed.screen({
       smartCSR: true,
-      title: 'Writers Editor',
+      title: "Novel Editor",
       cursor: {
         artificial: true,
-        shape: 'line',
+        shape: "line",
         blink: true,
-        color: null
+        color: null,
       },
-      debug: false
+      debug: false,
     });
 
     // Handle screen resize
-    this.screen.on('resize', () => {
+    this.screen.on("resize", () => {
       this.updateLayout();
     });
   }
@@ -103,17 +102,17 @@ class WritersTextEditor {
       right: 0,
       bottom: 3,
       border: {
-        type: 'line',
-        fg: 'blue'
+        type: "line",
+        fg: "blue",
       },
       style: {
-        fg: 'white',
-        bg: 'black',
+        fg: "white",
+        bg: "black",
         focus: {
           border: {
-            fg: 'green'
-          }
-        }
+            fg: "green",
+          },
+        },
       },
       scrollable: true,
       alwaysScroll: true,
@@ -122,7 +121,7 @@ class WritersTextEditor {
       vi: false,
       wrap: this.config.wrapText,
       tags: false,
-      inputOnFocus: true
+      inputOnFocus: true,
     });
 
     // Status bar
@@ -133,10 +132,10 @@ class WritersTextEditor {
       right: 0,
       height: 1,
       style: {
-        fg: 'white',
-        bg: 'blue'
+        fg: "white",
+        bg: "blue",
       },
-      content: ' Ready'
+      content: " Ready",
     });
 
     // Command line / info bar
@@ -147,9 +146,9 @@ class WritersTextEditor {
       right: 0,
       height: 1,
       style: {
-        fg: 'yellow',
-        bg: 'black'
-      }
+        fg: "yellow",
+        bg: "black",
+      },
     });
 
     // Help bar
@@ -160,10 +159,11 @@ class WritersTextEditor {
       right: 0,
       height: 1,
       style: {
-        fg: 'cyan',
-        bg: 'black'
+        fg: "cyan",
+        bg: "black",
       },
-      content: ' ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go to Line  ^W Word Count  F1 Help'
+      content:
+        " ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go to Line  ^W Word Count  F1 Help",
     });
 
     // Focus on editor and make it editable
@@ -171,7 +171,7 @@ class WritersTextEditor {
     this.editor.readInput();
 
     // Editor content change handler
-    this.editor.on('keypress', (ch, key) => {
+    this.editor.on("keypress", (ch, key) => {
       // Skip control keys for content changes
       if (key && (key.ctrl || key.meta)) {
         return;
@@ -186,7 +186,7 @@ class WritersTextEditor {
     });
 
     // Handle value changes
-    this.editor.on('submit', () => {
+    this.editor.on("submit", () => {
       // This fires when Enter is pressed
       this.markDirty();
       this.updateStats();
@@ -199,67 +199,67 @@ class WritersTextEditor {
    */
   setupKeybindings() {
     // Save file
-    this.screen.key(['C-s'], async () => {
+    this.screen.key(["C-s"], async () => {
       await this.saveFile();
     });
 
     // Open file
-    this.screen.key(['C-o'], () => {
+    this.screen.key(["C-o"], () => {
       this.showOpenDialog();
     });
 
     // Exit
-    this.screen.key(['C-x', 'C-c'], async () => {
+    this.screen.key(["C-x", "C-c"], async () => {
       await this.exit();
     });
 
     // Find
-    this.screen.key(['C-f'], () => {
+    this.screen.key(["C-f"], () => {
       this.showFindDialog();
     });
 
     // Replace
-    this.screen.key(['C-r'], () => {
+    this.screen.key(["C-r"], () => {
       this.showReplaceDialog();
     });
 
     // Go to line
-    this.screen.key(['C-g'], () => {
+    this.screen.key(["C-g"], () => {
       this.showGoToLineDialog();
     });
 
     // Word count
-    this.screen.key(['C-w'], () => {
+    this.screen.key(["C-w"], () => {
       this.showWordCountDialog();
     });
 
     // Help
-    this.screen.key(['f1'], () => {
+    this.screen.key(["f1"], () => {
       this.showHelp();
     });
 
     // Undo
-    this.screen.key(['C-z'], () => {
+    this.screen.key(["C-z"], () => {
       this.undo();
     });
 
     // Redo
-    this.screen.key(['C-y'], () => {
+    this.screen.key(["C-y"], () => {
       this.redo();
     });
 
     // Toggle distraction-free mode
-    this.screen.key(['f11'], () => {
+    this.screen.key(["f11"], () => {
       this.toggleDistractionFree();
     });
 
     // New file
-    this.screen.key(['C-n'], () => {
+    this.screen.key(["C-n"], () => {
       this.newFile();
     });
 
     // Select all
-    this.screen.key(['C-a'], () => {
+    this.screen.key(["C-a"], () => {
       this.selectAll();
     });
   }
@@ -274,7 +274,7 @@ class WritersTextEditor {
         if (save === null) return; // Cancelled
       }
 
-      const content = await fs.readFile(filePath, 'utf8');
+      const content = await fs.readFile(filePath, "utf8");
       this.currentFile = filePath;
       this.originalContent = content;
       this.editor.setValue(content);
@@ -301,7 +301,7 @@ class WritersTextEditor {
       }
 
       const content = this.editor.getValue();
-      await fs.writeFile(targetPath, content, 'utf8');
+      await fs.writeFile(targetPath, content, "utf8");
 
       this.currentFile = targetPath;
       this.originalContent = content;
@@ -319,25 +319,25 @@ class WritersTextEditor {
    */
   newFile() {
     if (this.isDirty) {
-      this.confirmSave().then(save => {
+      this.confirmSave().then((save) => {
         if (save !== null) {
           this.currentFile = null;
-          this.editor.setValue('');
-          this.originalContent = '';
+          this.editor.setValue("");
+          this.originalContent = "";
           this.isDirty = false;
           this.updateStats();
           this.updateStatus();
-          this.showMessage('New file created');
+          this.showMessage("New file created");
         }
       });
     } else {
       this.currentFile = null;
-      this.editor.setValue('');
-      this.originalContent = '';
+      this.editor.setValue("");
+      this.originalContent = "";
       this.isDirty = false;
       this.updateStats();
       this.updateStatus();
-      this.showMessage('New file created');
+      this.showMessage("New file created");
     }
   }
 
@@ -365,10 +365,12 @@ class WritersTextEditor {
    * Update status bar
    */
   updateStatus() {
-    const fileName = this.currentFile ? path.basename(this.currentFile) : 'Untitled';
-    const dirtyFlag = this.isDirty ? '*' : '';
+    const fileName = this.currentFile
+      ? path.basename(this.currentFile)
+      : "Untitled";
+    const dirtyFlag = this.isDirty ? "*" : "";
     const content = this.editor.getValue();
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     const currentLine = lines.length;
 
     let status = ` ${fileName}${dirtyFlag}`;
@@ -393,24 +395,24 @@ class WritersTextEditor {
   async showOpenDialog() {
     const dialog = blessed.prompt({
       parent: this.screen,
-      top: 'center',
-      left: 'center',
+      top: "center",
+      left: "center",
       width: 60,
-      height: 'shrink',
+      height: "shrink",
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Open File ',
+      label: " Open File ",
       style: {
-        fg: 'white',
-        bg: 'black',
+        fg: "white",
+        bg: "black",
         border: {
-          fg: 'green'
-        }
-      }
+          fg: "green",
+        },
+      },
     });
 
-    dialog.input('Enter file path:', '', async (err, value) => {
+    dialog.input("Enter file path:", "", async (err, value) => {
       if (!err && value) {
         await this.openFile(value);
       }
@@ -427,32 +429,36 @@ class WritersTextEditor {
   async showSaveAsDialog() {
     const dialog = blessed.prompt({
       parent: this.screen,
-      top: 'center',
-      left: 'center',
+      top: "center",
+      left: "center",
       width: 60,
-      height: 'shrink',
+      height: "shrink",
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Save As ',
+      label: " Save As ",
       style: {
-        fg: 'white',
-        bg: 'black',
+        fg: "white",
+        bg: "black",
         border: {
-          fg: 'green'
-        }
-      }
+          fg: "green",
+        },
+      },
     });
 
-    dialog.input('Enter file path:', this.currentFile || '', async (err, value) => {
-      if (!err && value) {
-        await this.saveFile(value);
-      }
-      dialog.destroy();
-      this.screen.render();
-      this.editor.focus();
-      this.editor.readInput();
-    });
+    dialog.input(
+      "Enter file path:",
+      this.currentFile || "",
+      async (err, value) => {
+        if (!err && value) {
+          await this.saveFile(value);
+        }
+        dialog.destroy();
+        this.screen.render();
+        this.editor.focus();
+        this.editor.readInput();
+      },
+    );
   }
 
   /**
@@ -461,24 +467,24 @@ class WritersTextEditor {
   showFindDialog() {
     const dialog = blessed.prompt({
       parent: this.screen,
-      top: 'center',
-      left: 'center',
+      top: "center",
+      left: "center",
       width: 60,
-      height: 'shrink',
+      height: "shrink",
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Find ',
+      label: " Find ",
       style: {
-        fg: 'white',
-        bg: 'black',
+        fg: "white",
+        bg: "black",
         border: {
-          fg: 'green'
-        }
-      }
+          fg: "green",
+        },
+      },
     });
 
-    dialog.input('Search for:', '', (err, value) => {
+    dialog.input("Search for:", "", (err, value) => {
       if (!err && value) {
         this.findText(value);
       }
@@ -495,28 +501,28 @@ class WritersTextEditor {
   showReplaceDialog() {
     const dialog = blessed.prompt({
       parent: this.screen,
-      top: 'center',
-      left: 'center',
+      top: "center",
+      left: "center",
       width: 60,
-      height: 'shrink',
+      height: "shrink",
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Replace ',
+      label: " Replace ",
       style: {
-        fg: 'white',
-        bg: 'black',
+        fg: "white",
+        bg: "black",
         border: {
-          fg: 'green'
-        }
-      }
+          fg: "green",
+        },
+      },
     });
 
-    dialog.input('Find:', '', (err, findValue) => {
+    dialog.input("Find:", "", (err, findValue) => {
       if (!err && findValue) {
-        dialog.input('Replace with:', '', (err, replaceValue) => {
+        dialog.input("Replace with:", "", (err, replaceValue) => {
           if (!err) {
-            this.replaceText(findValue, replaceValue || '');
+            this.replaceText(findValue, replaceValue || "");
           }
           dialog.destroy();
           this.screen.render();
@@ -538,24 +544,24 @@ class WritersTextEditor {
   showGoToLineDialog() {
     const dialog = blessed.prompt({
       parent: this.screen,
-      top: 'center',
-      left: 'center',
+      top: "center",
+      left: "center",
       width: 40,
-      height: 'shrink',
+      height: "shrink",
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Go to Line ',
+      label: " Go to Line ",
       style: {
-        fg: 'white',
-        bg: 'black',
+        fg: "white",
+        bg: "black",
         border: {
-          fg: 'green'
-        }
-      }
+          fg: "green",
+        },
+      },
     });
 
-    dialog.input('Line number:', '', (err, value) => {
+    dialog.input("Line number:", "", (err, value) => {
       if (!err && value) {
         const lineNum = parseInt(value);
         if (!isNaN(lineNum)) {
@@ -576,9 +582,9 @@ class WritersTextEditor {
     const content = this.editor.getValue();
     const words = markdownUtils.countWords(content);
     const characters = content.length;
-    const charactersNoSpaces = content.replace(/\s/g, '').length;
-    const lines = content.split('\n').length;
-    const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim()).length;
+    const charactersNoSpaces = content.replace(/\s/g, "").length;
+    const lines = content.split("\n").length;
+    const paragraphs = content.split(/\n\s*\n/).filter((p) => p.trim()).length;
     const readingTime = markdownUtils.estimateReadingTime(content);
 
     const stats = `
@@ -592,21 +598,21 @@ Reading Time: ${readingTime}
 
     const dialog = blessed.message({
       parent: this.screen,
-      top: 'center',
-      left: 'center',
+      top: "center",
+      left: "center",
       width: 50,
-      height: 'shrink',
+      height: "shrink",
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Document Statistics ',
+      label: " Document Statistics ",
       style: {
-        fg: 'white',
-        bg: 'black',
+        fg: "white",
+        bg: "black",
         border: {
-          fg: 'green'
-        }
-      }
+          fg: "green",
+        },
+      },
     });
 
     dialog.display(stats, 0, () => {
@@ -620,7 +626,7 @@ Reading Time: ${readingTime}
    */
   showHelp() {
     const helpText = `
-WRITERS EDITOR HELP
+NOVEL EDITOR HELP
 
 File Operations:
   Ctrl+N    - New file
@@ -660,19 +666,19 @@ Press any key to close this help.
       parent: this.screen,
       top: 0,
       left: 0,
-      width: '100%',
-      height: '100%',
+      width: "100%",
+      height: "100%",
       border: {
-        type: 'line'
+        type: "line",
       },
-      label: ' Help ',
+      label: " Help ",
       style: {
-        fg: 'white',
-        bg: 'black',
+        fg: "white",
+        bg: "black",
         border: {
-          fg: 'green'
-        }
-      }
+          fg: "green",
+        },
+      },
     });
 
     dialog.display(helpText, 0, () => {
@@ -705,7 +711,10 @@ Press any key to close this help.
    */
   replaceText(findText, replaceWith) {
     let content = this.editor.getValue();
-    const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const regex = new RegExp(
+      findText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+      "gi",
+    );
     const matches = content.match(regex);
 
     if (matches) {
@@ -725,15 +734,19 @@ Press any key to close this help.
    */
   goToLine(lineNumber) {
     const content = this.editor.getValue();
-    const lines = content.split('\n');
+    const lines = content.split("\n");
 
     if (lineNumber > 0 && lineNumber <= lines.length) {
       // For blessed textarea, we can't easily position cursor
       // but we can at least validate and give feedback
       this.editor.focus();
-      this.showMessage(`Line ${lineNumber} of ${lines.length} (use arrow keys to navigate)`);
+      this.showMessage(
+        `Line ${lineNumber} of ${lines.length} (use arrow keys to navigate)`,
+      );
     } else {
-      this.showMessage(`Invalid line number. Document has ${lines.length} lines.`);
+      this.showMessage(
+        `Invalid line number. Document has ${lines.length} lines.`,
+      );
     }
   }
 
@@ -749,7 +762,7 @@ Press any key to close this help.
       this.editor.setValue(previousContent);
       this.updateStats();
       this.updateStatus();
-      this.showMessage('Undo');
+      this.showMessage("Undo");
     }
   }
 
@@ -765,7 +778,7 @@ Press any key to close this help.
       this.editor.setValue(nextContent);
       this.updateStats();
       this.updateStatus();
-      this.showMessage('Redo');
+      this.showMessage("Redo");
     }
   }
 
@@ -795,18 +808,18 @@ Press any key to close this help.
       this.statusBar.hide();
       this.infoBar.hide();
       this.helpBar.hide();
-      this.editor.style.border.type = 'none';
+      this.editor.style.border.type = "none";
       this.editor.top = 0;
       this.editor.bottom = 0;
-      this.showMessage('Distraction-free mode ON');
+      this.showMessage("Distraction-free mode ON");
     } else {
       this.statusBar.show();
       this.infoBar.show();
       this.helpBar.show();
-      this.editor.style.border.type = 'line';
+      this.editor.style.border.type = "line";
       this.editor.top = 0;
       this.editor.bottom = 3;
-      this.showMessage('Distraction-free mode OFF');
+      this.showMessage("Distraction-free mode OFF");
     }
 
     this.screen.render();
@@ -842,7 +855,7 @@ Press any key to close this help.
 
     // Clear message after 3 seconds
     setTimeout(() => {
-      this.infoBar.setContent('');
+      this.infoBar.setContent("");
       this.screen.render();
     }, 3000);
   }
@@ -851,13 +864,13 @@ Press any key to close this help.
    * Show error message
    */
   showError(message) {
-    this.infoBar.style.fg = 'red';
+    this.infoBar.style.fg = "red";
     this.infoBar.setContent(` ERROR: ${message}`);
     this.screen.render();
 
     setTimeout(() => {
-      this.infoBar.style.fg = 'yellow';
-      this.infoBar.setContent('');
+      this.infoBar.style.fg = "yellow";
+      this.infoBar.setContent("");
       this.screen.render();
     }, 5000);
   }
@@ -869,31 +882,31 @@ Press any key to close this help.
     return new Promise((resolve) => {
       const dialog = blessed.question({
         parent: this.screen,
-        top: 'center',
-        left: 'center',
+        top: "center",
+        left: "center",
         width: 60,
-        height: 'shrink',
+        height: "shrink",
         border: {
-          type: 'line'
+          type: "line",
         },
-        label: ' Unsaved Changes ',
+        label: " Unsaved Changes ",
         style: {
-          fg: 'white',
-          bg: 'black',
+          fg: "white",
+          bg: "black",
           border: {
-            fg: 'yellow'
-          }
-        }
+            fg: "yellow",
+          },
+        },
       });
 
-      dialog.ask('Save changes? (y/n/c)', (err, value) => {
+      dialog.ask("Save changes? (y/n/c)", (err, value) => {
         if (err) {
           resolve(null);
         } else {
           const response = value.toLowerCase();
-          if (response === 'y' || response === 'yes') {
+          if (response === "y" || response === "yes") {
             this.saveFile().then(() => resolve(true));
-          } else if (response === 'n' || response === 'no') {
+          } else if (response === "n" || response === "no") {
             resolve(false);
           } else {
             resolve(null); // Cancel
