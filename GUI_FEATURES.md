@@ -18,11 +18,14 @@ The Writers CLI now includes a full-featured graphical user interface that provi
 - **Notes**: Keep research notes, plot ideas, and story development thoughts
 - **One-click Creation**: Add new content with simple buttons and forms
 
-### Integrated Editor
-- **Built-in Text Editor**: Write directly in the GUI with syntax highlighting
+### Advanced Integrated Editor
+- **Vim-inspired Keybindings**: Dual-mode editor with navigation and insert modes
+- **Professional Features**: Built-in find/replace, go-to-line, word count statistics
 - **Auto-save**: Automatically saves your work every 30 seconds
 - **Real-time Updates**: File changes immediately reflect in statistics and lists
 - **Quick Navigation**: Switch between files without losing your place
+- **Distraction-Free Mode**: F11 toggles full-screen writing mode
+- **Comprehensive Shortcuts**: Full keyboard navigation and editing commands
 
 ### Statistics & Progress Tracking
 - **Live Dashboard**: Real-time word counts, chapter counts, and progress tracking
@@ -36,7 +39,8 @@ The Writers CLI now includes a full-featured graphical user interface that provi
 - **Tabbed Navigation**: Easy switching between dashboard, files, statistics, and settings
 - **Responsive Design**: Works well on different screen sizes
 - **Dark Theme**: Eye-friendly interface for long writing sessions
-- **Keyboard Shortcuts**: Efficient navigation and file operations
+- **Advanced Editor Interface**: Professional toolbar with mode indicators and cursor position
+- **Comprehensive Keyboard Shortcuts**: Efficient navigation and file operations
 
 ### Export Capabilities
 - **HTML Export**: Export your complete project to a formatted HTML file
@@ -82,7 +86,27 @@ writers gui --debug
 - **Ctrl/Cmd + S**: Save current file
 - **Ctrl/Cmd + W**: Close editor
 - **Ctrl/Cmd + E**: Export project
-- **Escape**: Close any open modal
+- **Escape**: Toggle between navigation and insert modes / Close modals
+
+### Advanced Editor Shortcuts
+#### Navigation Mode (Press Esc)
+- **h, j, k, l**: Move cursor (vim-style navigation)
+- **w, b**: Move by word forward/backward
+- **0, $**: Start/end of line
+- **gg, G**: Start/end of document
+- **i, a**: Enter insert mode (before/after cursor)
+
+#### Insert Mode (Default)
+- **Esc**: Return to navigation mode
+- **Ctrl/Cmd + F**: Find text
+- **Ctrl/Cmd + R**: Find and replace
+- **Ctrl/Cmd + G**: Go to specific line
+- **Ctrl/Cmd + W**: Show detailed word count statistics
+- **F11**: Toggle distraction-free writing mode
+- **F1**: Show keyboard shortcuts help
+- **Ctrl/Cmd + Z**: Undo
+- **Ctrl/Cmd + Y**: Redo
+- **Ctrl/Cmd + A**: Select all text
 
 ## 💡 Tips & Best Practices
 
@@ -123,23 +147,31 @@ project/
 - All content is stored as Markdown files
 - Project settings are saved in `writers.config.json`
 - Statistics are calculated in real-time from file content
+- Advanced editor maintains undo/redo history
+- Auto-save functionality preserves work automatically
 - No external database required
 
 ### Performance
 - Optimized for projects with hundreds of files
 - Real-time statistics calculation
 - Efficient file watching and updates
-- Memory-friendly text editor
+- Advanced editor with vim-inspired navigation for speed
+- Memory-friendly text editor with efficient undo/redo
+- Distraction-free mode for focused writing sessions
 
 ## 🆕 What's New
 
 This comprehensive GUI includes all the functionality of the CLI tool plus:
 - Visual project management
 - Real-time statistics dashboard
-- Integrated editing environment
+- Advanced integrated editing environment with vim-inspired keybindings
+- Dual-mode editor (navigation and insert modes)
+- Professional editing features (find/replace, go-to-line, word count)
+- Distraction-free writing mode
 - Export functionality
 - Project settings management
 - File organization tools
+- Comprehensive keyboard shortcuts for efficient writing
 
 The GUI complements the existing CLI commands - you can use both interfaces with the same project files.
 
@@ -159,5 +191,15 @@ The GUI complements the existing CLI commands - you can use both interfaces with
 - The GUI auto-refreshes every few seconds
 - Manually refresh by switching tabs
 - Ensure file permissions allow reading/writing
+
+### Editor-Specific Issues
+- **Mode Confusion**: Press Esc to enter navigation mode, i/a to enter insert mode
+- **Shortcuts Not Working**: Ensure you're in the correct mode (navigation vs insert)
+- **Distraction-Free Mode**: Press F11 to toggle, or check View menu
+
+### Getting Help
+- **In-Editor Help**: Press F1 while in the editor for keyboard shortcuts
+- **Editor Modes**: The mode indicator shows current mode (INSERT/NAVIGATION)
+- **Cursor Position**: Bottom toolbar shows line and column numbers
 
 For more help, refer to the main README.md or create an issue on the project repository.

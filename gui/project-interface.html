@@ -111,6 +111,75 @@
                 padding: 8px 4px;
             }
 
+            /* Editor Specific Styles */
+            .toolbar {
+                background: #2d2d2d;
+                border-bottom: 1px solid #404040;
+                padding: 8px 16px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 12px;
+            }
+
+            .toolbar.hidden {
+                display: none;
+            }
+
+            .toolbar-left,
+            .toolbar-right {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .mode-indicator {
+                background: #4caf50;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 3px;
+                font-weight: bold;
+                font-size: 10px;
+                text-transform: uppercase;
+            }
+
+            .mode-indicator.navigation {
+                background: #ff9800;
+            }
+
+            .file-info {
+                color: #888;
+                font-style: italic;
+            }
+
+            .cursor-info {
+                color: #888;
+                font-family: monospace;
+                font-size: 11px;
+            }
+
+            .status-bar {
+                background: #2d2d2d;
+                border-top: 1px solid #404040;
+                padding: 6px 16px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 11px;
+                color: #888;
+            }
+
+            .status-bar.hidden {
+                display: none;
+            }
+
+            .status-left,
+            .status-right {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+
             /* Tab Content */
             .tab-content {
                 flex: 1;
@@ -445,7 +514,7 @@
 
             .editor {
                 width: 100%;
-                height: 100%;
+                flex: 1;
                 background: #1a1a1a;
                 color: #e0e0e0;
                 border: none;
@@ -455,6 +524,36 @@
                 line-height: 1.6;
                 resize: none;
                 outline: none;
+                tab-size: 4;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+
+            .editor:focus {
+                outline: none;
+            }
+
+            /* Search highlighting */
+            .search-highlight {
+                background-color: #666 !important;
+                color: #fff !important;
+            }
+
+            .search-current {
+                background-color: #4caf50 !important;
+                color: #fff !important;
+            }
+
+            /* Distraction-free mode */
+            .distraction-free .toolbar,
+            .distraction-free .status-bar {
+                display: none;
+            }
+
+            .distraction-free .editor {
+                padding: 40px;
+                font-size: 16px;
+                line-height: 1.8;
             }
 
             /* Statistics View */
@@ -648,6 +747,44 @@
                 100% {
                     transform: rotate(360deg);
                 }
+            }
+
+            /* Help Modal Styles */
+            .help-content {
+                line-height: 1.6;
+            }
+
+            .help-content h3 {
+                color: #4caf50;
+                margin: 20px 0 10px 0;
+                font-size: 16px;
+            }
+
+            .help-content table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+
+            .help-content th,
+            .help-content td {
+                padding: 8px 12px;
+                text-align: left;
+                border-bottom: 1px solid #404040;
+            }
+
+            .help-content th {
+                background: #333;
+                font-weight: 600;
+            }
+
+            .help-content kbd {
+                background: #555;
+                color: #e0e0e0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-family: monospace;
+                font-size: 11px;
             }
 
             /* Hidden State */
@@ -950,7 +1087,7 @@
                     <!-- Editor View -->
                     <div class="content-view" id="editor-view">
                         <div class="editor-container">
-                            <div class="editor-toolbar">
+                            <!-- <div class="editor-toolbar">
                                 <button
                                     class="btn btn-secondary"
                                     onclick="saveCurrentFile()"
@@ -964,13 +1101,64 @@
                                     Close
                                 </button>
                                 <span id="editorStatus"></span>
-                            </div>
+                            </div> -->
                             <div class="editor-area">
+                                <!-- Editor Toolbar -->
+                                <div class="toolbar" id="toolbar">
+                                    <div class="toolbar-left">
+                                        <div
+                                            class="mode-indicator"
+                                            id="modeIndicator"
+                                        >
+                                            INSERT
+                                        </div>
+                                        <div class="file-info" id="fileInfo">
+                                            No file open
+                                        </div>
+                                    </div>
+                                    <div class="toolbar-right">
+                                        <span class="cursor-info" id="cursorPos"
+                                            >Ln 1, Col 1</span
+                                        >
+                                        <span
+                                            class="cursor-info"
+                                            id="selection"
+                                        ></span>
+                                        <button
+                                            class="btn btn-secondary"
+                                            onclick="showHelp()"
+                                            title="Show keyboard shortcuts (F1)"
+                                            style="
+                                                padding: 4px 8px;
+                                                font-size: 11px;
+                                            "
+                                        >
+                                            Help
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Main Editor -->
                                 <textarea
-                                    class="editor"
-                                    id="mainEditor"
+                                    class="editor h-full"
+                                    id="editor"
+                                    style="height: 100%"
                                     placeholder="Start writing..."
+                                    spellcheck="true"
                                 ></textarea>
+
+                                <!-- Status Bar -->
+                                <div class="status-bar" id="statusBar">
+                                    <div class="status-left">
+                                        <span id="wordCount">0 words</span>
+                                        <span id="charCount">0 characters</span>
+                                        <span id="saveStatus">Saved</span>
+                                    </div>
+                                    <div class="status-right">
+                                        <span id="readingTime">0 min read</span>
+                                        <span id="lastSaved"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1040,6 +1228,184 @@
         </div>
 
         <!-- Modals -->
+        <!-- Find Modal -->
+        <div class="modal-overlay" id="findModal">
+            <div class="modal">
+                <h2>Find Text</h2>
+                <input
+                    type="text"
+                    id="findInput"
+                    placeholder="Enter search text..."
+                />
+                <div class="modal-buttons">
+                    <button
+                        class="btn btn-secondary"
+                        onclick="closeModal('findModal')"
+                    >
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" onclick="findNext()">
+                        Find Next
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Replace Modal -->
+        <div class="modal-overlay" id="replaceModal">
+            <div class="modal">
+                <h2>Find and Replace</h2>
+                <input type="text" id="replaceFind" placeholder="Find..." />
+                <input
+                    type="text"
+                    id="replaceWith"
+                    placeholder="Replace with..."
+                />
+                <div class="modal-buttons">
+                    <button
+                        class="btn btn-secondary"
+                        onclick="closeModal('replaceModal')"
+                    >
+                        Cancel
+                    </button>
+                    <button class="btn btn-secondary" onclick="replaceNext()">
+                        Replace
+                    </button>
+                    <button class="btn btn-primary" onclick="replaceAll()">
+                        Replace All
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Go to Line Modal -->
+        <div class="modal-overlay" id="gotoLineModal">
+            <div class="modal">
+                <h2>Go to Line</h2>
+                <input
+                    type="number"
+                    id="gotoLineInput"
+                    placeholder="Line number..."
+                    min="1"
+                />
+                <div class="modal-buttons">
+                    <button
+                        class="btn btn-secondary"
+                        onclick="closeModal('gotoLineModal')"
+                    >
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" onclick="goToLine()">
+                        Go
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Word Count Modal -->
+        <div class="modal-overlay" id="wordCountModal">
+            <div class="modal">
+                <h2>Document Statistics</h2>
+                <div id="wordCountDetails"></div>
+                <div class="modal-buttons">
+                    <button
+                        class="btn btn-primary"
+                        onclick="closeModal('wordCountModal')"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Modal -->
+        <div class="modal-overlay" id="helpModal">
+            <div class="modal">
+                <h2>Keyboard Shortcuts</h2>
+                <div class="help-content">
+                    <h3>Navigation Mode (Esc)</h3>
+                    <table>
+                        <tr>
+                            <td><kbd>h, j, k, l</kbd></td>
+                            <td>Move cursor (vim style)</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>w, b</kbd></td>
+                            <td>Move by word</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>0, $</kbd></td>
+                            <td>Start/end of line</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>gg, G</kbd></td>
+                            <td>Start/end of document</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>i, a</kbd></td>
+                            <td>Enter insert mode</td>
+                        </tr>
+                    </table>
+
+                    <h3>Insert Mode (i)</h3>
+                    <table>
+                        <tr>
+                            <td><kbd>Esc</kbd></td>
+                            <td>Return to navigation mode</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+S</kbd></td>
+                            <td>Save file</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+F</kbd></td>
+                            <td>Find text</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+R</kbd></td>
+                            <td>Replace text</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+G</kbd></td>
+                            <td>Go to line</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+W</kbd></td>
+                            <td>Word count</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>F11</kbd></td>
+                            <td>Distraction-free mode</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>F1</kbd></td>
+                            <td>Show this help</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+Z</kbd></td>
+                            <td>Undo</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+Y</kbd></td>
+                            <td>Redo</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl+A</kbd></td>
+                            <td>Select all</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-buttons">
+                    <button
+                        class="btn btn-primary"
+                        onclick="closeModal('helpModal')"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- New File Modal -->
         <div class="modal-overlay" id="newFileModal">
             <div class="modal">

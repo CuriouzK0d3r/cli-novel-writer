@@ -2,6 +2,583 @@ const { ipcRenderer } = require("electron");
 const fs = require("fs-extra");
 const path = require("path");
 
+// Import the advanced editor functionality
+class WritersGUIEditor {
+  constructor() {
+    this.editor = document.getElementById("editor");
+    this.modeIndicator = document.getElementById("modeIndicator");
+    this.fileInfo = document.getElementById("fileInfo");
+    this.cursorPos = document.getElementById("cursorPos");
+    this.selection = document.getElementById("selection");
+    this.wordCount = document.getElementById("wordCount");
+    this.charCount = document.getElementById("charCount");
+    this.saveStatus = document.getElementById("saveStatus");
+
+    this.mode = "insert"; // 'insert' or 'navigation'
+    this.isModified = false;
+    this.currentFile = null;
+    this.undoStack = [];
+    this.redoStack = [];
+    this.maxUndoSteps = 100;
+    this.autoSaveInterval = null;
+    this.isDistractionFree = false;
+    this.searchResults = [];
+    this.currentSearchIndex = 0;
+  }
+
+  init() {
+    this.setupEventListeners();
+    this.startAutoSave();
+    this.updateStatus();
+    this.pushUndo();
+  }
+
+  setupEventListeners() {
+    if (!this.editor) return;
+
+    // Editor focus and content changes
+    this.editor.addEventListener("input", () => {
+      this.markDirty();
+      this.updateStatus();
+      this.pushUndo();
+    });
+
+    this.editor.addEventListener("click", () => {
+      this.updateCursorPosition();
+    });
+
+    this.editor.addEventListener("keyup", () => {
+      this.updateCursorPosition();
+    });
+
+    // Handle key combinations
+    this.editor.addEventListener("keydown", (e) => {
+      this.handleKeydown(e);
+    });
+
+    // Handle selection changes
+    document.addEventListener("selectionchange", () => {
+      this.updateCursorPosition();
+    });
+  }
+
+  handleKeydown(e) {
+    // Navigation mode keybindings
+    if (this.mode === "navigation") {
+      e.preventDefault();
+      this.handleNavigationMode(e);
+      return;
+    }
+
+    // Insert mode keybindings
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key) {
+        case "s":
+          e.preventDefault();
+          window.projectInterface.saveCurrentFile();
+          break;
+        case "f":
+          e.preventDefault();
+          this.showFindModal();
+          break;
+        case "r":
+          e.preventDefault();
+          this.showReplaceModal();
+          break;
+        case "g":
+          e.preventDefault();
+          this.showGoToLineModal();
+          break;
+        case "w":
+          e.preventDefault();
+          this.showWordCountModal();
+          break;
+        case "z":
+          e.preventDefault();
+          this.undo();
+          break;
+        case "y":
+          e.preventDefault();
+          this.redo();
+          break;
+        case "a":
+          e.preventDefault();
+          this.selectAll();
+          break;
+      }
+    }
+
+    // F1 for help
+    if (e.key === "F1") {
+      e.preventDefault();
+      this.showHelpModal();
+    }
+
+    // Toggle modes
+    if (e.key === "Escape") {
+      e.preventDefault();
+      this.setMode(this.mode === "navigation" ? "insert" : "navigation");
+    }
+
+    // Enter insert mode from navigation
+    if (this.mode === "navigation" && (e.key === "i" || e.key === "a")) {
+      e.preventDefault();
+      this.setMode("insert");
+      if (e.key === "a") {
+        this.moveCursor("right");
+      }
+    }
+
+    // F11 for distraction-free mode
+    if (e.key === "F11") {
+      e.preventDefault();
+      this.toggleDistractionFree();
+    }
+  }
+
+  handleNavigationMode(e) {
+    switch (e.key) {
+      case "h":
+        this.moveCursor("left");
+        break;
+      case "j":
+        this.moveCursor("down");
+        break;
+      case "k":
+        this.moveCursor("up");
+        break;
+      case "l":
+        this.moveCursor("right");
+        break;
+      case "w":
+        this.moveCursor("wordForward");
+        break;
+      case "b":
+        this.moveCursor("wordBackward");
+        break;
+      case "0":
+        this.moveCursor("lineStart");
+        break;
+      case "$":
+        this.moveCursor("lineEnd");
+        break;
+      case "G":
+        if (e.shiftKey) {
+          this.moveCursor("documentEnd");
+        }
+        break;
+      case "g":
+        if (this.lastKey === "g") {
+          this.moveCursor("documentStart");
+        }
+        break;
+      case "i":
+        this.setMode("insert");
+        break;
+      case "a":
+        this.setMode("insert");
+        this.moveCursor("right");
+        break;
+    }
+    this.lastKey = e.key;
+  }
+
+  moveCursor(direction) {
+    const start = this.editor.selectionStart;
+    const text = this.editor.value;
+    let newPos = start;
+
+    switch (direction) {
+      case "left":
+        newPos = Math.max(0, start - 1);
+        break;
+      case "right":
+        newPos = Math.min(text.length, start + 1);
+        break;
+      case "up":
+        newPos = this.moveVertical(-1);
+        break;
+      case "down":
+        newPos = this.moveVertical(1);
+        break;
+      case "wordForward":
+        newPos = this.findNextWord(start);
+        break;
+      case "wordBackward":
+        newPos = this.findPreviousWord(start);
+        break;
+      case "lineStart":
+        newPos = this.findLineStart(start);
+        break;
+      case "lineEnd":
+        newPos = this.findLineEnd(start);
+        break;
+      case "documentStart":
+        newPos = 0;
+        break;
+      case "documentEnd":
+        newPos = text.length;
+        break;
+    }
+
+    this.editor.setSelectionRange(newPos, newPos);
+    this.updateCursorPosition();
+  }
+
+  moveVertical(direction) {
+    const text = this.editor.value;
+    const start = this.editor.selectionStart;
+    const lines = text.substring(0, start).split("\n");
+    const currentLine = lines.length - 1;
+    const currentCol = lines[currentLine].length;
+    const targetLine = currentLine + direction;
+
+    if (targetLine < 0) return 0;
+
+    const allLines = text.split("\n");
+    if (targetLine >= allLines.length) return text.length;
+
+    const targetLineText = allLines[targetLine];
+    const targetCol = Math.min(currentCol, targetLineText.length);
+
+    let pos = 0;
+    for (let i = 0; i < targetLine; i++) {
+      pos += allLines[i].length + 1; // +1 for newline
+    }
+    pos += targetCol;
+
+    return Math.min(pos, text.length);
+  }
+
+  findNextWord(pos) {
+    const text = this.editor.value;
+    let i = pos;
+    while (i < text.length && /\s/.test(text[i])) i++;
+    while (i < text.length && !/\s/.test(text[i])) i++;
+    return i;
+  }
+
+  findPreviousWord(pos) {
+    const text = this.editor.value;
+    let i = pos - 1;
+    while (i >= 0 && /\s/.test(text[i])) i--;
+    while (i >= 0 && !/\s/.test(text[i])) i--;
+    return i + 1;
+  }
+
+  findLineStart(pos) {
+    const text = this.editor.value;
+    let i = pos;
+    while (i > 0 && text[i - 1] !== "\n") i--;
+    return i;
+  }
+
+  findLineEnd(pos) {
+    const text = this.editor.value;
+    let i = pos;
+    while (i < text.length && text[i] !== "\n") i++;
+    return i;
+  }
+
+  setMode(mode) {
+    this.mode = mode;
+    if (this.modeIndicator) {
+      this.modeIndicator.textContent = mode.toUpperCase();
+      this.modeIndicator.className = `mode-indicator ${mode}`;
+    }
+  }
+
+  markDirty() {
+    this.isModified = true;
+    if (this.saveStatus) {
+      this.saveStatus.textContent = "Modified";
+    }
+    if (window.projectInterface) {
+      window.projectInterface.markModified();
+    }
+  }
+
+  markClean() {
+    this.isModified = false;
+    if (this.saveStatus) {
+      this.saveStatus.textContent = "Saved";
+    }
+  }
+
+  newFile() {
+    this.editor.value = "";
+    this.currentFile = null;
+    this.isModified = false;
+    this.markClean();
+    this.updateStatus();
+    this.pushUndo();
+  }
+
+  loadFile(data) {
+    this.editor.value = data.content || "";
+    this.currentFile = data.filePath;
+    this.isModified = false;
+    this.markClean();
+    this.updateStatus();
+    this.pushUndo();
+    if (this.fileInfo) {
+      this.fileInfo.textContent = data.filePath
+        ? path.basename(data.filePath)
+        : "No file open";
+    }
+  }
+
+  pushUndo() {
+    const state = {
+      content: this.editor.value,
+      cursor: this.editor.selectionStart,
+    };
+
+    if (this.undoStack.length > 0) {
+      const lastState = this.undoStack[this.undoStack.length - 1];
+      if (lastState.content === state.content) {
+        return;
+      }
+    }
+
+    this.undoStack.push(state);
+    if (this.undoStack.length > this.maxUndoSteps) {
+      this.undoStack.shift();
+    }
+    this.redoStack = [];
+  }
+
+  undo() {
+    if (this.undoStack.length > 1) {
+      this.redoStack.push(this.undoStack.pop());
+      const state = this.undoStack[this.undoStack.length - 1];
+      this.editor.value = state.content;
+      this.editor.setSelectionRange(state.cursor, state.cursor);
+      this.markDirty();
+      this.updateStatus();
+    }
+  }
+
+  redo() {
+    if (this.redoStack.length > 0) {
+      const state = this.redoStack.pop();
+      this.undoStack.push(state);
+      this.editor.value = state.content;
+      this.editor.setSelectionRange(state.cursor, state.cursor);
+      this.markDirty();
+      this.updateStatus();
+    }
+  }
+
+  selectAll() {
+    this.editor.select();
+    this.updateCursorPosition();
+  }
+
+  updateStatus() {
+    const text = this.editor.value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    const lines = text.split("\n").length;
+
+    if (this.wordCount) {
+      this.wordCount.textContent = `${words} words`;
+    }
+    if (this.charCount) {
+      this.charCount.textContent = `${chars} characters`;
+    }
+
+    // Calculate reading time
+    const readingTime = Math.ceil(words / 200);
+    const readingTimeEl = document.getElementById("readingTime");
+    if (readingTimeEl) {
+      readingTimeEl.textContent = `${readingTime} min read`;
+    }
+  }
+
+  updateCursorPosition() {
+    if (!this.editor || !this.cursorPos) return;
+
+    const text = this.editor.value;
+    const pos = this.editor.selectionStart;
+    const endPos = this.editor.selectionEnd;
+
+    const lines = text.substring(0, pos).split("\n");
+    const line = lines.length;
+    const col = lines[line - 1].length + 1;
+
+    this.cursorPos.textContent = `Ln ${line}, Col ${col}`;
+
+    if (this.selection && pos !== endPos) {
+      const selectedText = text.substring(pos, endPos);
+      const selectedWords = selectedText.trim()
+        ? selectedText.trim().split(/\s+/).length
+        : 0;
+      this.selection.textContent = `${endPos - pos} chars, ${selectedWords} words`;
+    } else if (this.selection) {
+      this.selection.textContent = "";
+    }
+  }
+
+  startAutoSave() {
+    this.autoSaveInterval = setInterval(() => {
+      if (this.isModified && this.currentFile && window.projectInterface) {
+        window.projectInterface.autoSave();
+      }
+    }, 30000);
+  }
+
+  toggleDistractionFree() {
+    this.isDistractionFree = !this.isDistractionFree;
+    const container = document.querySelector(".editor-container");
+    if (container) {
+      container.classList.toggle("distraction-free", this.isDistractionFree);
+    }
+  }
+
+  showFindModal() {
+    if (window.projectInterface) {
+      window.projectInterface.showModal("findModal");
+      setTimeout(() => {
+        const input = document.getElementById("findInput");
+        if (input) input.focus();
+      }, 100);
+    }
+  }
+
+  showReplaceModal() {
+    if (window.projectInterface) {
+      window.projectInterface.showModal("replaceModal");
+      setTimeout(() => {
+        const input = document.getElementById("replaceFind");
+        if (input) input.focus();
+      }, 100);
+    }
+  }
+
+  showGoToLineModal() {
+    if (window.projectInterface) {
+      window.projectInterface.showModal("gotoLineModal");
+      setTimeout(() => {
+        const input = document.getElementById("gotoLineInput");
+        if (input) input.focus();
+      }, 100);
+    }
+  }
+
+  showWordCountModal() {
+    const text = this.editor.value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    const charsNoSpaces = text.replace(/\s/g, "").length;
+    const lines = text.split("\n").length;
+    const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim()).length;
+
+    const details = `
+      <p><strong>Words:</strong> ${words}</p>
+      <p><strong>Characters (with spaces):</strong> ${chars}</p>
+      <p><strong>Characters (no spaces):</strong> ${charsNoSpaces}</p>
+      <p><strong>Lines:</strong> ${lines}</p>
+      <p><strong>Paragraphs:</strong> ${paragraphs}</p>
+    `;
+
+    const detailsEl = document.getElementById("wordCountDetails");
+    if (detailsEl) {
+      detailsEl.innerHTML = details;
+    }
+
+    if (window.projectInterface) {
+      window.projectInterface.showModal("wordCountModal");
+    }
+  }
+
+  showHelpModal() {
+    if (window.projectInterface) {
+      window.projectInterface.showModal("helpModal");
+    }
+  }
+
+  findNext() {
+    const searchText = document.getElementById("findInput")?.value;
+    if (!searchText) return;
+
+    const text = this.editor.value;
+    const startPos = this.editor.selectionEnd;
+    const foundPos = text.indexOf(searchText, startPos);
+
+    if (foundPos !== -1) {
+      this.editor.setSelectionRange(foundPos, foundPos + searchText.length);
+      this.editor.focus();
+    } else {
+      // Search from beginning
+      const foundFromStart = text.indexOf(searchText);
+      if (foundFromStart !== -1) {
+        this.editor.setSelectionRange(
+          foundFromStart,
+          foundFromStart + searchText.length,
+        );
+        this.editor.focus();
+      }
+    }
+  }
+
+  replaceNext() {
+    const findText = document.getElementById("replaceFind")?.value;
+    const replaceText = document.getElementById("replaceWith")?.value;
+    if (!findText) return;
+
+    const text = this.editor.value;
+    const start = this.editor.selectionStart;
+    const end = this.editor.selectionEnd;
+
+    if (text.substring(start, end) === findText) {
+      this.editor.setRangeText(replaceText, start, end);
+      this.editor.setSelectionRange(start, start + replaceText.length);
+      this.markDirty();
+      this.updateStatus();
+    }
+
+    this.findNext();
+  }
+
+  replaceAll() {
+    const findText = document.getElementById("replaceFind")?.value;
+    const replaceText = document.getElementById("replaceWith")?.value;
+    if (!findText) return;
+
+    const newContent = this.editor.value.replace(
+      new RegExp(this.escapeRegExp(findText), "g"),
+      replaceText,
+    );
+    this.editor.value = newContent;
+    this.markDirty();
+    this.updateStatus();
+    this.pushUndo();
+  }
+
+  goToLine() {
+    const lineNumber = parseInt(
+      document.getElementById("gotoLineInput")?.value,
+    );
+    if (!lineNumber) return;
+
+    const lines = this.editor.value.split("\n");
+    if (lineNumber > 0 && lineNumber <= lines.length) {
+      let pos = 0;
+      for (let i = 0; i < lineNumber - 1; i++) {
+        pos += lines[i].length + 1;
+      }
+      this.editor.setSelectionRange(pos, pos);
+      this.editor.focus();
+      this.updateCursorPosition();
+    }
+  }
+
+  escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+}
+
 class WritersProjectInterface {
   constructor() {
     this.currentProject = null;
@@ -10,6 +587,7 @@ class WritersProjectInterface {
     this.activeTab = "dashboard";
     this.activeView = "welcome-view";
     this.currentFileType = null;
+    this.editorInstance = null;
     this.files = {
       chapters: [],
       scenes: [],
@@ -29,8 +607,15 @@ class WritersProjectInterface {
   async init() {
     this.setupEventListeners();
     this.setupIPC();
+    this.initializeEditor();
     await this.checkForProject();
     this.updateInterface();
+  }
+
+  initializeEditor() {
+    this.editorInstance = new WritersGUIEditor();
+    this.editorInstance.init();
+    window.editorInstance = this.editorInstance; // Make available globally
   }
 
   setupEventListeners() {
@@ -55,13 +640,7 @@ class WritersProjectInterface {
       });
     });
 
-    // Editor content changes
-    const editor = document.getElementById("mainEditor");
-    if (editor) {
-      editor.addEventListener("input", () => {
-        this.markModified();
-      });
-    }
+    // Editor content changes are now handled by WritersGUIEditor
 
     // Keyboard shortcuts
     document.addEventListener("keydown", (e) => {
@@ -323,7 +902,14 @@ class WritersProjectInterface {
       this.currentFile = filePath;
       this.currentFileType = category;
 
-      document.getElementById("mainEditor").value = content;
+      // Load file in the advanced editor
+      if (this.editorInstance) {
+        this.editorInstance.loadFile({
+          content: content,
+          filePath: filePath,
+        });
+      }
+
       this.switchView("editor-view");
       this.markClean();
 
@@ -353,9 +939,14 @@ class WritersProjectInterface {
     if (!this.currentFile) return;
 
     try {
-      const content = document.getElementById("mainEditor").value;
+      const content = this.editorInstance
+        ? this.editorInstance.editor.value
+        : "";
       await ipcRenderer.invoke("write-file", this.currentFile, content);
       this.markClean();
+      if (this.editorInstance) {
+        this.editorInstance.markClean();
+      }
       this.showNotification("File saved", "success");
 
       // Update word count and statistics
@@ -385,7 +976,9 @@ class WritersProjectInterface {
     this.currentFile = null;
     this.currentFileType = null;
     this.markClean();
-    document.getElementById("mainEditor").value = "";
+    if (this.editorInstance) {
+      this.editorInstance.newFile();
+    }
     this.switchView("welcome-view");
   }
 
@@ -757,6 +1350,38 @@ class WritersProjectInterface {
 
 // Global functions for HTML onclick handlers
 let projectInterface;
+
+// Advanced editor functions
+window.findNext = function () {
+  if (window.editorInstance) {
+    window.editorInstance.findNext();
+  }
+};
+
+window.replaceNext = function () {
+  if (window.editorInstance) {
+    window.editorInstance.replaceNext();
+  }
+};
+
+window.replaceAll = function () {
+  if (window.editorInstance) {
+    window.editorInstance.replaceAll();
+  }
+};
+
+window.goToLine = function () {
+  if (window.editorInstance) {
+    window.editorInstance.goToLine();
+  }
+  projectInterface.closeModal("gotoLineModal");
+};
+
+window.showHelp = function () {
+  if (window.editorInstance) {
+    window.editorInstance.showHelpModal();
+  }
+};
 
 window.createNew = function (type) {
   projectInterface.createNew(type);

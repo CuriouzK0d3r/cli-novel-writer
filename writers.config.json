@@ -7,7 +7,10 @@
   "settings": {
     "autoSave": true,
     "backups": true,
-    "defaultEditor": "vim"
+    "defaultEditor": "vim",
+    "editor": {
+      "typewriterMode": false
+    }
   },
   "structure": {
     "chapters": "chapters",

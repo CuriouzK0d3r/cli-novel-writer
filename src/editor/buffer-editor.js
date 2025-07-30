@@ -48,6 +48,11 @@ class BufferEditor {
     // Dialogs
     this.dialogs = null;
 
+    // Typewriter mode state
+    this.typewriterMode = false;
+    this.typewriterTargetLine = null; // Target line position for typewriter mode
+    this.lastCursorY = 0; // Track cursor movement direction
+
     // Configuration
     this.config = {
       autoSave: true,
@@ -56,6 +61,8 @@ class BufferEditor {
       showReadingTime: true,
       tabSize: 2,
       wrapText: false,
+      typewriterMode: false,
+      typewriterPosition: 0.66, // Position as ratio of screen height (0.66 = 2/3 down)
     };
   }
 
@@ -74,6 +81,22 @@ class BufferEditor {
 
       // Initialize dialogs
       this.dialogs = new EditorDialogs(this.screen, this);
+
+      // Initialize typewriter mode from config
+      try {
+        const projectManager = require("../utils/project");
+        if (projectManager.isWritersProject()) {
+          const config = await projectManager.getConfig();
+          this.typewriterMode =
+            config.settings?.editor?.typewriterMode ||
+            this.config.typewriterMode ||
+            false;
+        } else {
+          this.typewriterMode = this.config.typewriterMode || false;
+        }
+      } catch (error) {
+        this.typewriterMode = this.config.typewriterMode || false;
+      }
 
       // Auto-save timer
       if (this.config.autoSave) {
@@ -235,6 +258,7 @@ class BufferEditor {
     this.screen.key(["C-w"], () => this.showWordCountDialog());
     this.screen.key(["f1"], () => this.showHelp());
     this.screen.key(["f11"], () => this.toggleDistractionFree());
+    this.screen.key(["f9"], async () => await this.toggleTypewriterMode());
 
     // Handle all character input and navigation
     this.screen.on("keypress", (ch, key) => {
@@ -607,14 +631,35 @@ class BufferEditor {
     const editorHeight = this.getEditorHeight();
     const editorWidth = this.getEditorWidth();
 
-    // Vertical scrolling
-    if (this.cursorY < this.scrollY) {
-      this.scrollY = this.cursorY;
-    } else if (this.cursorY >= this.scrollY + editorHeight) {
-      this.scrollY = this.cursorY - editorHeight + 1;
+    // Typewriter mode: keep cursor at a fixed position on screen
+    if (this.typewriterMode) {
+      const targetLine = Math.floor(
+        editorHeight * this.config.typewriterPosition,
+      );
+
+      // Calculate desired scroll position to keep cursor at target line
+      const desiredScrollY = this.cursorY - targetLine;
+
+      // Only apply typewriter positioning when moving down (typing forward)
+      // or when the cursor would go off screen
+      const movingDown = this.cursorY > this.lastCursorY;
+      const cursorOffScreen =
+        this.cursorY < this.scrollY ||
+        this.cursorY >= this.scrollY + editorHeight;
+
+      if (movingDown || cursorOffScreen) {
+        this.scrollY = Math.max(0, desiredScrollY);
+      }
+    } else {
+      // Normal scrolling behavior
+      if (this.cursorY < this.scrollY) {
+        this.scrollY = this.cursorY;
+      } else if (this.cursorY >= this.scrollY + editorHeight) {
+        this.scrollY = this.cursorY - editorHeight + 1;
+      }
     }
 
-    // Horizontal scrolling
+    // Horizontal scrolling (same for both modes)
     const displayX = this.cursorX + (this.showLineNumbers ? 5 : 0);
     if (displayX < this.scrollX) {
       this.scrollX = displayX;
@@ -624,6 +669,9 @@ class BufferEditor {
 
     this.scrollY = Math.max(0, this.scrollY);
     this.scrollX = Math.max(0, this.scrollX);
+
+    // Update last cursor position for typewriter mode
+    this.lastCursorY = this.cursorY;
   }
 
   getEditorHeight() {
@@ -905,6 +953,11 @@ class BufferEditor {
     status += ` | Line: ${this.cursorY + 1}, Col: ${this.cursorX + 1}`;
     status += ` | Lines: ${this.lines.length}`;
 
+    // Show typewriter mode status
+    if (this.typewriterMode) {
+      status += ` | TYPEWRITER`;
+    }
+
     this.statusBar.setContent(status);
     this.screen.render();
   }
@@ -1146,6 +1199,38 @@ class BufferEditor {
     this.showMessage(
       `Distraction-free mode ${this.distraction_free ? "ON" : "OFF"}`,
     );
+  }
+
+  async toggleTypewriterMode() {
+    this.typewriterMode = !this.typewriterMode;
+    this.config.typewriterMode = this.typewriterMode;
+
+    // Save to project config if available
+    try {
+      const projectManager = require("../utils/project");
+      if (projectManager.isWritersProject()) {
+        const config = await projectManager.getConfig();
+        if (!config.settings.editor) {
+          config.settings.editor = {};
+        }
+        config.settings.editor.typewriterMode = this.typewriterMode;
+        await projectManager.updateConfig(config);
+      }
+    } catch (error) {
+      // Silently ignore if not in a project or config save fails
+    }
+
+    // Reset scroll position when enabling typewriter mode
+    if (this.typewriterMode) {
+      const editorHeight = this.getEditorHeight();
+      const targetLine = Math.floor(
+        editorHeight * this.config.typewriterPosition,
+      );
+      this.scrollY = Math.max(0, this.cursorY - targetLine);
+    }
+
+    this.render();
+    this.showMessage(`Typewriter mode ${this.typewriterMode ? "ON" : "OFF"}`);
   }
 
   async confirmSave() {

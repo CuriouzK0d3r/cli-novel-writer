@@ -1,0 +1,59 @@
+# Typewriter Mode Demo
+
+This is a sample text file to demonstrate the typewriter mode feature in the Writers CLI editor.
+
+## What is Typewriter Mode?
+
+Typewriter mode keeps your current line of text centered (or positioned at 2/3 down the screen) as you type, similar to how a physical typewriter works where the paper moves up as you type new lines.
+
+## How to Test
+
+1. Open this file in the editor: `writers edit typewriter-demo.txt`
+2. Press F9 to toggle typewriter mode ON
+3. Press 'i' to enter insert mode
+4. Position your cursor at the end of this document
+5. Start typing new lines and watch how the text scrolls
+
+## Sample Content for Testing
+
+Line 1: This is the first line of sample content.
+Line 2: Notice how when you add new lines below...
+Line 3: The cursor should stay in the same position on screen...
+Line 4: While the text above scrolls up automatically.
+Line 5: This creates a focused writing experience.
+Line 6: Perfect for long writing sessions.
+Line 7: No need to manually scroll to keep your work visible.
+Line 8: Just keep typing and let the editor handle the rest.
+Line 9: You can toggle typewriter mode on and off with F9.
+Line 10: Try switching between normal and typewriter modes.
+
+## More Lines for Extended Testing
+
+Line 11: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Line 12: Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Line 13: Ut enim ad minim veniam, quis nostrud exercitation ullamco.
+Line 14: Laboris nisi ut aliquip ex ea commodo consequat.
+Line 15: Duis aute irure dolor in reprehenderit in voluptate velit esse.
+Line 16: Cillum dolore eu fugiat nulla pariatur.
+Line 17: Excepteur sint occaecat cupidatat non proident.
+Line 18: Sunt in culpa qui officia deserunt mollit anim id est laborum.
+Line 19: Sed ut perspiciatis unde omnis iste natus error sit voluptatem.
+Line 20: Accusantium doloremque laudantium, totam rem aperiam.
+
+## Key Features of Typewriter Mode
+
+- Keeps current line positioned at 2/3 down the screen
+- Only scrolls when typing forward (new lines)
+- Doesn't interfere with manual cursor movement
+- Shows "TYPEWRITER" indicator in status bar when active
+- Can be toggled on/off anytime with F9
+
+## Instructions
+
+Try typing new content at the end of this file with typewriter mode enabled.
+You should notice that your cursor stays in the same vertical position
+while the content above scrolls up smoothly.
+
+---
+
+Add your test content below this line:

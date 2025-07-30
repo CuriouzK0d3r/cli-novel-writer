@@ -15,6 +15,7 @@
     "demo": "node demo.js",
     "demo-editor": "node demo-editor.js",
     "demo-gui": "node demo-gui.js",
+    "test-typewriter": "node test-typewriter.js",
     "build": "pkg --config pkg.config.json bin/writers.js"
   },
   "keywords": [

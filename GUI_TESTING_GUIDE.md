@@ -90,16 +90,38 @@ npm run demo-gui
   - Save settings and restart GUI
   - Verify changes are maintained
 
-### Editor Testing
+### Advanced Editor Testing
+- **Dual-Mode Editor**:
+  - Test navigation mode (press Esc)
+  - Test insert mode (press i or a)
+  - Verify mode indicator updates correctly
+  - Test vim-style navigation (h, j, k, l in navigation mode)
+  
 - **Text Editing**:
   - Type content and verify real-time word counting
   - Test auto-save functionality (wait 30+ seconds)
   - Verify unsaved changes warning when switching files
+  - Test undo/redo functionality (Ctrl+Z, Ctrl+Y)
+  
+- **Advanced Features**:
+  - Test find functionality (Ctrl+F)
+  - Test find and replace (Ctrl+R)
+  - Test go-to-line feature (Ctrl+G)
+  - Test word count modal (Ctrl+W)
+  - Test distraction-free mode (F11)
+  - Test help modal (F1)
+  
+- **Navigation Features**:
+  - Test word movement (w, b in navigation mode)
+  - Test line start/end (0, $ in navigation mode)
+  - Test document start/end (gg, G in navigation mode)
+  - Test cursor position display
   
 - **File Navigation**:
   - Switch between different files
   - Verify content preservation
   - Test file status indicators
+  - Verify mode persistence across file switches
 
 ### Export Testing
 - **HTML Export**:
@@ -115,18 +137,23 @@ npm run demo-gui
 - **Duplicate Names**: Attempt to create files with existing names
 - **File Permissions**: Test in read-only directories
 - **Missing Dependencies**: Test with/without electron
+- **Editor Error Handling**: Test invalid search patterns, invalid line numbers
 
 ### Performance Testing
 - **Large Projects**: Test with 50+ chapters
 - **File Size**: Test with very long chapters (10,000+ words)
 - **Real-time Updates**: Verify responsiveness with multiple files open
 - **Memory Usage**: Monitor during extended editing sessions
+- **Editor Performance**: Test navigation speed in large documents
+- **Undo/Redo Performance**: Test with large undo history
 
 ### UI Responsiveness
 - **Sidebar Collapse**: Test collapse/expand functionality
 - **Tab Switching**: Verify smooth transitions between tabs
 - **Modal Dialogs**: Test all modal interactions
 - **Keyboard Shortcuts**: Test Ctrl+N, Ctrl+S, Ctrl+O, etc.
+- **Editor Mode Switching**: Test smooth transitions between navigation/insert modes
+- **Distraction-Free Mode**: Test F11 toggle functionality
 
 ## 🐛 Known Issues to Verify Fixed
 
@@ -138,6 +165,14 @@ npm run demo-gui
 ### Auto-save Functionality
 - **Test**: Edit file, wait 30 seconds, check for save confirmation
 - **Expected**: File saves automatically without user intervention
+
+### Advanced Editor Features
+- **Test**: Navigate using vim-style keys (h,j,k,l) in navigation mode
+- **Expected**: Cursor moves correctly without entering text
+- **Test**: Use find/replace functionality with various patterns
+- **Expected**: Search and replace works accurately
+- **Test**: Enter distraction-free mode and verify UI changes
+- **Expected**: Toolbar and status bar hide, editor font increases
 
 ### Statistics Updates
 - **Test**: Add content to chapters and verify dashboard updates
@@ -179,6 +214,21 @@ npm run demo-gui
 - [ ] File editing and saving
 - [ ] Auto-save functionality
 - [ ] Real-time word count updates
+
+### Advanced Editor Functionality
+- [ ] Navigation mode works (Esc key)
+- [ ] Insert mode works (i/a keys)
+- [ ] Vim-style navigation (h,j,k,l)
+- [ ] Word movement (w,b)
+- [ ] Line start/end navigation (0,$)
+- [ ] Document start/end (gg,G)
+- [ ] Find functionality (Ctrl+F)
+- [ ] Find and replace (Ctrl+R)
+- [ ] Go to line (Ctrl+G)
+- [ ] Word count modal (Ctrl+W)
+- [ ] Distraction-free mode (F11)
+- [ ] Help modal (F1)
+- [ ] Undo/redo (Ctrl+Z/Y)
 
 ### Interface Features
 - [ ] Sidebar navigation works
@@ -247,8 +297,10 @@ When reporting GUI issues, include:
 The GUI should provide:
 - **Complete CLI Parity**: All CLI functions available in GUI
 - **Intuitive Interface**: Easy navigation and file management
+- **Advanced Editor**: Vim-inspired keybindings and professional editing features
 - **Real-time Updates**: Immediate feedback on changes
 - **Reliable Performance**: Stable operation with large projects
 - **Professional Appearance**: Clean, modern interface design
+- **Efficient Workflow**: Keyboard-driven editing for power users
 
 This comprehensive GUI transforms Writers CLI from a command-line tool into a full-featured writing application suitable for both technical and non-technical users.
