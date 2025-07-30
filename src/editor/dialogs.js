@@ -1,4 +1,4 @@
-const blessed = require('blessed');
+const blessed = require("blessed");
 
 class EditorDialogs {
   constructor(screen, editor) {
@@ -9,24 +9,24 @@ class EditorDialogs {
   createDialog(options) {
     const dialog = blessed.box({
       parent: this.screen,
-      top: 'center',
-      left: 'center',
+      top: "center",
+      left: "center",
       width: options.width || 60,
-      height: options.height || 'shrink',
+      height: options.height || "shrink",
       border: {
-        type: 'line',
-        fg: options.borderColor || 'green'
+        type: "line",
+        fg: options.borderColor || "green",
       },
-      label: options.label || ' Dialog ',
+      label: options.label || " Dialog ",
       style: {
-        fg: 'white',
-        bg: 'black',
+        fg: "white",
+        bg: "black",
         border: {
-          fg: options.borderColor || 'green'
-        }
+          fg: options.borderColor || "green",
+        },
       },
       keys: true,
-      mouse: true
+      mouse: true,
     });
 
     return dialog;
@@ -35,9 +35,9 @@ class EditorDialogs {
   showOpenDialog() {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
-        label: ' Open File ',
+        label: " Open File ",
         width: 70,
-        height: 8
+        height: 8,
       });
 
       const input = blessed.textbox({
@@ -47,13 +47,13 @@ class EditorDialogs {
         right: 2,
         height: 1,
         border: {
-          type: 'line'
+          type: "line",
         },
         style: {
-          fg: 'white',
-          bg: 'black'
+          fg: "white",
+          bg: "black",
         },
-        inputOnFocus: true
+        inputOnFocus: true,
       });
 
       const instructions = blessed.text({
@@ -62,22 +62,23 @@ class EditorDialogs {
         left: 2,
         right: 2,
         height: 2,
-        content: 'Enter file path or press Tab to browse current directory.\nPress Enter to open, Escape to cancel.',
+        content:
+          "Enter file path or press Tab to browse current directory.\nPress Enter to open, Escape to cancel.",
         style: {
-          fg: 'cyan'
-        }
+          fg: "cyan",
+        },
       });
 
       input.focus();
 
-      input.key(['enter'], () => {
+      input.key(["enter"], () => {
         const value = input.getValue();
         dialog.destroy();
         this.screen.render();
         resolve(value);
       });
 
-      input.key(['escape'], () => {
+      input.key(["escape"], () => {
         dialog.destroy();
         this.screen.render();
         resolve(null);
@@ -87,12 +88,12 @@ class EditorDialogs {
     });
   }
 
-  showSaveAsDialog(currentFile = '') {
+  showSaveAsDialog(currentFile = "") {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
-        label: ' Save As ',
+        label: " Save As ",
         width: 70,
-        height: 8
+        height: 8,
       });
 
       const input = blessed.textbox({
@@ -102,13 +103,13 @@ class EditorDialogs {
         right: 2,
         height: 1,
         border: {
-          type: 'line'
+          type: "line",
         },
         style: {
-          fg: 'white',
-          bg: 'black'
+          fg: "white",
+          bg: "black",
         },
-        inputOnFocus: true
+        inputOnFocus: true,
       });
 
       if (currentFile) {
@@ -121,22 +122,23 @@ class EditorDialogs {
         left: 2,
         right: 2,
         height: 2,
-        content: 'Enter file path to save.\nPress Enter to save, Escape to cancel.',
+        content:
+          "Enter file path to save.\nPress Enter to save, Escape to cancel.",
         style: {
-          fg: 'cyan'
-        }
+          fg: "cyan",
+        },
       });
 
       input.focus();
 
-      input.key(['enter'], () => {
+      input.key(["enter"], () => {
         const value = input.getValue();
         dialog.destroy();
         this.screen.render();
         resolve(value);
       });
 
-      input.key(['escape'], () => {
+      input.key(["escape"], () => {
         dialog.destroy();
         this.screen.render();
         resolve(null);
@@ -149,9 +151,9 @@ class EditorDialogs {
   showFindDialog() {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
-        label: ' Find Text ',
+        label: " Find Text ",
         width: 60,
-        height: 8
+        height: 8,
       });
 
       const input = blessed.textbox({
@@ -161,13 +163,13 @@ class EditorDialogs {
         right: 2,
         height: 1,
         border: {
-          type: 'line'
+          type: "line",
         },
         style: {
-          fg: 'white',
-          bg: 'black'
+          fg: "white",
+          bg: "black",
         },
-        inputOnFocus: true
+        inputOnFocus: true,
       });
 
       const instructions = blessed.text({
@@ -176,22 +178,23 @@ class EditorDialogs {
         left: 2,
         right: 2,
         height: 2,
-        content: 'Enter text to search for.\nPress Enter to find, Escape to cancel.',
+        content:
+          "Enter text to search for.\nPress Enter to find, Escape to cancel.",
         style: {
-          fg: 'cyan'
-        }
+          fg: "cyan",
+        },
       });
 
       input.focus();
 
-      input.key(['enter'], () => {
+      input.key(["enter"], () => {
         const value = input.getValue();
         dialog.destroy();
         this.screen.render();
         resolve(value);
       });
 
-      input.key(['escape'], () => {
+      input.key(["escape"], () => {
         dialog.destroy();
         this.screen.render();
         resolve(null);
@@ -204,9 +207,9 @@ class EditorDialogs {
   showReplaceDialog() {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
-        label: ' Find and Replace ',
+        label: " Find and Replace ",
         width: 70,
-        height: 12
+        height: 12,
       });
 
       const findInput = blessed.textbox({
@@ -216,14 +219,14 @@ class EditorDialogs {
         right: 2,
         height: 1,
         border: {
-          type: 'line'
+          type: "line",
         },
-        label: ' Find ',
+        label: " Find ",
         style: {
-          fg: 'white',
-          bg: 'black'
+          fg: "white",
+          bg: "black",
         },
-        inputOnFocus: true
+        inputOnFocus: true,
       });
 
       const replaceInput = blessed.textbox({
@@ -233,14 +236,14 @@ class EditorDialogs {
         right: 2,
         height: 1,
         border: {
-          type: 'line'
+          type: "line",
         },
-        label: ' Replace with ',
+        label: " Replace with ",
         style: {
-          fg: 'white',
-          bg: 'black'
+          fg: "white",
+          bg: "black",
         },
-        inputOnFocus: true
+        inputOnFocus: true,
       });
 
       const instructions = blessed.text({
@@ -249,10 +252,11 @@ class EditorDialogs {
         left: 2,
         right: 2,
         height: 2,
-        content: 'Enter find and replace text.\nPress Enter to replace all, Escape to cancel.',
+        content:
+          "Enter find and replace text.\nPress Enter to replace all, Escape to cancel.",
         style: {
-          fg: 'cyan'
-        }
+          fg: "cyan",
+        },
       });
 
       findInput.focus();
@@ -265,13 +269,13 @@ class EditorDialogs {
         resolve({ find: findValue, replace: replaceValue });
       };
 
-      findInput.key(['enter'], () => {
+      findInput.key(["enter"], () => {
         replaceInput.focus();
       });
 
-      replaceInput.key(['enter'], handleSubmit);
+      replaceInput.key(["enter"], handleSubmit);
 
-      dialog.key(['escape'], () => {
+      dialog.key(["escape"], () => {
         dialog.destroy();
         this.screen.render();
         resolve(null);
@@ -284,9 +288,9 @@ class EditorDialogs {
   showGoToLineDialog(totalLines) {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
-        label: ' Go to Line ',
+        label: " Go to Line ",
         width: 50,
-        height: 8
+        height: 8,
       });
 
       const input = blessed.textbox({
@@ -296,13 +300,13 @@ class EditorDialogs {
         right: 2,
         height: 1,
         border: {
-          type: 'line'
+          type: "line",
         },
         style: {
-          fg: 'white',
-          bg: 'black'
+          fg: "white",
+          bg: "black",
         },
-        inputOnFocus: true
+        inputOnFocus: true,
       });
 
       const instructions = blessed.text({
@@ -313,13 +317,13 @@ class EditorDialogs {
         height: 2,
         content: `Enter line number (1-${totalLines}).\nPress Enter to go, Escape to cancel.`,
         style: {
-          fg: 'cyan'
-        }
+          fg: "cyan",
+        },
       });
 
       input.focus();
 
-      input.key(['enter'], () => {
+      input.key(["enter"], () => {
         const value = parseInt(input.getValue());
         dialog.destroy();
         this.screen.render();
@@ -330,7 +334,7 @@ class EditorDialogs {
         }
       });
 
-      input.key(['escape'], () => {
+      input.key(["escape"], () => {
         dialog.destroy();
         this.screen.render();
         resolve(null);
@@ -343,9 +347,9 @@ class EditorDialogs {
   showWordCountDialog(stats) {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
-        label: ' Document Statistics ',
+        label: " Document Statistics ",
         width: 60,
-        height: 15
+        height: 15,
       });
 
       const content = `
@@ -354,7 +358,7 @@ Characters: ${stats.characters || 0}
 Characters (no spaces): ${stats.charactersNoSpaces || 0}
 Lines: ${stats.lines || 0}
 Paragraphs: ${stats.paragraphs || 0}
-Reading Time: ${stats.readingTime || 'N/A'}
+Reading Time: ${stats.readingTime || "N/A"}
 
 Current Position:
   Line: ${stats.currentLine || 1}
@@ -369,8 +373,8 @@ Current Position:
         bottom: 2,
         content: content,
         style: {
-          fg: 'white'
-        }
+          fg: "white",
+        },
       });
 
       const instructions = blessed.text({
@@ -379,13 +383,13 @@ Current Position:
         left: 2,
         right: 2,
         height: 1,
-        content: 'Press any key to close',
+        content: "Press any key to close",
         style: {
-          fg: 'cyan'
-        }
+          fg: "cyan",
+        },
       });
 
-      dialog.key(['escape', 'enter', 'space'], () => {
+      dialog.key(["escape", "enter", "space"], () => {
         dialog.destroy();
         this.screen.render();
         resolve();
@@ -399,21 +403,30 @@ Current Position:
   showHelpDialog() {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
-        label: ' Writers Editor Help ',
+        label: " Writers Editor Help ",
         width: 80,
-        height: '90%'
+        height: "90%",
       });
 
       const helpText = `
-WRITERS EDITOR - KEYBOARD SHORTCUTS
+WRITERS EDITOR - MODAL EDITING HELP
 
-File Operations:
-  Ctrl+N         New file
-  Ctrl+O         Open file
-  Ctrl+S         Save file
-  Ctrl+X         Exit editor
+MODES:
+The editor has two modes (shown in status bar):
+  Navigation Mode (NAV) - Default mode, cannot edit text
+  Insert Mode (INS)     - Allows text editing
 
-Navigation:
+Mode Switching:
+  i              Enter Insert mode from Navigation mode
+  Escape         Return to Navigation mode from any mode
+
+NAVIGATION MODE:
+Movement (Vim-style):
+  h/j/k/l        Left/Down/Up/Right
+  w/a/s/d        Up/Left/Down/Right
+
+INSERT MODE:
+Movement:
   Arrow Keys     Move cursor
   Ctrl+Left/Right  Move by word
   Home           Beginning of line
@@ -422,11 +435,20 @@ Navigation:
   Ctrl+End       End of document
   Page Up/Down   Scroll by page
 
-Editing:
+Text Editing (Insert mode only):
   Enter          New line
   Backspace      Delete character before cursor
   Delete         Delete character at cursor
   Tab            Insert tab/spaces
+
+BOTH MODES:
+File Operations:
+  Ctrl+N         New file
+  Ctrl+O         Open file
+  Ctrl+S         Save file
+  Ctrl+X         Exit editor
+
+Edit Operations:
   Ctrl+Z         Undo
   Ctrl+Y         Redo
   Ctrl+A         Select all
@@ -446,15 +468,16 @@ Writing Features:
   - Reading time estimation
   - Auto-save every 30 seconds
   - Line numbers
+  - Modal editing for focused writing
   - Distraction-free writing mode
   - Markdown-aware word counting
 
-Tips for Better Writing:
-  - Use F11 for focused writing sessions
-  - Check Ctrl+W regularly for progress
-  - The editor auto-saves, but Ctrl+S is instant
-  - Use Ctrl+G to jump to specific sections
-  - Arrow keys work anywhere in the document
+Tips for Modal Editing:
+  - Start in Navigation mode for browsing
+  - Press 'i' when ready to write/edit
+  - Use Escape to quickly return to navigation
+  - Navigation mode prevents accidental edits
+  - Use h/j/k/l or w/a/s/d for quick movement
 
 Press any key to close this help.
       `.trim();
@@ -467,15 +490,15 @@ Press any key to close this help.
         bottom: 1,
         content: helpText,
         style: {
-          fg: 'white'
+          fg: "white",
         },
         scrollable: true,
         alwaysScroll: true,
         mouse: true,
-        keys: true
+        keys: true,
       });
 
-      dialog.key(['escape', 'f1', 'q'], () => {
+      dialog.key(["escape", "f1", "q"], () => {
         dialog.destroy();
         this.screen.render();
         resolve();
@@ -486,13 +509,13 @@ Press any key to close this help.
     });
   }
 
-  showConfirmDialog(message, title = ' Confirm ') {
+  showConfirmDialog(message, title = " Confirm ") {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
         label: title,
         width: 60,
         height: 8,
-        borderColor: 'yellow'
+        borderColor: "yellow",
       });
 
       const text = blessed.text({
@@ -503,8 +526,8 @@ Press any key to close this help.
         height: 2,
         content: message,
         style: {
-          fg: 'white'
-        }
+          fg: "white",
+        },
       });
 
       const instructions = blessed.text({
@@ -513,25 +536,25 @@ Press any key to close this help.
         left: 2,
         right: 2,
         height: 1,
-        content: 'Y/y = Yes, N/n = No, Escape = Cancel',
+        content: "Y/y = Yes, N/n = No, Escape = Cancel",
         style: {
-          fg: 'yellow'
-        }
+          fg: "yellow",
+        },
       });
 
-      dialog.key(['y'], () => {
+      dialog.key(["y"], () => {
         dialog.destroy();
         this.screen.render();
         resolve(true);
       });
 
-      dialog.key(['n'], () => {
+      dialog.key(["n"], () => {
         dialog.destroy();
         this.screen.render();
         resolve(false);
       });
 
-      dialog.key(['escape'], () => {
+      dialog.key(["escape"], () => {
         dialog.destroy();
         this.screen.render();
         resolve(null);
@@ -542,11 +565,11 @@ Press any key to close this help.
     });
   }
 
-  showMessage(message, title = ' Message ', timeout = 3000) {
+  showMessage(message, title = " Message ", timeout = 3000) {
     const dialog = this.createDialog({
       label: title,
       width: Math.min(message.length + 10, 70),
-      height: 5
+      height: 5,
     });
 
     const text = blessed.text({
@@ -557,8 +580,8 @@ Press any key to close this help.
       height: 1,
       content: message,
       style: {
-        fg: 'white'
-      }
+        fg: "white",
+      },
     });
 
     this.screen.render();
@@ -569,13 +592,13 @@ Press any key to close this help.
     }, timeout);
   }
 
-  showError(message, title = ' Error ') {
+  showError(message, title = " Error ") {
     return new Promise((resolve) => {
       const dialog = this.createDialog({
         label: title,
         width: Math.min(message.length + 10, 70),
         height: 6,
-        borderColor: 'red'
+        borderColor: "red",
       });
 
       const text = blessed.text({
@@ -586,8 +609,8 @@ Press any key to close this help.
         height: 2,
         content: message,
         style: {
-          fg: 'red'
-        }
+          fg: "red",
+        },
       });
 
       const instructions = blessed.text({
@@ -596,13 +619,13 @@ Press any key to close this help.
         left: 2,
         right: 2,
         height: 1,
-        content: 'Press any key to continue',
+        content: "Press any key to continue",
         style: {
-          fg: 'cyan'
-        }
+          fg: "cyan",
+        },
       });
 
-      dialog.key(['escape', 'enter', 'space'], () => {
+      dialog.key(["escape", "enter", "space"], () => {
         dialog.destroy();
         this.screen.render();
         resolve();

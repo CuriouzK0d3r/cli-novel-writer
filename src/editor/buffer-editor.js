@@ -16,6 +16,9 @@ class BufferEditor {
     this.currentFile = null;
     this.isDirty = false;
 
+    // Editor mode state
+    this.mode = "navigation"; // "navigation" or "insert"
+
     // Buffer state
     this.lines = [""];
     this.cursorX = 0;
@@ -209,58 +212,181 @@ class BufferEditor {
   }
 
   setupKeybindings() {
-    // Navigation keys
-    this.screen.key(["up"], () => this.moveCursor(0, -1));
-    this.screen.key(["down"], () => this.moveCursor(0, 1));
-    this.screen.key(["left"], () => this.moveCursor(-1, 0));
-    this.screen.key(["right"], () => this.moveCursor(1, 0));
+    // Mode switching keys (work in both modes)
+    this.screen.key(["i"], () => {
+      if (this.mode === "navigation") {
+        this.setMode("insert");
+      }
+      // In insert mode, don't handle 'i' here to avoid double insertion
+    });
+    this.screen.key(["escape"], () => this.setMode("navigation"));
 
-    // Word navigation
-    this.screen.key(["C-left"], () => this.moveWordLeft());
-    this.screen.key(["C-right"], () => this.moveWordRight());
+    // Navigation mode keys (WASD and HJKL) - only handle navigation, not insertion
+    this.screen.key(["w"], () => {
+      if (this.mode === "navigation") {
+        this.moveCursor(0, -1);
+      }
+      // In insert mode, 'w' will be handled by the general keypress handler
+    });
+    this.screen.key(["a"], () => {
+      if (this.mode === "navigation") {
+        this.moveCursor(-1, 0);
+      }
+      // In insert mode, 'a' will be handled by the general keypress handler
+    });
+    this.screen.key(["s"], () => {
+      if (this.mode === "navigation") {
+        this.moveCursor(0, 1);
+      }
+      // In insert mode, 's' will be handled by the general keypress handler
+    });
+    this.screen.key(["d"], () => {
+      if (this.mode === "navigation") {
+        this.moveCursor(1, 0);
+      }
+      // In insert mode, 'd' will be handled by the general keypress handler
+    });
+    this.screen.key(["h"], () => {
+      if (this.mode === "navigation") {
+        this.moveCursor(-1, 0);
+      }
+      // In insert mode, 'h' will be handled by the general keypress handler
+    });
+    this.screen.key(["j"], () => {
+      if (this.mode === "navigation") {
+        this.moveCursor(0, 1);
+      }
+      // In insert mode, 'j' will be handled by the general keypress handler
+    });
+    this.screen.key(["k"], () => {
+      if (this.mode === "navigation") {
+        this.moveCursor(0, -1);
+      }
+      // In insert mode, 'k' will be handled by the general keypress handler
+    });
+    this.screen.key(["l"], () => {
+      if (this.mode === "navigation") {
+        this.moveCursor(1, 0);
+      }
+      // In insert mode, 'l' will be handled by the general keypress handler
+    });
 
-    // Line navigation
-    this.screen.key(["home"], () => this.moveCursorToLineStart());
-    this.screen.key(["end"], () => this.moveCursorToLineEnd());
+    // Arrow keys (work in insert mode, ignored in navigation mode)
+    this.screen.key(["up"], () => {
+      if (this.mode === "insert") {
+        this.moveCursor(0, -1);
+      }
+    });
+    this.screen.key(["down"], () => {
+      if (this.mode === "insert") {
+        this.moveCursor(0, 1);
+      }
+    });
+    this.screen.key(["left"], () => {
+      if (this.mode === "insert") {
+        this.moveCursor(-1, 0);
+      }
+    });
+    this.screen.key(["right"], () => {
+      if (this.mode === "insert") {
+        this.moveCursor(1, 0);
+      }
+    });
 
-    // Page navigation
-    this.screen.key(["pageup"], () => this.pageUp());
-    this.screen.key(["pagedown"], () => this.pageDown());
+    // Word navigation (insert mode only)
+    this.screen.key(["C-left"], () => {
+      if (this.mode === "insert") {
+        this.moveWordLeft();
+      }
+    });
+    this.screen.key(["C-right"], () => {
+      if (this.mode === "insert") {
+        this.moveWordRight();
+      }
+    });
 
-    // Document navigation
-    this.screen.key(["C-home"], () => this.moveCursorToDocStart());
-    this.screen.key(["C-end"], () => this.moveCursorToDocEnd());
+    // Line navigation (insert mode only)
+    this.screen.key(["home"], () => {
+      if (this.mode === "insert") {
+        this.moveCursorToLineStart();
+      }
+    });
+    this.screen.key(["end"], () => {
+      if (this.mode === "insert") {
+        this.moveCursorToLineEnd();
+      }
+    });
 
-    // Text editing
-    this.screen.key(["enter"], () => this.insertNewLine());
-    this.screen.key(["backspace"], () => this.backspace());
-    this.screen.key(["delete"], () => this.delete());
-    this.screen.key(["tab"], () => this.insertTab());
+    // Page navigation (insert mode only)
+    this.screen.key(["pageup"], () => {
+      if (this.mode === "insert") {
+        this.pageUp();
+      }
+    });
+    this.screen.key(["pagedown"], () => {
+      if (this.mode === "insert") {
+        this.pageDown();
+      }
+    });
 
-    // File operations
+    // Document navigation (insert mode only)
+    this.screen.key(["C-home"], () => {
+      if (this.mode === "insert") {
+        this.moveCursorToDocStart();
+      }
+    });
+    this.screen.key(["C-end"], () => {
+      if (this.mode === "insert") {
+        this.moveCursorToDocEnd();
+      }
+    });
+
+    // Text editing (insert mode only)
+    this.screen.key(["enter"], () => {
+      if (this.mode === "insert") {
+        this.insertNewLine();
+      }
+    });
+    this.screen.key(["backspace"], () => {
+      if (this.mode === "insert") {
+        this.backspace();
+      }
+    });
+    this.screen.key(["delete"], () => {
+      if (this.mode === "insert") {
+        this.delete();
+      }
+    });
+    this.screen.key(["tab"], () => {
+      if (this.mode === "insert") {
+        this.insertTab();
+      }
+    });
+
+    // File operations (work in both modes)
     this.screen.key(["C-s"], () => this.saveFile());
     this.screen.key(["C-o"], () => this.showOpenDialog());
     this.screen.key(["C-n"], () => this.newFile());
     this.screen.key(["C-x", "C-c"], () => this.exit());
 
-    // Edit operations
+    // Edit operations (work in both modes)
     this.screen.key(["C-z"], () => this.undo());
     this.screen.key(["C-y"], () => this.redo());
     this.screen.key(["C-a"], () => this.selectAll());
 
-    // Search
+    // Search (work in both modes)
     this.screen.key(["C-f"], () => this.showFindDialog());
     this.screen.key(["C-r"], () => this.showReplaceDialog());
     this.screen.key(["C-g"], () => this.showGoToLineDialog());
 
-    // View
+    // View (work in both modes)
     this.screen.key(["C-w"], () => this.showWordCountDialog());
     this.screen.key(["f1"], () => this.showHelp());
     this.screen.key(["f11"], () => this.toggleDistractionFree());
 
-    // Handle regular character input
+    // Handle regular character input (insert mode only)
     this.screen.on("keypress", (ch, key) => {
-      if (this.isRegularChar(ch, key)) {
+      if (this.mode === "insert" && this.isRegularChar(ch, key)) {
         this.insertChar(ch);
       }
     });
@@ -273,7 +399,8 @@ class BufferEditor {
       key.name === "enter" ||
       key.name === "backspace" ||
       key.name === "delete" ||
-      key.name === "tab"
+      key.name === "tab" ||
+      key.name === "escape"
     )
       return false;
     if (
@@ -282,6 +409,16 @@ class BufferEditor {
     )
       return false;
     if (key.name && key.name.match(/^f\d+$/)) return false;
+
+    // In navigation mode, don't treat navigation keys as regular chars
+    if (
+      this.mode === "navigation" &&
+      key.name &&
+      ["w", "a", "s", "d", "h", "j", "k", "l", "i"].includes(key.name)
+    ) {
+      return false;
+    }
+
     return ch.length === 1 && ch.charCodeAt(0) >= 32;
   }
 
@@ -775,6 +912,10 @@ class BufferEditor {
 
     let status = ` ${fileName}${dirtyFlag}`;
 
+    // Show current mode
+    const modeText = this.mode === "navigation" ? "NAV" : "INS";
+    status += ` | Mode: ${modeText}`;
+
     if (this.config.showWordCount) {
       const wordCount = markdownUtils.countWords(content);
       status += ` | Words: ${wordCount}`;
@@ -1083,8 +1224,26 @@ class BufferEditor {
   }
 
   resetCursorBlink() {
-    this.cursorVisible = true;
+    this.stopCursorBlink();
     this.startCursorBlink();
+  }
+
+  /**
+   * Set the editor mode
+   */
+  setMode(mode) {
+    if (mode === "navigation" || mode === "insert") {
+      this.mode = mode;
+      this.updateStatus();
+      this.render();
+    }
+  }
+
+  /**
+   * Get the current editor mode
+   */
+  getMode() {
+    return this.mode;
   }
 }
 

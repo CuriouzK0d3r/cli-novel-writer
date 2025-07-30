@@ -10,7 +10,6 @@ Lyrad discovers her magical abilities when ancient crystals react to her presenc
 - Establish the protagonist's ordinary world
 - First glimpse of the larger conflict
 
----
 
 ## Content
 
