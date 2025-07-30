@@ -8,11 +8,13 @@
   },
   "scripts": {
     "start": "node bin/writers.js",
-    "gui": "electron --no-sandbox gui/main.js",
+    "gui": "node gui-launcher.js",
+    "gui-dev": "electron --no-sandbox gui/main.js",
     "test": "jest",
     "dev": "nodemon bin/writers.js",
     "demo": "node demo.js",
     "demo-editor": "node demo-editor.js",
+    "demo-gui": "node demo-gui.js",
     "build": "pkg --config pkg.config.json bin/writers.js"
   },
   "keywords": [

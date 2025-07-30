@@ -1,12 +1,12 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require("electron");
 const path = require("path");
 const fs = require("fs-extra");
-const WritersEditor = require("../src/editor/index");
+const projectManager = require("../src/utils/project");
 
 class WritersGUI {
   constructor() {
     this.mainWindow = null;
-    this.editor = new WritersEditor();
+    this.currentProject = null;
     this.currentFile = null;
     this.isModified = false;
   }
@@ -27,8 +27,8 @@ class WritersGUI {
       titleBarStyle: "default",
     });
 
-    // Load the index.html of the app
-    this.mainWindow.loadFile(path.join(__dirname, "renderer.html"));
+    // Load the project interface
+    this.mainWindow.loadFile(path.join(__dirname, "project-interface.html"));
 
     // Show window when ready to prevent visual flash
     this.mainWindow.once("ready-to-show", () => {
@@ -179,7 +179,244 @@ class WritersGUI {
   }
 
   setupIPC() {
+    // Project operations
+    ipcMain.handle("check-project", async () => {
+      return projectManager.isWritersProject();
+    });
+
+    ipcMain.handle("get-project-config", async () => {
+      if (!projectManager.isWritersProject()) {
+        throw new Error("Not a Writers project");
+      }
+      return await projectManager.getConfig();
+    });
+
+    ipcMain.handle("create-project", async (event, projectData) => {
+      try {
+        // Show save dialog to select directory
+        const result = await dialog.showSaveDialog(this.mainWindow, {
+          title: "Create New Project",
+          defaultPath: projectData.name,
+          properties: ["createDirectory"],
+        });
+
+        if (result.canceled) {
+          throw new Error("Project creation cancelled");
+        }
+
+        const projectPath = result.filePath;
+
+        // Create directory if it doesn't exist
+        await fs.ensureDir(projectPath);
+
+        // Change to project directory
+        process.chdir(projectPath);
+
+        // Initialize project
+        const config = await projectManager.initProject(projectData);
+        this.currentProject = projectPath;
+
+        return config;
+      } catch (error) {
+        throw new Error(`Failed to create project: ${error.message}`);
+      }
+    });
+
+    ipcMain.handle("open-project-dialog", async () => {
+      const result = await dialog.showOpenDialog(this.mainWindow, {
+        properties: ["openDirectory"],
+        title: "Open Project Directory",
+      });
+
+      if (!result.canceled && result.filePaths.length > 0) {
+        const projectPath = result.filePaths[0];
+
+        // Change to project directory
+        process.chdir(projectPath);
+
+        if (!projectManager.isWritersProject()) {
+          throw new Error("Selected directory is not a Writers project");
+        }
+
+        const config = await projectManager.getConfig();
+        this.currentProject = projectPath;
+
+        return config;
+      }
+
+      return null;
+    });
+
+    ipcMain.handle("update-project-config", async (event, updates) => {
+      return await projectManager.updateConfig(updates);
+    });
+
     // File operations
+    ipcMain.handle("get-files", async (event, type) => {
+      try {
+        const files = await projectManager.getFiles(type);
+
+        // Add word count for each file
+        const filesWithStats = await Promise.all(
+          files.map(async (file) => {
+            try {
+              const content = await fs.readFile(file.path, "utf8");
+              const words = projectManager.countWords(content);
+              return { ...file, words };
+            } catch (error) {
+              console.error(`Error reading file ${file.path}:`, error);
+              return { ...file, words: 0 };
+            }
+          }),
+        );
+
+        return filesWithStats;
+      } catch (error) {
+        console.error("Error getting files:", error);
+        throw new Error(`Failed to get files: ${error.message}`);
+      }
+    });
+
+    ipcMain.handle("create-file", async (event, type, name) => {
+      try {
+        // Map singular types to plural types that projectManager expects
+        const typeMap = {
+          chapter: "chapters",
+          scene: "scenes",
+          character: "characters",
+          shortstory: "shortstories",
+          note: "notes",
+        };
+
+        const pluralType = typeMap[type] || type;
+        return await projectManager.createFile(pluralType, name);
+      } catch (error) {
+        console.error("Error creating file:", error);
+        throw new Error(`Failed to create ${type}: ${error.message}`);
+      }
+    });
+
+    ipcMain.handle("read-file", async (event, filePath) => {
+      try {
+        return await fs.readFile(filePath, "utf8");
+      } catch (error) {
+        console.error("Error reading file:", error);
+        throw new Error(`Failed to read file: ${error.message}`);
+      }
+    });
+
+    ipcMain.handle("write-file", async (event, filePath, content) => {
+      try {
+        await fs.writeFile(filePath, content, "utf8");
+        return { success: true };
+      } catch (error) {
+        console.error("Error writing file:", error);
+        throw new Error(`Failed to save file: ${error.message}`);
+      }
+    });
+
+    // Statistics
+    ipcMain.handle("get-project-stats", async () => {
+      try {
+        return await projectManager.getProjectStats();
+      } catch (error) {
+        console.error("Error getting project stats:", error);
+        throw new Error(`Failed to get statistics: ${error.message}`);
+      }
+    });
+
+    ipcMain.handle("get-detailed-stats", async () => {
+      try {
+        const stats = await projectManager.getProjectStats();
+
+        // Add more detailed statistics
+        const detailedStats = {
+          ...stats,
+          avgChapterLength:
+            stats.chapters.length > 0
+              ? Math.round(stats.totalWords / stats.chapters.length)
+              : 0,
+          readingTime: Math.ceil(stats.totalWords / 200), // 200 words per minute
+          lastModified:
+            stats.chapters.length > 0
+              ? Math.max(
+                  ...stats.chapters.map((c) =>
+                    new Date(c.modified || 0).getTime(),
+                  ),
+                )
+              : null,
+        };
+
+        return detailedStats;
+      } catch (error) {
+        console.error("Error getting detailed stats:", error);
+        throw new Error(`Failed to get detailed statistics: ${error.message}`);
+      }
+    });
+
+    // Export
+    ipcMain.handle("export-project", async (event, options = {}) => {
+      try {
+        // Show save dialog for export location
+        const result = await dialog.showSaveDialog(this.mainWindow, {
+          title: "Export Project",
+          defaultPath: `${this.currentProject ? path.basename(this.currentProject) : "project"}-export`,
+          filters: [
+            { name: "HTML Files", extensions: ["html"] },
+            { name: "Text Files", extensions: ["txt"] },
+            { name: "PDF Files", extensions: ["pdf"] },
+          ],
+        });
+
+        if (result.canceled) {
+          return null;
+        }
+
+        // Simple HTML export for now
+        const stats = await projectManager.getProjectStats();
+        const files = await projectManager.getFiles("chapters");
+
+        let html = `<!DOCTYPE html>
+<html>
+<head>
+    <title>${stats.project}</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { border-bottom: 2px solid #333; }
+        h2 { margin-top: 2em; }
+        .chapter { page-break-before: always; }
+    </style>
+</head>
+<body>
+    <h1>${stats.project}</h1>
+    <p>By ${stats.author}</p>
+    <hr>
+`;
+
+        for (const file of files) {
+          try {
+            const content = await fs.readFile(file.path, "utf8");
+            html += `<div class="chapter">
+              <h2>${file.name}</h2>
+              ${content.replace(/\n/g, "<br>")}
+            </div>`;
+          } catch (error) {
+            console.error(`Error reading ${file.path}:`, error);
+          }
+        }
+
+        html += `
+</body>
+</html>`;
+
+        await fs.writeFile(result.filePath, html, "utf8");
+        return { success: true, path: result.filePath };
+      } catch (error) {
+        throw new Error(`Export failed: ${error.message}`);
+      }
+    });
+
+    // Legacy file operations for compatibility
     ipcMain.handle("save-file", async (event, content) => {
       return await this.saveFileContent(content);
     });
@@ -347,11 +584,17 @@ class WritersGUI {
 
   updateWindowTitle() {
     let title = "Writers CLI";
+
+    if (this.currentProject) {
+      const projectName = path.basename(this.currentProject);
+      title = `${projectName} - Writers CLI`;
+    }
+
     if (this.currentFile) {
       const fileName = path.basename(this.currentFile);
-      title = `${fileName}${this.isModified ? " •" : ""} - Writers CLI`;
+      title = `${fileName}${this.isModified ? " •" : ""} - ${title}`;
     } else if (this.isModified) {
-      title = "Untitled • - Writers CLI";
+      title = `Untitled • - ${title}`;
     }
 
     if (this.mainWindow) {
