@@ -12,6 +12,7 @@ const editCommand = require("../src/commands/edit");
 const statsCommand = require("../src/commands/stats");
 const exportCommand = require("../src/commands/export");
 const listCommand = require("../src/commands/list");
+const guiCommand = require("../src/commands/gui");
 
 const program = new Command();
 
@@ -72,6 +73,11 @@ program
   .description("Open a chapter or scene in the built-in editor")
   .argument("[target]", "Chapter or scene to edit (e.g., chapter1, scene2)")
   .action(editCommand);
+
+program
+  .command("gui")
+  .description("Launch the GUI version of Writers CLI")
+  .action(guiCommand);
 
 program
   .command("stats")
