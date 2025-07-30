@@ -40,6 +40,7 @@ The editor uses the `blessed` library which provides a terminal-based interface.
 | `Ctrl+R` | Find and replace |
 | `Ctrl+W` | Show word count statistics |
 | `F1` | Show help |
+| `F9` | Toggle typewriter mode |
 | `F11` | Toggle distraction-free mode |
 
 ## Getting Text Into the Editor
@@ -96,6 +97,12 @@ writers edit "My New Chapter"
 - Character count (with and without spaces)
 - Line and paragraph counts
 
+### Typewriter Mode (F9)
+- Keeps cursor centered while writing
+- Automatically scrolls text up as you type
+- Creates focused writing experience
+- Perfect for long writing sessions
+
 ### Distraction-Free Mode (F11)
 - Hides all interface elements
 - Full-screen text editing
@@ -132,6 +139,21 @@ writers edit "My New Chapter"
 1. Some terminals don't show the cursor properly
 2. The cursor position is tracked internally
 3. Use arrow keys and text input will appear at the correct location
+
+## Navigation Modes
+
+The editor supports multiple navigation styles to suit different preferences:
+
+### Navigation Mode
+- **Arrow Keys**: Standard up/down/left/right navigation
+- **Vim Style**: h/j/k/l for left/down/up/right
+- **WASD Style**: w/a/s/d for up/left/down/right
+- **Extended**: Home/End, Page Up/Down, Ctrl+Arrow for word movement
+
+### Insert Mode
+- **Arrow Keys**: Move cursor while editing
+- **Standard Keys**: Home/End, Page Up/Down
+- **Word Navigation**: Ctrl+Left/Right for word jumping
 
 ## Alternative Editors
 

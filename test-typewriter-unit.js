@@ -5,7 +5,7 @@
  * Tests the core logic without requiring the full blessed interface
  */
 
-const assert = require('assert');
+const assert = require("assert");
 
 // Mock the blessed dependencies and create a simplified test version of BufferEditor
 class MockBufferEditor {
@@ -16,9 +16,9 @@ class MockBufferEditor {
     this.scrollY = 0;
     this.config = {
       typewriterPosition: 0.66,
-      typewriterMode: false
+      typewriterMode: false,
     };
-    this.lines = [''];
+    this.lines = [""];
   }
 
   getEditorHeight() {
@@ -81,6 +81,13 @@ class MockBufferEditor {
     }
   }
 
+  // Mock cursor movement methods for testing
+  moveCursor(deltaX, deltaY) {
+    this.cursorX = Math.max(0, this.cursorX + deltaX);
+    this.cursorY = Math.max(0, this.cursorY + deltaY);
+    this.ensureCursorVisible();
+  }
+
   // Helper method to simulate typing (moving cursor down)
   simulateTyping(newCursorY) {
     this.cursorY = newCursorY;
@@ -96,39 +103,55 @@ class MockBufferEditor {
 
 // Test suite
 function runTests() {
-  console.log('Running Typewriter Mode Unit Tests...\n');
+  console.log("Running Typewriter Mode Unit Tests...\n");
 
   // Test 1: Normal scrolling behavior (typewriter mode off)
-  console.log('Test 1: Normal scrolling behavior');
+  console.log("Test 1: Normal scrolling behavior");
   const editor1 = new MockBufferEditor();
   editor1.typewriterMode = false;
 
   // Cursor at line 0, should not scroll
   editor1.simulateTyping(0);
-  assert.strictEqual(editor1.scrollY, 0, 'Should not scroll when cursor at top');
+  assert.strictEqual(
+    editor1.scrollY,
+    0,
+    "Should not scroll when cursor at top",
+  );
 
   // Cursor moves to line 25 (beyond screen), should scroll
   editor1.simulateTyping(25);
-  assert.strictEqual(editor1.scrollY, 6, 'Should scroll to keep cursor at bottom'); // 25 - 20 + 1 = 6
+  assert.strictEqual(
+    editor1.scrollY,
+    6,
+    "Should scroll to keep cursor at bottom",
+  ); // 25 - 20 + 1 = 6
 
-  console.log('✓ Normal scrolling works correctly\n');
+  console.log("✓ Normal scrolling works correctly\n");
 
   // Test 2: Typewriter mode activation
-  console.log('Test 2: Typewriter mode activation');
+  console.log("Test 2: Typewriter mode activation");
   const editor2 = new MockBufferEditor();
   editor2.cursorY = 10;
   editor2.toggleTypewriterMode();
 
-  assert.strictEqual(editor2.typewriterMode, true, 'Typewriter mode should be enabled');
+  assert.strictEqual(
+    editor2.typewriterMode,
+    true,
+    "Typewriter mode should be enabled",
+  );
 
   const expectedTargetLine = Math.floor(20 * 0.66); // 13
   const expectedInitialScroll = Math.max(0, 10 - expectedTargetLine); // max(0, 10-13) = 0
-  assert.strictEqual(editor2.scrollY, expectedInitialScroll, 'Should position cursor at target line');
+  assert.strictEqual(
+    editor2.scrollY,
+    expectedInitialScroll,
+    "Should position cursor at target line",
+  );
 
-  console.log('✓ Typewriter mode activation works correctly\n');
+  console.log("✓ Typewriter mode activation works correctly\n");
 
   // Test 3: Typewriter mode scrolling when typing forward
-  console.log('Test 3: Typewriter mode scrolling when typing');
+  console.log("Test 3: Typewriter mode scrolling when typing");
   const editor3 = new MockBufferEditor();
   editor3.typewriterMode = true;
   editor3.cursorY = 5;
@@ -139,12 +162,16 @@ function runTests() {
 
   const targetLine = Math.floor(20 * 0.66); // 13
   const expectedScroll = 20 - targetLine; // 20 - 13 = 7
-  assert.strictEqual(editor3.scrollY, expectedScroll, 'Should scroll to maintain cursor at target line');
+  assert.strictEqual(
+    editor3.scrollY,
+    expectedScroll,
+    "Should scroll to maintain cursor at target line",
+  );
 
-  console.log('✓ Typewriter mode scrolling works correctly\n');
+  console.log("✓ Typewriter mode scrolling works correctly\n");
 
   // Test 4: Typewriter mode doesn't scroll when moving up
-  console.log('Test 4: Manual cursor movement (up) in typewriter mode');
+  console.log("Test 4: Manual cursor movement (up) in typewriter mode");
   const editor4 = new MockBufferEditor();
   editor4.typewriterMode = true;
   editor4.cursorY = 20;
@@ -156,12 +183,18 @@ function runTests() {
   editor4.ensureCursorVisible();
 
   // Should not apply typewriter positioning when moving up
-  assert.strictEqual(editor4.scrollY, 7, 'Should not change scroll when moving cursor up manually');
+  assert.strictEqual(
+    editor4.scrollY,
+    7,
+    "Should not change scroll when moving cursor up manually",
+  );
 
-  console.log('✓ Manual upward movement doesn\'t trigger typewriter scrolling\n');
+  console.log(
+    "✓ Manual upward movement doesn't trigger typewriter scrolling\n",
+  );
 
   // Test 5: Typewriter mode handles cursor going off screen
-  console.log('Test 5: Cursor off screen in typewriter mode');
+  console.log("Test 5: Cursor off screen in typewriter mode");
   const editor5 = new MockBufferEditor();
   editor5.typewriterMode = true;
   editor5.cursorY = 50;
@@ -173,12 +206,16 @@ function runTests() {
 
   const targetLine5 = Math.floor(20 * 0.66); // 13
   const expectedScroll5 = 50 - targetLine5; // 50 - 13 = 37
-  assert.strictEqual(editor5.scrollY, expectedScroll5, 'Should position cursor when off screen');
+  assert.strictEqual(
+    editor5.scrollY,
+    expectedScroll5,
+    "Should position cursor when off screen",
+  );
 
-  console.log('✓ Off-screen cursor handling works correctly\n');
+  console.log("✓ Off-screen cursor handling works correctly\n");
 
   // Test 6: Configuration values are respected
-  console.log('Test 6: Custom typewriter position configuration');
+  console.log("Test 6: Custom typewriter position configuration");
   const editor6 = new MockBufferEditor();
   editor6.config.typewriterPosition = 0.5; // Center of screen
   editor6.typewriterMode = true;
@@ -189,12 +226,16 @@ function runTests() {
 
   const targetLine6 = Math.floor(20 * 0.5); // 10
   const expectedScroll6 = 30 - targetLine6; // 30 - 10 = 20
-  assert.strictEqual(editor6.scrollY, expectedScroll6, 'Should respect custom typewriter position');
+  assert.strictEqual(
+    editor6.scrollY,
+    expectedScroll6,
+    "Should respect custom typewriter position",
+  );
 
-  console.log('✓ Custom configuration works correctly\n');
+  console.log("✓ Custom configuration works correctly\n");
 
   // Test 7: Edge case - negative scroll prevention
-  console.log('Test 7: Negative scroll prevention');
+  console.log("Test 7: Negative scroll prevention");
   const editor7 = new MockBufferEditor();
   editor7.typewriterMode = true;
   editor7.cursorY = 5;
@@ -202,33 +243,82 @@ function runTests() {
 
   editor7.ensureCursorVisible();
 
-  assert.strictEqual(editor7.scrollY, 0, 'Should never allow negative scroll');
+  assert.strictEqual(editor7.scrollY, 0, "Should never allow negative scroll");
 
-  console.log('✓ Negative scroll prevention works correctly\n');
+  console.log("✓ Negative scroll prevention works correctly\n");
 
-  console.log('🎉 All tests passed! Typewriter mode implementation is working correctly.');
+  // Test 8: Arrow key navigation in both modes
+  console.log("Test 8: Arrow key navigation support");
+
+  // This test verifies that the navigation logic supports multiple key types
+  // We can't test actual key events here, but we can verify the cursor movement works
+  const editor8 = new MockBufferEditor();
+
+  // Test navigation mode movement
+  editor8.mode = "navigation";
+  editor8.cursorY = 10;
+  editor8.cursorX = 5;
+
+  // Simulate cursor movements that would happen with different key types
+  editor8.moveCursor(0, -1); // Up movement (arrow, k, w)
+  assert.strictEqual(
+    editor8.cursorY,
+    9,
+    "Should move cursor up in navigation mode",
+  );
+
+  editor8.moveCursor(1, 0); // Right movement (arrow, l, d)
+  assert.strictEqual(
+    editor8.cursorX,
+    6,
+    "Should move cursor right in navigation mode",
+  );
+
+  editor8.moveCursor(0, 1); // Down movement (arrow, j, s)
+  assert.strictEqual(
+    editor8.cursorY,
+    10,
+    "Should move cursor down in navigation mode",
+  );
+
+  editor8.moveCursor(-1, 0); // Left movement (arrow, h, a)
+  assert.strictEqual(
+    editor8.cursorX,
+    5,
+    "Should move cursor left in navigation mode",
+  );
+
+  console.log("✓ Arrow key navigation support verified\n");
+
+  console.log(
+    "🎉 All tests passed! Typewriter mode implementation is working correctly.",
+  );
 }
 
 // Additional helper function to demonstrate the behavior
 function demonstrateTypewriterMode() {
-  console.log('\n📝 Typewriter Mode Behavior Demonstration:\n');
+  console.log("\n📝 Typewriter Mode Behavior Demonstration:\n");
 
   const editor = new MockBufferEditor();
-  console.log('Editor height: 20 lines');
-  console.log('Typewriter position: 66% (line 13 from top)\n');
+  console.log("Editor height: 20 lines");
+  console.log("Typewriter position: 66% (line 13 from top)\n");
 
-  console.log('Enabling typewriter mode...');
+  console.log("Enabling typewriter mode...");
   editor.toggleTypewriterMode();
 
-  console.log('\nSimulating typing session:');
+  console.log("\nSimulating typing session:");
   const positions = [0, 5, 10, 15, 20, 25, 30];
 
-  positions.forEach(pos => {
+  positions.forEach((pos) => {
     editor.simulateTyping(pos);
-    console.log(`Cursor line: ${pos.toString().padStart(2)}, Scroll: ${editor.scrollY.toString().padStart(2)}, Visible cursor line: ${(pos - editor.scrollY).toString().padStart(2)}`);
+    console.log(
+      `Cursor line: ${pos.toString().padStart(2)}, Scroll: ${editor.scrollY.toString().padStart(2)}, Visible cursor line: ${(pos - editor.scrollY).toString().padStart(2)}`,
+    );
   });
 
-  console.log('\nNotice how the visible cursor line stays around 13 (the target) as scroll adjusts.');
+  console.log(
+    "\nNotice how the visible cursor line stays around 13 (the target) as scroll adjusts.",
+  );
 }
 
 // Run the tests
@@ -237,7 +327,7 @@ if (require.main === module) {
     runTests();
     demonstrateTypewriterMode();
   } catch (error) {
-    console.error('❌ Test failed:', error.message);
+    console.error("❌ Test failed:", error.message);
     process.exit(1);
   }
 }

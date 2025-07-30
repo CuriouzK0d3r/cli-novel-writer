@@ -421,9 +421,14 @@ Mode Switching:
   Escape         Return to Navigation mode from any mode
 
 NAVIGATION MODE:
-Movement (Vim-style):
-  h/j/k/l        Left/Down/Up/Right
-  w/a/s/d        Up/Left/Down/Right
+Movement:
+  Arrow Keys     Move cursor (up/down/left/right)
+  h/j/k/l        Left/Down/Up/Right (Vim-style)
+  w/a/s/d        Up/Left/Down/Right (WASD-style)
+  Home/End       Beginning/End of line
+  Page Up/Down   Scroll by page
+  Ctrl+Left/Right  Move by word
+  Ctrl+Home/End    Beginning/End of document
 
 INSERT MODE:
 Movement:

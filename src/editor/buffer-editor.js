@@ -284,20 +284,54 @@ class BufferEditor {
           switch (key.name) {
             case "w":
             case "k":
+            case "up":
               this.moveCursor(0, -1);
               return;
             case "a":
             case "h":
+            case "left":
               this.moveCursor(-1, 0);
               return;
             case "s":
             case "j":
+            case "down":
               this.moveCursor(0, 1);
               return;
             case "d":
             case "l":
+            case "right":
               this.moveCursor(1, 0);
               return;
+            case "home":
+              this.moveCursorToLineStart();
+              return;
+            case "end":
+              this.moveCursorToLineEnd();
+              return;
+            case "pageup":
+              this.pageUp();
+              return;
+            case "pagedown":
+              this.pageDown();
+              return;
+          }
+
+          // Word navigation with Ctrl in navigation mode
+          if (key.ctrl) {
+            switch (key.name) {
+              case "left":
+                this.moveWordLeft();
+                return;
+              case "right":
+                this.moveWordRight();
+                return;
+              case "home":
+                this.moveCursorToDocStart();
+                return;
+              case "end":
+                this.moveCursorToDocEnd();
+                return;
+            }
           }
         }
 
