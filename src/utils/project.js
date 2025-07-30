@@ -138,13 +138,31 @@ Use \`writers stats\` to track your progress toward your ${config.wordGoal.toLoc
     }
 
     const files = await fs.readdir(dir);
-    return files
-      .filter((file) => file.endsWith(".md"))
-      .map((file) => ({
-        name: file.replace(".md", ""),
-        path: path.join(dir, file),
-        fullName: file,
-      }));
+    const fileStats = await Promise.all(
+      files.map(async (file) => {
+        const filePath = path.join(dir, file);
+        try {
+          const stats = await fs.stat(filePath);
+          return {
+            name: path.basename(file, path.extname(file)),
+            path: filePath,
+            fullName: file,
+            isDirectory: stats.isDirectory(),
+            size: stats.size,
+            modified: stats.mtime,
+            created: stats.birthtime
+          };
+        } catch (error) {
+          console.error(`Error getting stats for ${filePath}:`, error);
+          return null;
+        }
+      })
+    );
+
+    // Filter out any null entries and directories, and sort by name
+    return fileStats
+      .filter(file => file && !file.isDirectory)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**

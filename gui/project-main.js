@@ -778,7 +778,20 @@ class WritersProjectInterface {
     const listId =
       category === "shortstories" ? "storiesList" : `${category}List`;
     const list = document.getElementById(listId);
-    if (!list) return;
+    if (!list) {
+      console.error(`Element with ID ${listId} not found`);
+      return;
+    }
+
+    // Show a message if no files are found
+    if (!files || files.length === 0) {
+      list.innerHTML = `
+        <li class="empty-message">
+          No ${category} found. Click the + button to create one.
+        </li>
+      `;
+      return;
+    }
 
     list.innerHTML = "";
 
@@ -787,10 +800,35 @@ class WritersProjectInterface {
       li.className = "file-item";
       li.dataset.path = file.path; // Add path for active indicator
 
+      // Format file size
+      const formatSize = (bytes) => {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+      };
+
+      // Format date
+      const formatDate = (date) => {
+        if (!date) return '';
+        return new Date(date).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      };
+
       li.innerHTML = `
-                <span class="file-name">${file.name}</span>
-                <span class="file-stats">${file.words || 0}w</span>
-            `;
+        <div class="file-info">
+          <span class="file-name">${file.name}</span>
+          <div class="file-meta">
+            ${file.size ? `<span class="file-size">${formatSize(file.size)}</span>` : ''}
+            ${file.modified ? `<span class="file-modified" title="Last modified">${formatDate(file.modified)}</span>` : ''}
+          </div>
+        </div>
+        <span class="file-stats">${file.words || 0}w</span>
+      `;
 
       li.addEventListener("click", () => {
         this.openFile(file.path, category);
