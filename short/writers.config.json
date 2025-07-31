@@ -1,25 +1,11 @@
 {
-  "name": "eliza",
+  "name": "elisa",
   "author": "alexisk",
-  "created": "2025-07-31T14:56:26.941Z",
-  "version": "1.0.0",
-  "wordGoal": 3000,
-  "settings": {
-    "autoSave": true,
-    "backups": true,
-    "defaultEditor": "novel-editor"
-  },
-  "structure": {
-    "chapters": "chapters",
-    "scenes": "scenes",
-    "characters": "characters",
-    "notes": "notes",
-    "shortstories": "shortstories",
-    "stories": "stories",
-    "drafts": "drafts",
-    "submission-ready": "submission-ready",
-    "exercises": "exercises",
-    "prompts": "prompts",
-    "exports": "exports"
-  }
+  "type": "shortstory-project",
+  "projectType": "single",
+  "genre": "Science Fiction",
+  "targetLength": "standard",
+  "editor": "novel-editor",
+  "created": "2025-07-31T14:59:34.450Z",
+  "version": "1.0.0"
 }

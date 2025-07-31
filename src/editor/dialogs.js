@@ -27,6 +27,8 @@ class EditorDialogs {
       },
       keys: true,
       mouse: true,
+      grabKeys: options.grabKeys || false,
+      modal: options.modal || false,
     });
 
     return dialog;
@@ -395,6 +397,17 @@ Current Position:
         resolve();
       });
 
+      // Also listen for any other keypress (excluding special keys)
+      dialog.on('keypress', (ch, key) => {
+        if (key && key.name &&
+            !['escape', 'enter', 'space'].includes(key.name) &&
+            !key.ctrl && !key.meta && !key.alt) {
+          dialog.destroy();
+          this.screen.render();
+          resolve();
+        }
+      });
+
       dialog.focus();
       this.screen.render();
     });
@@ -406,6 +419,8 @@ Current Position:
         label: " Novel Editor Help ",
         width: 80,
         height: "90%",
+        grabKeys: true,   // Grab all keys for this dialog
+        modal: true,      // Make this a modal dialog
       });
 
       const helpText = `
@@ -460,6 +475,7 @@ File Operations:
   Ctrl+N         New file
   Ctrl+O         Open file
   Ctrl+S         Save file
+  Ctrl+T         Toggle between story and notes
   Ctrl+X         Exit editor
 
 Edit Operations:
@@ -523,9 +539,21 @@ Press any key to close this help.
         scrollable: true,
         alwaysScroll: true,
         mouse: true,
-        keys: true,
+        keys: false,  // Don't let this handle keys
+        keyable: false,
       });
 
+      // Catch ALL key events before they bubble up
+      dialog.on('keypress', (ch, key) => {
+        // Close on any key except pure modifiers
+        if (key && (!key.ctrl && !key.meta && !key.alt && !key.shift)) {
+          dialog.destroy();
+          this.screen.render();
+          resolve();
+        }
+      });
+
+      // Also handle specific keys as before
       dialog.key(["escape", "f1", "q"], () => {
         dialog.destroy();
         this.screen.render();
@@ -657,6 +685,17 @@ Press any key to close this help.
         dialog.destroy();
         this.screen.render();
         resolve();
+      });
+
+      // Also listen for any other keypress to close error (excluding special keys)
+      dialog.on('keypress', (ch, key) => {
+        if (key && key.name &&
+            !['escape', 'enter', 'space'].includes(key.name) &&
+            !key.ctrl && !key.meta && !key.alt) {
+          dialog.destroy();
+          this.screen.render();
+          resolve();
+        }
       });
 
       dialog.focus();

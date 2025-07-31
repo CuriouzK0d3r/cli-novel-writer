@@ -7,8 +7,10 @@ const packageJson = require("../package.json");
 // Import commands
 const initCommand = require("../src/commands/init");
 const initShortStoryCommand = require("../src/commands/init-shortstory");
+const initShortCommand = require("../src/commands/init-short");
 const newCommand = require("../src/commands/new");
 const writeCommand = require("../src/commands/write");
+const smartWriteCommand = require("../src/commands/smart-write");
 const editCommand = require("../src/commands/edit");
 const statsCommand = require("../src/commands/stats");
 const exportCommand = require("../src/commands/export");
@@ -16,6 +18,7 @@ const listCommand = require("../src/commands/list");
 const guiCommand = require("../src/commands/gui");
 const storyCommand = require("../src/commands/story");
 const workflowCommand = require("../src/commands/workflow");
+const simplifyCommand = require("../src/commands/simplify");
 
 const program = new Command();
 
@@ -58,6 +61,13 @@ program
   .action(initShortStoryCommand);
 
 program
+  .command("init-short")
+  .description("Initialize a simple short story project (recommended)")
+  .option("-n, --name <n>", "Project name")
+  .option("-a, --author <author>", "Author name")
+  .action(initShortCommand);
+
+program
   .command("new")
   .description("Create new content")
   .argument(
@@ -70,7 +80,33 @@ program
 
 program
   .command("write")
-  .description("Open a chapter or scene for writing (external editor)")
+  .description("Smart write command with auto-discovery and menu (Ctrl+T for notes toggle)")
+  .argument("[story]", "Story name (optional - shows menu if not provided)")
+  .option(
+    "-e, --editor <editor>",
+    "Preferred editor (novel-editor, nano, vim, code)",
+  )
+  .action(async (story, options) => {
+    try {
+      // Check if we're in a simplified short story project
+      const fs = require("fs");
+      if (fs.existsSync("writers.config.json")) {
+        const config = JSON.parse(fs.readFileSync("writers.config.json", 'utf8'));
+        if (config.type === "simple-short-story") {
+          return await smartWriteCommand(story, options);
+        }
+      }
+      // Fallback to regular write command
+      return await writeCommand(story, options);
+    } catch (error) {
+      // If there's any error, fallback to regular write
+      return await writeCommand(story, options);
+    }
+  });
+
+program
+  .command("write-classic")
+  .description("Classic write command (external editor)")
   .argument("[target]", "Chapter or scene to write (e.g., chapter1, scene2)")
   .option(
     "-e, --editor <editor>",
@@ -149,6 +185,11 @@ program
   .option("--time <minutes>", "Set time limit in minutes")
   .option("--words <count>", "Set word count target")
   .action(workflowCommand);
+
+program
+  .command("simplify")
+  .description("Convert complex project to simplified short story workflow")
+  .action(simplifyCommand);
 
 // Handle unknown commands
 program.on("command:*", () => {

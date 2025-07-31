@@ -191,7 +191,7 @@ class BufferEditor {
       height: 1,
       style: styles.helpBar,
       content:
-        " ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go to Line  ^W Word Count  F1 Help  F2 Theme",
+        " ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go  ^W Stats  ^T Notes  F1 Help",
     });
 
     this.editor.focus();
@@ -258,6 +258,9 @@ class BufferEditor {
     this.screen.key(["f2"], () => this.switchTheme());
     this.screen.key(["f11"], () => this.toggleDistractionFree());
     this.screen.key(["f9"], async () => await this.toggleTypewriterMode());
+
+    // Notes toggle (work in both modes)
+    this.screen.key(["C-t"], async () => await this.toggleNotes());
 
     // Handle all character input and navigation
     this.screen.on("keypress", (ch, key) => {
@@ -1010,6 +1013,123 @@ class BufferEditor {
       this.render();
       this.updateStatus();
       this.showMessage("New file created");
+    }
+  }
+
+  async toggleNotes() {
+    if (!this.currentFile) {
+      this.showError("Save the current file first to create associated notes");
+      return;
+    }
+
+    try {
+      const currentPath = this.currentFile;
+      const isNotesFile = this.isNotesFile(currentPath);
+
+      if (isNotesFile) {
+        // Currently viewing notes, switch back to story
+        const storyPath = await this.getStoryPathFromNotes(currentPath);
+        if (await this.fileExists(storyPath)) {
+          await this.openFile(storyPath);
+          this.showMessage(`Switched to story: ${path.basename(storyPath)}`);
+        } else {
+          this.showError("Original story file not found");
+        }
+      } else {
+        // Currently viewing story, switch to notes
+        const notesPath = this.getNotesPathFromStory(currentPath);
+
+        // Create notes file if it doesn't exist
+        if (!(await this.fileExists(notesPath))) {
+          await this.createNotesFile(notesPath, currentPath);
+        }
+
+        await this.openFile(notesPath);
+        this.showMessage(`Switched to notes: ${path.basename(notesPath)}`);
+      }
+    } catch (error) {
+      this.showError(`Error switching to notes: ${error.message}`);
+    }
+  }
+
+  isNotesFile(filePath) {
+    return filePath.includes("-notes.md") || filePath.startsWith("notes/");
+  }
+
+  getNotesPathFromStory(storyPath) {
+    const dir = path.dirname(storyPath);
+    const name = path.basename(storyPath, path.extname(storyPath));
+
+    // For simplified structure, put notes in notes/ directory
+    if (dir === "drafts" || dir === "finished") {
+      return path.join("notes", `${name}-notes.md`);
+    }
+
+    // For other structures, put notes alongside the file
+    return path.join(dir, `${name}-notes.md`);
+  }
+
+  async getStoryPathFromNotes(notesPath) {
+    const dir = path.dirname(notesPath);
+    const name = path.basename(notesPath, "-notes.md");
+
+    // Look for story in common locations
+    const possiblePaths = [
+      path.join("drafts", `${name}.md`),
+      path.join("finished", `${name}.md`),
+      path.join("stories", `${name}.md`),
+      path.join("shortstories", `${name}.md`),
+      path.join(dir, `${name}.md`),
+      path.join(dir, `${name}.txt`)
+    ];
+
+    // Find the first path that actually exists
+    for (const possiblePath of possiblePaths) {
+      if (await this.fileExists(possiblePath)) {
+        return possiblePath;
+      }
+    }
+
+    // If no existing file found, return the most likely location
+    return possiblePaths[0];
+  }
+
+  async createNotesFile(notesPath, storyPath) {
+    const storyName = path.basename(storyPath, path.extname(storyPath))
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, l => l.toUpperCase());
+
+    const content = `# Notes for "${storyName}"
+
+*Created: ${new Date().toLocaleDateString()}*
+*Story: ${path.basename(storyPath)}*
+
+## Plot Ideas
+
+## Character Notes
+
+## Research
+
+## Revision Notes
+
+## Random Thoughts
+
+---
+
+Press Ctrl+T to switch back to your story.
+`;
+
+    // Ensure notes directory exists
+    await fs.mkdir(path.dirname(notesPath), { recursive: true });
+    await fs.writeFile(notesPath, content);
+  }
+
+  async fileExists(filePath) {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
     }
   }
 

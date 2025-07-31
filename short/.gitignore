@@ -1,0 +1,18 @@
+# Writers CLI
+exports/
+backups/
+.writers-temp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*.swo
+*~
+
+# Node (if using any JS tools)
+node_modules/
+npm-debug.log*
