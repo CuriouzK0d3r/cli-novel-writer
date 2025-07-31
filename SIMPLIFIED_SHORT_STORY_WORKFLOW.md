@@ -98,6 +98,15 @@ Moving between statuses is as simple as moving files between folders.
 - Works from any story in any directory
 - Perfect for jotting down ideas without losing your place
 
+### Built-in Pomodoro Timer
+
+- **F3** to start/pause focused writing sessions (25 min work, 5 min break)
+- **F4** to view timer status and configuration
+- **Shift+F3** to reset timer and session count
+- Shows progress in status bar with visual indicators
+- Automatic notifications when sessions complete
+- Perfect for maintaining writing momentum and preventing burnout
+
 ## Advanced Features (Optional)
 
 For users who want more features, these remain available but hidden by default:

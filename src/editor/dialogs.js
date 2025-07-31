@@ -504,8 +504,14 @@ View & Themes:
   Ctrl+W         Show document statistics
   F1             Show this help
 
+Pomodoro Timer:
+  F3             🍅 Start/pause Pomodoro timer
+  F4             Show timer status and configuration
+  Shift+F3       Reset timer and session count
+
 Writing Features:
   - 🎨 Beautiful dark & light themes with syntax highlighting
+  - 🍅 Built-in Pomodoro timer for focused writing sessions
   - Real-time word count in status bar
   - Reading time estimation
   - Auto-save every 30 seconds
@@ -696,6 +702,67 @@ Press any key to close this help.
           this.screen.render();
           resolve();
         }
+      });
+
+      dialog.focus();
+      this.screen.render();
+    });
+  }
+
+  showInfoDialog(content, title = " Information ") {
+    return new Promise((resolve) => {
+      const dialog = this.createDialog({
+        label: title,
+        width: 80,
+        height: "70%",
+        grabKeys: true,
+        modal: true,
+      });
+
+      const text = blessed.scrollabletext({
+        parent: dialog,
+        top: 1,
+        left: 2,
+        right: 2,
+        bottom: 2,
+        content: content,
+        style: {
+          fg: "white",
+        },
+        scrollable: true,
+        alwaysScroll: true,
+        mouse: true,
+        keys: false,
+        keyable: false,
+      });
+
+      const instructions = blessed.text({
+        parent: dialog,
+        bottom: 0,
+        left: 2,
+        right: 2,
+        height: 1,
+        content: "Press any key to close",
+        style: {
+          fg: "cyan",
+        },
+      });
+
+      // Catch ALL key events before they bubble up
+      dialog.on('keypress', (ch, key) => {
+        // Close on any key except pure modifiers
+        if (key && (!key.ctrl && !key.meta && !key.alt && !key.shift)) {
+          dialog.destroy();
+          this.screen.render();
+          resolve();
+        }
+      });
+
+      // Also handle specific keys as before
+      dialog.key(["escape", "enter", "space"], () => {
+        dialog.destroy();
+        this.screen.render();
+        resolve();
       });
 
       dialog.focus();

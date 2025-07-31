@@ -333,7 +333,7 @@ class DarkTheme extends BaseTheme {
    * @returns {string} Formatted status bar content
    */
   getStatusBarContent(editorState) {
-    const { mode, line, col, filename, modified, wordCount } = editorState;
+    const { mode, line, col, filename, modified, wordCount, pomodoro } = editorState;
 
     const modeText = mode === 'insert' ? 'INSERT' : 'NORMAL';
     const fileText = filename ? `📝 ${filename}` : '📄 New File';
@@ -341,7 +341,19 @@ class DarkTheme extends BaseTheme {
     const positionText = `Ln ${line}, Col ${col}`;
     const wordText = wordCount ? ` | ${wordCount} words` : '';
 
-    return `${modeText} | ${fileText}${modifiedText} | ${positionText}${wordText}`;
+    // Pomodoro timer display
+    let pomodoroText = '';
+    if (pomodoro && (pomodoro.isRunning || pomodoro.completedPomodoros > 0)) {
+      const phaseIcon = pomodoro.phase === 'work' ? '🍅' : '☕';
+      const statusIcon = pomodoro.isRunning ? (pomodoro.isPaused ? '⏸️' : '▶️') : '⏹️';
+      pomodoroText = ` | ${phaseIcon} ${pomodoro.timeFormatted} ${statusIcon}`;
+
+      if (pomodoro.completedPomodoros > 0) {
+        pomodoroText += ` (${pomodoro.completedPomodoros})`;
+      }
+    }
+
+    return `${modeText} | ${fileText}${modifiedText} | ${positionText}${wordText}${pomodoroText}`;
   }
 }
 

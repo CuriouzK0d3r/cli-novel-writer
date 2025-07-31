@@ -5,6 +5,7 @@ const markdownUtils = require("../utils/markdown");
 const EditorDialogs = require("./dialogs");
 const Clipboard = require("./clipboard");
 const { ThemeManager } = require("./themes");
+const PomodoroTimer = require("./pomodoro-timer");
 
 class BufferEditor {
   constructor() {
@@ -49,6 +50,10 @@ class BufferEditor {
 
     // Dialogs
     this.dialogs = null;
+
+    // Pomodoro timer
+    this.pomodoroTimer = new PomodoroTimer();
+    this.setupPomodoroCallbacks();
 
     // Typewriter mode state
     this.typewriterMode = false;
@@ -191,7 +196,7 @@ class BufferEditor {
       height: 1,
       style: styles.helpBar,
       content:
-        " ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go  ^W Stats  ^T Notes  F1 Help",
+        " ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go  ^W Stats  ^T Notes  F1 Help  F3 Timer",
     });
 
     this.editor.focus();
@@ -261,6 +266,11 @@ class BufferEditor {
 
     // Notes toggle (work in both modes)
     this.screen.key(["C-t"], async () => await this.toggleNotes());
+
+    // Pomodoro timer controls (work in both modes)
+    this.screen.key(["f3"], () => this.togglePomodoroTimer());
+    this.screen.key(["f4"], () => this.showPomodoroDialog());
+    this.screen.key(["S-f3"], () => this.resetPomodoroTimer());
 
     // Handle all character input and navigation
     this.screen.on("keypress", (ch, key) => {
@@ -1213,6 +1223,7 @@ Press Ctrl+T to switch back to your story.
       wordCount: wordCount,
       totalLines: this.lines.length,
       typewriterMode: this.typewriterMode,
+      pomodoro: this.pomodoroTimer.getStatus(),
     };
 
     // Get themed status bar content
@@ -1851,6 +1862,106 @@ Press Ctrl+T to switch back to your story.
     // Show theme change message
     this.showMessage(`Switched to ${newTheme.displayName}`);
     this.render();
+  }
+
+  /**
+   * Setup Pomodoro timer callbacks
+   */
+  setupPomodoroCallbacks() {
+    this.pomodoroTimer.setCallbacks({
+      onTick: (timeRemaining, phase) => {
+        // Update status bar every second
+        this.render();
+      },
+      onPhaseComplete: (completedPhase, newPhase) => {
+        const phaseNames = {
+          'work': 'Focus session',
+          'break': 'Break'
+        };
+
+        if (completedPhase === 'work') {
+          this.showMessage(`🎉 ${phaseNames.work} complete! Time for a break.`);
+        } else {
+          this.showMessage(`✍️  Break over! Time to focus.`);
+        }
+
+        // Auto-start next phase (optional - can be made configurable)
+        setTimeout(() => {
+          this.pomodoroTimer.start();
+        }, 2000);
+      },
+      onPomodoroComplete: (completedCount) => {
+        this.showMessage(`🍅 Pomodoro #${completedCount} completed! Great work!`);
+      }
+    });
+  }
+
+  /**
+   * Toggle Pomodoro timer (start/pause)
+   */
+  togglePomodoroTimer() {
+    const status = this.pomodoroTimer.getStatus();
+
+    if (!status.isRunning) {
+      this.pomodoroTimer.start();
+      this.showMessage(`🍅 Pomodoro started: ${this.pomodoroTimer.getPhaseDisplayName()} session`);
+    } else if (status.isPaused) {
+      this.pomodoroTimer.resume();
+      this.showMessage("▶️  Pomodoro resumed");
+    } else {
+      this.pomodoroTimer.pause();
+      this.showMessage("⏸️  Pomodoro paused");
+    }
+
+    this.render();
+  }
+
+  /**
+   * Reset Pomodoro timer
+   */
+  resetPomodoroTimer() {
+    this.pomodoroTimer.resetAll();
+    this.showMessage("🔄 Pomodoro timer reset");
+    this.render();
+  }
+
+  /**
+   * Show Pomodoro configuration dialog
+   */
+  async showPomodoroDialog() {
+    const status = this.pomodoroTimer.getStatus();
+    const config = this.pomodoroTimer.getConfig();
+
+    const dialogContent = `
+🍅 POMODORO TIMER
+
+Current Status:
+  Phase: ${this.pomodoroTimer.getPhaseDisplayName()}
+  Time: ${status.timeFormatted}
+  Status: ${status.isRunning ? (status.isPaused ? 'Paused' : 'Running') : 'Stopped'}
+  Completed: ${status.completedPomodoros} Pomodoros
+
+Configuration:
+  Work Duration: ${config.workDuration / 60000} minutes
+  Short Break: ${config.shortBreak / 60000} minutes
+  Long Break: ${config.longBreak / 60000} minutes
+  Long Break Every: ${config.longBreakInterval} Pomodoros
+
+Controls:
+  F3        Start/Pause timer
+  Shift+F3  Reset timer
+  F4        Show this dialog
+
+Tips:
+• The timer will show in your status bar
+• Automatic notifications when phases complete
+• Focus sessions help maintain writing flow
+• Take breaks to avoid fatigue and maintain creativity
+
+Current Phase Progress: ${'█'.repeat(Math.floor(status.phaseProgress * 20))}${'░'.repeat(20 - Math.floor(status.phaseProgress * 20))} ${Math.floor(status.phaseProgress * 100)}%
+    `.trim();
+
+    await this.dialogs.showInfoDialog(dialogContent, " Pomodoro Timer ");
   }
 }
 
