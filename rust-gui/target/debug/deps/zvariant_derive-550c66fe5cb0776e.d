@@ -1,0 +1,10 @@
+/home/kornilak/cli-novel-writer/rust-gui/target/debug/deps/zvariant_derive-550c66fe5cb0776e.d: /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/lib.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/dict.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/type.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/utils.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/value.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/../README.md
+
+/home/kornilak/cli-novel-writer/rust-gui/target/debug/deps/libzvariant_derive-550c66fe5cb0776e.so: /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/lib.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/dict.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/type.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/utils.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/value.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/../README.md
+
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/lib.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/dict.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/type.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/utils.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/value.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zvariant_derive-5.6.0/src/../README.md:

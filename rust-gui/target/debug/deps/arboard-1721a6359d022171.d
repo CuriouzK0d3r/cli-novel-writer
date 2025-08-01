@@ -1,0 +1,10 @@
+/home/kornilak/cli-novel-writer/rust-gui/target/debug/deps/arboard-1721a6359d022171.d: /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/lib.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/common.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/mod.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/linux/mod.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/linux/x11.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/linux/wayland.rs
+
+/home/kornilak/cli-novel-writer/rust-gui/target/debug/deps/libarboard-1721a6359d022171.rmeta: /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/lib.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/common.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/mod.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/linux/mod.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/linux/x11.rs /home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/linux/wayland.rs
+
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/lib.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/common.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/mod.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/linux/mod.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/linux/x11.rs:
+/home/kornilak/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arboard-3.6.0/src/platform/linux/wayland.rs:

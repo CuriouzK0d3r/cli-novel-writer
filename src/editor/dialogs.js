@@ -4,9 +4,13 @@ class EditorDialogs {
   constructor(screen, editor) {
     this.screen = screen;
     this.editor = editor;
+    this.themeManager = editor.themeManager;
   }
 
   createDialog(options) {
+    const theme = this.themeManager.getCurrentTheme();
+    const colors = theme.colors;
+
     const dialog = blessed.box({
       parent: this.screen,
       top: "center",
@@ -15,14 +19,14 @@ class EditorDialogs {
       height: options.height || "shrink",
       border: {
         type: "line",
-        fg: options.borderColor || "green",
+        fg: colors.borderFocus,
       },
       label: options.label || " Dialog ",
       style: {
-        fg: "white",
-        bg: "black",
+        fg: colors.foreground,
+        bg: colors.background,
         border: {
-          fg: options.borderColor || "green",
+          fg: colors.borderFocus,
         },
       },
       keys: true,
@@ -158,6 +162,9 @@ class EditorDialogs {
         height: 8,
       });
 
+      const theme = this.themeManager.getCurrentTheme();
+      const colors = theme.colors;
+
       const input = blessed.textbox({
         parent: dialog,
         top: 1,
@@ -166,10 +173,18 @@ class EditorDialogs {
         height: 1,
         border: {
           type: "line",
+          fg: colors.border,
         },
         style: {
-          fg: "white",
-          bg: "black",
+          fg: colors.inputFg || colors.foreground,
+          bg: colors.inputBg || colors.infoBg,
+          focus: {
+            fg: colors.inputFg || colors.foreground,
+            bg: colors.inputFocusBg || colors.selectionBg,
+            border: {
+              fg: colors.inputFocusBorder || colors.borderFocus,
+            },
+          },
         },
         inputOnFocus: true,
       });
@@ -183,7 +198,7 @@ class EditorDialogs {
         content:
           "Enter text to search for.\nPress Enter to find, Escape to cancel.",
         style: {
-          fg: "cyan",
+          fg: colors.info,
         },
       });
 
@@ -214,6 +229,9 @@ class EditorDialogs {
         height: 12,
       });
 
+      const theme = this.themeManager.getCurrentTheme();
+      const colors = theme.colors;
+
       const findInput = blessed.textbox({
         parent: dialog,
         top: 1,
@@ -222,11 +240,19 @@ class EditorDialogs {
         height: 1,
         border: {
           type: "line",
+          fg: colors.border,
         },
         label: " Find ",
         style: {
-          fg: "white",
-          bg: "black",
+          fg: colors.inputFg || colors.foreground,
+          bg: colors.inputBg || colors.infoBg,
+          focus: {
+            fg: colors.inputFg || colors.foreground,
+            bg: colors.inputFocusBg || colors.selectionBg,
+            border: {
+              fg: colors.inputFocusBorder || colors.borderFocus,
+            },
+          },
         },
         inputOnFocus: true,
       });
@@ -239,11 +265,19 @@ class EditorDialogs {
         height: 1,
         border: {
           type: "line",
+          fg: colors.border,
         },
         label: " Replace with ",
         style: {
-          fg: "white",
-          bg: "black",
+          fg: colors.inputFg || colors.foreground,
+          bg: colors.inputBg || colors.infoBg,
+          focus: {
+            fg: colors.inputFg || colors.foreground,
+            bg: colors.inputFocusBg || colors.selectionBg,
+            border: {
+              fg: colors.inputFocusBorder || colors.borderFocus,
+            },
+          },
         },
         inputOnFocus: true,
       });
@@ -257,7 +291,7 @@ class EditorDialogs {
         content:
           "Enter find and replace text.\nPress Enter to replace all, Escape to cancel.",
         style: {
-          fg: "cyan",
+          fg: colors.info,
         },
       });
 
@@ -295,6 +329,9 @@ class EditorDialogs {
         height: 8,
       });
 
+      const theme = this.themeManager.getCurrentTheme();
+      const colors = theme.colors;
+
       const input = blessed.textbox({
         parent: dialog,
         top: 1,
@@ -303,10 +340,18 @@ class EditorDialogs {
         height: 1,
         border: {
           type: "line",
+          fg: colors.border,
         },
         style: {
-          fg: "white",
-          bg: "black",
+          fg: colors.inputFg || colors.foreground,
+          bg: colors.inputBg || colors.infoBg,
+          focus: {
+            fg: colors.inputFg || colors.foreground,
+            bg: colors.inputFocusBg || colors.selectionBg,
+            border: {
+              fg: colors.inputFocusBorder || colors.borderFocus,
+            },
+          },
         },
         inputOnFocus: true,
       });
@@ -319,7 +364,7 @@ class EditorDialogs {
         height: 2,
         content: `Enter line number (1-${totalLines}).\nPress Enter to go, Escape to cancel.`,
         style: {
-          fg: "cyan",
+          fg: colors.info,
         },
       });
 
@@ -348,10 +393,13 @@ class EditorDialogs {
 
   showWordCountDialog(stats) {
     return new Promise((resolve) => {
+      const theme = this.themeManager.getCurrentTheme();
+      const colors = theme.colors;
+
       const dialog = this.createDialog({
         label: " Document Statistics ",
         width: 60,
-        height: 15,
+        height: 14,
       });
 
       const content = `
@@ -372,40 +420,52 @@ Current Position:
         top: 1,
         left: 2,
         right: 2,
-        bottom: 2,
+        bottom: 3,
         content: content,
         style: {
-          fg: "white",
+          fg: colors.foreground,
         },
       });
 
       const instructions = blessed.text({
         parent: dialog,
-        bottom: 0,
+        bottom: 1,
         left: 2,
         right: 2,
         height: 1,
-        content: "Press any key to close",
+        content: "Auto-closing in 5 seconds... (Press any key to close now)",
         style: {
-          fg: "cyan",
+          fg: colors.info,
         },
       });
 
-      dialog.key(["escape", "enter", "space"], () => {
-        dialog.destroy();
-        this.screen.render();
-        resolve();
-      });
-
-      // Also listen for any other keypress (excluding special keys)
-      dialog.on('keypress', (ch, key) => {
-        if (key && key.name &&
-            !['escape', 'enter', 'space'].includes(key.name) &&
-            !key.ctrl && !key.meta && !key.alt) {
+      // Auto-close after 5 seconds
+      const timeout = setTimeout(() => {
+        if (!dialog.destroyed) {
           dialog.destroy();
           this.screen.render();
           resolve();
         }
+      }, 5000);
+
+      // Allow manual close with any key
+      dialog.key(["escape", "enter", "space", "q"], () => {
+        clearTimeout(timeout);
+        if (!dialog.destroyed) {
+          dialog.destroy();
+          this.screen.render();
+        }
+        resolve();
+      });
+
+      // Also listen for any keypress
+      dialog.on("keypress", () => {
+        clearTimeout(timeout);
+        if (!dialog.destroyed) {
+          dialog.destroy();
+          this.screen.render();
+        }
+        resolve();
       });
 
       dialog.focus();
@@ -419,8 +479,8 @@ Current Position:
         label: " Novel Editor Help ",
         width: 80,
         height: "90%",
-        grabKeys: true,   // Grab all keys for this dialog
-        modal: true,      // Make this a modal dialog
+        grabKeys: true, // Grab all keys for this dialog
+        modal: true, // Make this a modal dialog
       });
 
       const helpText = `
@@ -545,14 +605,14 @@ Press any key to close this help.
         scrollable: true,
         alwaysScroll: true,
         mouse: true,
-        keys: false,  // Don't let this handle keys
+        keys: false, // Don't let this handle keys
         keyable: false,
       });
 
       // Catch ALL key events before they bubble up
-      dialog.on('keypress', (ch, key) => {
+      dialog.on("keypress", (ch, key) => {
         // Close on any key except pure modifiers
-        if (key && (!key.ctrl && !key.meta && !key.alt && !key.shift)) {
+        if (key && !key.ctrl && !key.meta && !key.alt && !key.shift) {
           dialog.destroy();
           this.screen.render();
           resolve();
@@ -694,10 +754,15 @@ Press any key to close this help.
       });
 
       // Also listen for any other keypress to close error (excluding special keys)
-      dialog.on('keypress', (ch, key) => {
-        if (key && key.name &&
-            !['escape', 'enter', 'space'].includes(key.name) &&
-            !key.ctrl && !key.meta && !key.alt) {
+      dialog.on("keypress", (ch, key) => {
+        if (
+          key &&
+          key.name &&
+          !["escape", "enter", "space"].includes(key.name) &&
+          !key.ctrl &&
+          !key.meta &&
+          !key.alt
+        ) {
           dialog.destroy();
           this.screen.render();
           resolve();
@@ -749,9 +814,9 @@ Press any key to close this help.
       });
 
       // Catch ALL key events before they bubble up
-      dialog.on('keypress', (ch, key) => {
+      dialog.on("keypress", (ch, key) => {
         // Close on any key except pure modifiers
-        if (key && (!key.ctrl && !key.meta && !key.alt && !key.shift)) {
+        if (key && !key.ctrl && !key.meta && !key.alt && !key.shift) {
           dialog.destroy();
           this.screen.render();
           resolve();

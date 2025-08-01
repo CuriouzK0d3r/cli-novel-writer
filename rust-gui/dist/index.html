@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writers CLI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+Pro:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="theme-dark">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="fas fa-feather-alt"></i>
+            </div>
+            <div class="loading-spinner"></div>
+            <h2>Writers CLI</h2>
+            <p id="loading-text">Initializing writing environment...</p>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="app hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="app-logo">
+                    <i class="fas fa-feather-alt"></i>
+                    <span>Writers CLI</span>
+                </div>
+                <button id="toggle-sidebar" class="toggle-sidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-item active" data-section="editor">
+                        <i class="fas fa-pen"></i>
+                        <span>Editor</span>
+                    </button>
+                    <button class="nav-item" data-section="projects">
+                        <i class="fas fa-folder"></i>
+                        <span>Projects</span>
+                    </button>
+                    <button class="nav-item" data-section="files">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Files</span>
+                    </button>
+                    <button class="nav-item" data-section="characters">
+                        <i class="fas fa-users"></i>
+                        <span>Characters</span>
+                    </button>
+                    <button class="nav-item" data-section="notes">
+                        <i class="fas fa-sticky-note"></i>
+                        <span>Notes</span>
+                    </button>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Tools</h3>
+                    <button class="nav-item" data-section="stats">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Statistics</span>
+                    </button>
+                    <button class="nav-item" data-section="goals">
+                        <i class="fas fa-target"></i>
+                        <span>Goals</span>
+                    </button>
+                    <button class="nav-item" data-section="timer">
+                        <i class="fas fa-clock"></i>
+                        <span>Pomodoro</span>
+                    </button>
+                    <button class="nav-item" data-section="export">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Collaboration</h3>
+                    <button class="nav-item" data-section="share">
+                        <i class="fas fa-share-alt"></i>
+                        <span>Share</span>
+                    </button>
+                    <button class="nav-item" data-section="comments">
+                        <i class="fas fa-comments"></i>
+                        <span>Comments</span>
+                    </button>
+                    <button class="nav-item" data-section="changes">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Changes</span>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="word-count-widget">
+                    <div class="word-count-number" id="word-count">0</div>
+                    <div class="word-count-label">Words</div>
+                </div>
+                <div class="writing-session" id="writing-session">
+                    <div class="session-time">00:00:00</div>
+                    <button class="session-toggle" id="session-toggle">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1 id="document-title">Untitled Document</h1>
+                    <div class="document-info">
+                        <span id="last-saved">Never saved</span>
+                        <span class="separator">•</span>
+                        <span id="file-path">No file selected</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-controls">
+                        <button id="distraction-free" class="header-btn" title="Distraction Free Mode (F11)">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button id="split-view" class="header-btn" title="Split View">
+                            <i class="fas fa-columns"></i>
+                        </button>
+                        <div class="theme-selector">
+                            <select id="theme-select">
+                                <option value="dark">Dark</option>
+                                <option value="light">Light</option>
+                                <option value="sepia">Sepia</option>
+                                <option value="high-contrast">High Contrast</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Editor Section -->
+                <section id="editor-section" class="content-section active">
+                    <div class="editor-container">
+                        <div class="editor-toolbar">
+                            <div class="toolbar-group">
+                                <button class="toolbar-btn" id="bold" title="Bold (Ctrl+B)">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button class="toolbar-btn" id="italic" title="Italic (Ctrl+I)">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button class="toolbar-btn" id="strikethrough" title="Strikethrough">
+                                    <i class="fas fa-strikethrough"></i>
+                                </button>
+                            </div>
+                            <div class="toolbar-group">
+                                <button class="toolbar-btn" id="heading" title="Heading">
+                                    <i class="fas fa-heading"></i>
+                                </button>
+                                <button class="toolbar-btn" id="quote" title="Quote">
+                                    <i class="fas fa-quote-left"></i>
+                                </button>
+                                <button class="toolbar-btn" id="list" title="List">
+                                    <i class="fas fa-list-ul"></i>
+                                </button>
+                            </div>
+                            <div class="toolbar-group">
+                                <button class="toolbar-btn" id="find" title="Find (Ctrl+F)">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <button class="toolbar-btn" id="replace" title="Replace (Ctrl+H)">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                            </div>
+                            <div class="toolbar-spacer"></div>
+                            <div class="toolbar-group">
+                                <span class="toolbar-text" id="cursor-position">Line 1, Column 1</span>
+                            </div>
+                        </div>
+
+                        <div class="editor-wrapper">
+                            <textarea id="main-editor" class="main-editor" placeholder="Start writing your story..."></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Projects Section -->
+                <section id="projects-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Projects</h2>
+                        <button class="btn btn-primary" id="new-project">
+                            <i class="fas fa-plus"></i>
+                            New Project
+                        </button>
+                    </div>
+
+                    <div class="projects-grid">
+                        <div class="project-card recent-projects">
+                            <h3>Recent Projects</h3>
+                            <div id="recent-projects-list" class="recent-projects-list">
+                                <div class="empty-state">
+                                    <i class="fas fa-folder-open"></i>
+                                    <p>No recent projects</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-card templates">
+                            <h3>Templates</h3>
+                            <div class="templates-list">
+                                <button class="template-item" data-template="novel">
+                                    <i class="fas fa-book"></i>
+                                    <span>Novel</span>
+                                </button>
+                                <button class="template-item" data-template="short-story">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>Short Story</span>
+                                </button>
+                                <button class="template-item" data-template="screenplay">
+                                    <i class="fas fa-film"></i>
+                                    <span>Screenplay</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Other sections would be added here -->
+                <section id="stats-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Writing Statistics</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-font"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="total-words">0</div>
+                                <div class="stat-label">Total Words</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="session-time">0m</div>
+                                <div class="stat-label">Session Time</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-target"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="daily-goal">1000</div>
+                                <div class="stat-label">Daily Goal</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="streak">0</div>
+                                <div class="stat-label">Day Streak</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal" id="new-project-modal">
+            <div class="modal-header">
+                <h3>Create New Project</h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="new-project-form">
+                    <div class="form-group">
+                        <label for="project-name">Project Name</label>
+                        <input type="text" id="project-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-path">Location</label>
+                        <input type="text" id="project-path" required>
+                        <button type="button" id="browse-path" class="btn btn-secondary">Browse</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-template">Template</label>
+                        <select id="project-template">
+                            <option value="">None</option>
+                            <option value="novel">Novel</option>
+                            <option value="short-story">Short Story</option>
+                            <option value="screenplay">Screenplay</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-project">Cancel</button>
+                <button class="btn btn-primary" id="create-project">Create Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu hidden">
+        <div class="context-menu-item" data-action="cut">
+            <i class="fas fa-cut"></i>
+            <span>Cut</span>
+        </div>
+        <div class="context-menu-item" data-action="copy">
+            <i class="fas fa-copy"></i>
+            <span>Copy</span>
+        </div>
+        <div class="context-menu-item" data-action="paste">
+            <i class="fas fa-paste"></i>
+            <span>Paste</span>
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="select-all">
+            <i class="fas fa-select-all"></i>
+            <span>Select All</span>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+        <div class="status-left">
+            <span id="status-message">Ready</span>
+        </div>
+        <div class="status-right">
+            <span id="character-count">0 characters</span>
+            <span class="separator">|</span>
+            <span id="reading-time">0 min read</span>
+            <span class="separator">|</span>
+            <span id="backup-status">Auto-save: On</span>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

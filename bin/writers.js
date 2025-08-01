@@ -80,7 +80,9 @@ program
 
 program
   .command("write")
-  .description("Smart write command with auto-discovery and menu (Ctrl+T for notes toggle)")
+  .description(
+    "Smart write command with auto-discovery and menu (Ctrl+T for notes toggle)",
+  )
   .argument("[story]", "Story name (optional - shows menu if not provided)")
   .option(
     "-e, --editor <editor>",
@@ -91,7 +93,9 @@ program
       // Check if we're in a simplified short story project
       const fs = require("fs");
       if (fs.existsSync("writers.config.json")) {
-        const config = JSON.parse(fs.readFileSync("writers.config.json", 'utf8'));
+        const config = JSON.parse(
+          fs.readFileSync("writers.config.json", "utf8"),
+        );
         if (config.type === "simple-short-story") {
           return await smartWriteCommand(story, options);
         }
@@ -122,7 +126,10 @@ program
 
 program
   .command("gui")
-  .description("Launch the GUI version of Writers CLI")
+  .description("Launch the GUI version of Writers CLI (Enhanced Edition)")
+  .option("--classic", "Use classic GUI instead of Enhanced Edition")
+  .option("--debug", "Show debug output")
+  .option("--quiet", "Suppress startup messages")
   .action(guiCommand);
 
 program

@@ -144,21 +144,34 @@
             }
 
             .modal input,
-            .modal textarea {
+            .modal textarea,
+            #findInput,
+            #replaceFind,
+            #replaceWith,
+            #lineNumber {
                 width: 100%;
-                background: #3c3c3c;
-                border: 1px solid #555;
-                color: #d4d4d4;
+                background: #000000 !important;
+                border: 3px solid #ffffff !important;
+                color: #ffffff !important;
                 padding: 8px 12px;
                 border-radius: 4px;
                 font-family: inherit;
                 margin-bottom: 12px;
+                font-size: 16px !important;
+                font-weight: 700 !important;
             }
 
             .modal input:focus,
-            .modal textarea:focus {
-                outline: none;
-                border-color: #007acc;
+            .modal textarea:focus,
+            #findInput:focus,
+            #replaceFind:focus,
+            #replaceWith:focus,
+            #lineNumber:focus {
+                outline: none !important;
+                border-color: #00ff00 !important;
+                background: #222222 !important;
+                color: #ffffff !important;
+                box-shadow: 0 0 0 5px rgba(0, 255, 0, 0.5) !important;
             }
 
             .modal-buttons {
@@ -389,6 +402,7 @@
                     <button
                         class="btn btn-primary"
                         onclick="closeWordCountModal()"
+                        id="closeWordCountBtn"
                     >
                         Close
                     </button>

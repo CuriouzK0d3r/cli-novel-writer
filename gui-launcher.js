@@ -25,7 +25,7 @@ console.log("Starting Writers CLI GUI...");
 
 // Launch Electron with the GUI
 const electronPath = require("electron");
-const child = spawn(electronPath, [guiMainPath], {
+const child = spawn(electronPath, ["--no-sandbox", guiMainPath], {
   stdio: "inherit",
   cwd: __dirname,
 });

@@ -28,6 +28,7 @@ class WritersGUIEditor {
   init() {
     this.setupEventListeners();
     this.setupIPC();
+    this.setupModalEventListeners();
     this.startAutoSave();
     this.updateStatus();
     this.pushUndo();
@@ -493,7 +494,9 @@ class WritersGUIEditor {
   // Modal functions
   showFindModal() {
     document.getElementById("findModal").style.display = "flex";
-    document.getElementById("findInput").focus();
+    const input = document.getElementById("findInput");
+    this.forceHighContrastInput(input);
+    input.focus();
   }
 
   closeFindModal() {
@@ -504,7 +507,11 @@ class WritersGUIEditor {
 
   showReplaceModal() {
     document.getElementById("replaceModal").style.display = "flex";
-    document.getElementById("replaceFind").focus();
+    const findInput = document.getElementById("replaceFind");
+    const replaceInput = document.getElementById("replaceWith");
+    this.forceHighContrastInput(findInput);
+    this.forceHighContrastInput(replaceInput);
+    findInput.focus();
   }
 
   closeReplaceModal() {
@@ -515,7 +522,9 @@ class WritersGUIEditor {
 
   showGoToLineModal() {
     document.getElementById("goToLineModal").style.display = "flex";
-    document.getElementById("lineNumber").focus();
+    const input = document.getElementById("lineNumber");
+    this.forceHighContrastInput(input);
+    input.focus();
   }
 
   closeGoToLineModal() {
@@ -545,13 +554,29 @@ class WritersGUIEditor {
       </table>
     `;
 
-    document.getElementById("wordCountStats").innerHTML = statsHTML;
-    document.getElementById("wordCountModal").style.display = "flex";
+    const statsElement = document.getElementById("wordCountStats");
+    const modalElement = document.getElementById("wordCountModal");
+
+    if (statsElement) {
+      statsElement.innerHTML = statsHTML;
+    }
+    if (modalElement) {
+      modalElement.style.display = "flex";
+    }
   }
 
   closeWordCountModal() {
-    document.getElementById("wordCountModal").style.display = "none";
-    this.editor.focus();
+    try {
+      const modal = document.getElementById("wordCountModal");
+      if (modal) {
+        modal.style.display = "none";
+      }
+      if (this.editor) {
+        this.editor.focus();
+      }
+    } catch (error) {
+      console.error("Error closing word count modal:", error);
+    }
   }
 
   showHelpModal() {
@@ -569,6 +594,35 @@ class WritersGUIEditor {
       modal.style.display = "none";
     });
     this.clearSearchHighlights();
+  }
+
+  forceHighContrastInput(input) {
+    if (!input) return;
+
+    // Force maximum contrast styling
+    input.style.setProperty("background-color", "#000000", "important");
+    input.style.setProperty("color", "#ffffff", "important");
+    input.style.setProperty("border", "3px solid #ffffff", "important");
+    input.style.setProperty("font-size", "16px", "important");
+    input.style.setProperty("font-weight", "700", "important");
+    input.style.setProperty("padding", "8px 12px", "important");
+
+    // Force focus styling
+    input.addEventListener("focus", () => {
+      input.style.setProperty("background-color", "#222222", "important");
+      input.style.setProperty("border-color", "#00ff00", "important");
+      input.style.setProperty(
+        "box-shadow",
+        "0 0 0 5px rgba(0, 255, 0, 0.5)",
+        "important",
+      );
+    });
+
+    input.addEventListener("blur", () => {
+      input.style.setProperty("background-color", "#000000", "important");
+      input.style.setProperty("border-color", "#ffffff", "important");
+      input.style.setProperty("box-shadow", "none", "important");
+    });
   }
 
   // Search functionality
@@ -737,13 +791,71 @@ window.closeGoToLineModal = function () {
 };
 
 window.closeWordCountModal = function () {
-  document.getElementById("wordCountModal").style.display = "none";
-  document.getElementById("editor").focus();
+  try {
+    const modal = document.getElementById("wordCountModal");
+    if (modal) {
+      modal.style.display = "none";
+    }
+    const editor = document.getElementById("editor");
+    if (editor) {
+      editor.focus();
+    }
+  } catch (error) {
+    console.error("Error closing word count modal:", error);
+  }
 };
 
 window.closeHelpModal = function () {
   document.getElementById("helpModal").style.display = "none";
   document.getElementById("editor").focus();
+};
+
+// Setup additional modal event listeners
+WritersGUIEditor.prototype.setupModalEventListeners = function () {
+  // Add backup event listeners for modal close buttons
+  document.addEventListener("DOMContentLoaded", () => {
+    // Word count modal close button
+    const wordCountBtn = document.getElementById("closeWordCountBtn");
+    if (wordCountBtn) {
+      wordCountBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Word count close button clicked");
+        window.closeWordCountModal();
+      });
+    }
+
+    // Add click listener to modal overlay for closing
+    const wordCountModal = document.getElementById("wordCountModal");
+    if (wordCountModal) {
+      wordCountModal.addEventListener("click", (e) => {
+        if (e.target === wordCountModal) {
+          console.log("Word count modal overlay clicked");
+          window.closeWordCountModal();
+        }
+      });
+    }
+
+    // Add escape key listener for closing modals
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        const visibleModals = [
+          "wordCountModal",
+          "findModal",
+          "replaceModal",
+          "goToLineModal",
+          "helpModal",
+        ];
+        visibleModals.forEach((modalId) => {
+          const modal = document.getElementById(modalId);
+          if (modal && modal.style.display === "flex") {
+            console.log(`Closing ${modalId} with Escape key`);
+            modal.style.display = "none";
+          }
+        });
+      }
+    });
+  });
 };
 
 // Store editor instance globally for modal functions

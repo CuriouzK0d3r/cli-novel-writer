@@ -1,0 +1,373 @@
+{
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "devPath": "../dist",
+    "distDir": "../dist",
+    "withGlobalTauri": false
+  },
+  "package": {
+    "productName": "Writers CLI",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      },
+      "dialog": {
+        "all": false,
+        "ask": true,
+        "confirm": true,
+        "message": true,
+        "open": true,
+        "save": true
+      },
+      "fs": {
+        "all": true,
+        "readFile": true,
+        "writeFile": true,
+        "readDir": true,
+        "copyFile": true,
+        "createDir": true,
+        "removeDir": true,
+        "removeFile": true,
+        "renameFile": true,
+        "exists": true
+      },
+      "path": {
+        "all": true
+      },
+      "os": {
+        "all": true
+      },
+      "process": {
+        "all": false,
+        "exit": true,
+        "relaunch": true,
+        "relaunchDangerousAllowSymlinkMacos": false
+      },
+      "notification": {
+        "all": true
+      },
+      "globalShortcut": {
+        "all": true
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true,
+        "setResizable": true,
+        "setMaximizable": true,
+        "setMinimizable": true,
+        "setClosable": true,
+        "setTitle": true,
+        "setSkipTaskbar": true,
+        "setFullscreen": true,
+        "setFocus": true,
+        "setIcon": true,
+        "setIgnoreCursorEvents": true,
+        "requestUserAttention": true,
+        "onCloseRequested": true,
+        "onFocusChanged": true,
+        "onMenuClicked": true,
+        "onResized": true,
+        "onMoved": true,
+        "onThemeChanged": true,
+        "onFileDropped": true
+      },
+      "clipboard": {
+        "all": true,
+        "writeText": true,
+        "readText": true
+      },
+      "app": {
+        "all": false,
+        "show": true,
+        "hide": true
+      },
+      "http": {
+        "all": true,
+        "request": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.writers-cli.app",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "category": "Productivity",
+      "shortDescription": "A modern writing tool for novels and stories",
+      "longDescription": "Writers CLI is a comprehensive writing application designed for authors, screenwriters, and storytellers. Features include distraction-free writing, project management, export options, and collaborative tools.",
+      "appimage": {
+        "bundleMediaFramework": false
+      },
+      "deb": {
+        "depends": []
+      },
+      "macOS": {
+        "frameworks": [],
+        "minimumSystemVersion": "10.13",
+        "exceptionDomain": "",
+        "signingIdentity": null,
+        "providerShortName": null,
+        "entitlements": null
+      },
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "updater": {
+      "active": false
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "Writers CLI",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "center": true,
+        "decorations": true,
+        "alwaysOnTop": false,
+        "skipTaskbar": false,
+        "theme": "Dark",
+        "titleBarStyle": "Visible",
+        "hiddenTitle": false,
+        "acceptFirstMouse": false,
+        "tabbingIdentifier": null,
+        "maximizable": true,
+        "minimizable": true,
+        "closable": true,
+        "transparent": false,
+        "shadow": true,
+        "fileDropEnabled": true,
+        "url": "index.html"
+      }
+    ],
+    "menu": [
+      {
+        "label": "File",
+        "submenu": [
+          {
+            "label": "New Project",
+            "accelerator": "CmdOrCtrl+N"
+          },
+          {
+            "label": "Open Project",
+            "accelerator": "CmdOrCtrl+O"
+          },
+          {
+            "label": "Save",
+            "accelerator": "CmdOrCtrl+S"
+          },
+          {
+            "label": "Save As",
+            "accelerator": "CmdOrCtrl+Shift+S"
+          },
+          {
+            "type": "Separator"
+          },
+          {
+            "label": "Export",
+            "submenu": [
+              {
+                "label": "Export as PDF"
+              },
+              {
+                "label": "Export as EPUB"
+              },
+              {
+                "label": "Export as DOCX"
+              },
+              {
+                "label": "Export as HTML"
+              }
+            ]
+          },
+          {
+            "type": "Separator"
+          },
+          {
+            "label": "Quit",
+            "accelerator": "CmdOrCtrl+Q"
+          }
+        ]
+      },
+      {
+        "label": "Edit",
+        "submenu": [
+          {
+            "label": "Undo",
+            "accelerator": "CmdOrCtrl+Z"
+          },
+          {
+            "label": "Redo",
+            "accelerator": "CmdOrCtrl+Shift+Z"
+          },
+          {
+            "type": "Separator"
+          },
+          {
+            "label": "Cut",
+            "accelerator": "CmdOrCtrl+X"
+          },
+          {
+            "label": "Copy",
+            "accelerator": "CmdOrCtrl+C"
+          },
+          {
+            "label": "Paste",
+            "accelerator": "CmdOrCtrl+V"
+          },
+          {
+            "type": "Separator"
+          },
+          {
+            "label": "Find",
+            "accelerator": "CmdOrCtrl+F"
+          },
+          {
+            "label": "Replace",
+            "accelerator": "CmdOrCtrl+H"
+          }
+        ]
+      },
+      {
+        "label": "View",
+        "submenu": [
+          {
+            "label": "Toggle Sidebar",
+            "accelerator": "CmdOrCtrl+B"
+          },
+          {
+            "label": "Distraction Free",
+            "accelerator": "F11"
+          },
+          {
+            "label": "Split View",
+            "accelerator": "CmdOrCtrl+\\"
+          },
+          {
+            "type": "Separator"
+          },
+          {
+            "label": "Zoom In",
+            "accelerator": "CmdOrCtrl+Plus"
+          },
+          {
+            "label": "Zoom Out",
+            "accelerator": "CmdOrCtrl+-"
+          },
+          {
+            "label": "Reset Zoom",
+            "accelerator": "CmdOrCtrl+0"
+          }
+        ]
+      },
+      {
+        "label": "Tools",
+        "submenu": [
+          {
+            "label": "Word Count",
+            "accelerator": "CmdOrCtrl+Shift+W"
+          },
+          {
+            "label": "Writing Goals"
+          },
+          {
+            "label": "Pomodoro Timer"
+          },
+          {
+            "type": "Separator"
+          },
+          {
+            "label": "Character Tracker"
+          },
+          {
+            "label": "Plot Tracker"
+          },
+          {
+            "label": "Research Notes"
+          },
+          {
+            "type": "Separator"
+          },
+          {
+            "label": "Spell Check",
+            "accelerator": "F7"
+          },
+          {
+            "label": "Grammar Check"
+          }
+        ]
+      },
+      {
+        "label": "Window",
+        "submenu": [
+          {
+            "label": "Minimize",
+            "accelerator": "CmdOrCtrl+M"
+          },
+          {
+            "label": "Close",
+            "accelerator": "CmdOrCtrl+W"
+          }
+        ]
+      },
+      {
+        "label": "Help",
+        "submenu": [
+          {
+            "label": "Keyboard Shortcuts"
+          },
+          {
+            "label": "Writing Tips"
+          },
+          {
+            "label": "User Guide"
+          },
+          {
+            "type": "Separator"
+          },
+          {
+            "label": "Check for Updates"
+          },
+          {
+            "label": "Report Issue"
+          },
+          {
+            "label": "About Writers CLI"
+          }
+        ]
+      }
+    ],
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true,
+      "menuOnLeftClick": false,
+      "tooltip": "Writers CLI"
+    }
+  }
+}

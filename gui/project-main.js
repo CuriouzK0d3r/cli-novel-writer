@@ -802,20 +802,20 @@ class WritersProjectInterface {
 
       // Format file size
       const formatSize = (bytes) => {
-        if (bytes === 0) return '0 B';
+        if (bytes === 0) return "0 B";
         const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const sizes = ["B", "KB", "MB", "GB"];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
       };
 
       // Format date
       const formatDate = (date) => {
-        if (!date) return '';
+        if (!date) return "";
         return new Date(date).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
+          year: "numeric",
+          month: "short",
+          day: "numeric",
         });
       };
 
@@ -823,8 +823,8 @@ class WritersProjectInterface {
         <div class="file-info">
           <span class="file-name">${file.name}</span>
           <div class="file-meta">
-            ${file.size ? `<span class="file-size">${formatSize(file.size)}</span>` : ''}
-            ${file.modified ? `<span class="file-modified" title="Last modified">${formatDate(file.modified)}</span>` : ''}
+            ${file.size ? `<span class="file-size">${formatSize(file.size)}</span>` : ""}
+            ${file.modified ? `<span class="file-modified" title="Last modified">${formatDate(file.modified)}</span>` : ""}
           </div>
         </div>
         <span class="file-stats">${file.words || 0}w</span>
@@ -1032,11 +1032,69 @@ class WritersProjectInterface {
 
   // Modal management
   showModal(modalId) {
-    document.getElementById(modalId).style.display = "flex";
+    try {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = "flex";
+        console.log(`Opened modal: ${modalId}`);
+
+        // Force high contrast on modal inputs
+        const inputs = modal.querySelectorAll('input[type="text"], textarea');
+        inputs.forEach((input) => this.forceHighContrastInput(input));
+
+        // Focus the first input if it exists
+        if (inputs.length > 0) {
+          setTimeout(() => inputs[0].focus(), 100);
+        }
+      } else {
+        console.warn(`Modal not found: ${modalId}`);
+      }
+    } catch (error) {
+      console.error(`Error showing modal ${modalId}:`, error);
+    }
   }
 
   closeModal(modalId) {
-    document.getElementById(modalId).style.display = "none";
+    try {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = "none";
+        console.log(`Closed modal: ${modalId}`);
+      } else {
+        console.warn(`Modal not found: ${modalId}`);
+      }
+    } catch (error) {
+      console.error(`Error closing modal ${modalId}:`, error);
+    }
+  }
+
+  forceHighContrastInput(input) {
+    if (!input) return;
+
+    // Force maximum contrast styling
+    input.style.setProperty("background-color", "#000000", "important");
+    input.style.setProperty("color", "#ffffff", "important");
+    input.style.setProperty("border", "3px solid #ffffff", "important");
+    input.style.setProperty("font-size", "16px", "important");
+    input.style.setProperty("font-weight", "700", "important");
+    input.style.setProperty("padding", "8px 12px", "important");
+
+    // Force focus styling
+    input.addEventListener("focus", () => {
+      input.style.setProperty("background-color", "#222222", "important");
+      input.style.setProperty("border-color", "#00ff00", "important");
+      input.style.setProperty(
+        "box-shadow",
+        "0 0 0 5px rgba(0, 255, 0, 0.5)",
+        "important",
+      );
+    });
+
+    input.addEventListener("blur", () => {
+      input.style.setProperty("background-color", "#000000", "important");
+      input.style.setProperty("border-color", "#ffffff", "important");
+      input.style.setProperty("box-shadow", "none", "important");
+    });
   }
 
   // File creation
@@ -1462,13 +1520,72 @@ window.closeEditor = function () {
 };
 
 window.closeModal = function (modalId) {
-  projectInterface.closeModal(modalId);
+  try {
+    if (window.projectInterface) {
+      window.projectInterface.closeModal(modalId);
+    } else {
+      console.warn("projectInterface not available, attempting direct close");
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = "none";
+      }
+    }
+  } catch (error) {
+    console.error(`Error in global closeModal for ${modalId}:`, error);
+  }
 };
+
+// Setup additional modal event listeners for project interface
+function setupProjectModalEventListeners() {
+  // Add backup event listeners for modal close buttons
+  const wordCountBtn = document.getElementById("closeWordCountBtn");
+  if (wordCountBtn) {
+    wordCountBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("Project word count close button clicked");
+      window.closeModal("wordCountModal");
+    });
+  }
+
+  // Add click listener to modal overlay for closing
+  const wordCountModal = document.getElementById("wordCountModal");
+  if (wordCountModal) {
+    wordCountModal.addEventListener("click", (e) => {
+      if (e.target === wordCountModal) {
+        console.log("Project word count modal overlay clicked");
+        window.closeModal("wordCountModal");
+      }
+    });
+  }
+
+  // Add escape key listener for closing modals
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      const visibleModals = [
+        "wordCountModal",
+        "findModal",
+        "replaceModal",
+        "helpModal",
+        "newFileModal",
+        "openFileModal",
+      ];
+      visibleModals.forEach((modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal && modal.style.display === "flex") {
+          console.log(`Closing ${modalId} with Escape key`);
+          window.closeModal(modalId);
+        }
+      });
+    }
+  });
+}
 
 // Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  projectInterface = new WritersProjectInterface();
-  projectInterface.init();
+  window.projectInterface = new WritersProjectInterface();
+  window.projectInterface.init();
+  setupProjectModalEventListeners();
 });
 
 // Handle window close
