@@ -194,15 +194,32 @@ class ThemeManager {
       return theme.getStatusBarContent(editorState);
     }
 
-    // Fallback status bar formatting
-    const { mode, line, col, filename, modified, wordCount } = editorState;
+    // Fallback status bar formatting with pomodoro support
+    const { mode, line, col, filename, modified, wordCount, pomodoro } =
+      editorState;
     const modeText = mode === "insert" ? "INSERT" : "NORMAL";
     const fileText = filename || "New File";
     const modifiedText = modified ? " *" : "";
     const positionText = `${line}:${col}`;
     const wordText = wordCount ? ` | ${wordCount} words` : "";
 
-    return `${modeText} | ${fileText}${modifiedText} | ${positionText}${wordText}`;
+    // Pomodoro timer display
+    let pomodoroText = "";
+    if (pomodoro && (pomodoro.isRunning || pomodoro.completedPomodoros > 0)) {
+      const phaseIcon = pomodoro.phase === "work" ? "🍅" : "☕";
+      const statusIcon = pomodoro.isRunning
+        ? pomodoro.isPaused
+          ? "⏸️"
+          : "▶️"
+        : "⏹️";
+      pomodoroText = ` | ${phaseIcon} ${pomodoro.timeFormatted} ${statusIcon}`;
+
+      if (pomodoro.completedPomodoros > 0) {
+        pomodoroText += ` (${pomodoro.completedPomodoros})`;
+      }
+    }
+
+    return `${modeText} | ${fileText}${modifiedText} | ${positionText}${wordText}${pomodoroText}`;
   }
 
   /**

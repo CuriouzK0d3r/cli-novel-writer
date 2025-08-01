@@ -196,7 +196,7 @@ class BufferEditor {
       height: 1,
       style: styles.helpBar,
       content:
-        " ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go  ^W Stats  ^T Notes  F1 Help  F3 Timer",
+        " ^S Save  ^O Open  ^X Exit  ^F Find  ^G Go  ^W Stats  ^T Notes  F1 Help  F3/^P Timer",
     });
 
     this.editor.focus();
@@ -269,8 +269,11 @@ class BufferEditor {
 
     // Pomodoro timer controls (work in both modes)
     this.screen.key(["f3"], () => this.togglePomodoroTimer());
+    this.screen.key(["C-p"], () => this.togglePomodoroTimer()); // Alternative to F3
     this.screen.key(["f4"], () => this.showPomodoroDialog());
+    this.screen.key(["C-S-p"], () => this.showPomodoroDialog()); // Alternative to F4
     this.screen.key(["S-f3"], () => this.resetPomodoroTimer());
+    this.screen.key(["C-r"], () => this.resetPomodoroTimer()); // Alternative to Shift+F3
 
     // Handle all character input and navigation
     this.screen.on("keypress", (ch, key) => {
@@ -800,14 +803,21 @@ class BufferEditor {
   }
 
   getEditorHeight() {
+    if (!this.editor) return 20; // Default height when editor not initialized
     return this.editor.height - (this.editor.border ? 2 : 0);
   }
 
   getEditorWidth() {
+    if (!this.editor) return 80; // Default width when editor not initialized
     return this.editor.width - (this.editor.border ? 2 : 0);
   }
 
   render() {
+    // Guard against rendering when editor is not initialized
+    if (!this.editor || !this.screen) {
+      return;
+    }
+
     const editorHeight = this.getEditorHeight();
     const editorWidth = this.getEditorWidth();
 
@@ -1090,7 +1100,7 @@ class BufferEditor {
       path.join("stories", `${name}.md`),
       path.join("shortstories", `${name}.md`),
       path.join(dir, `${name}.md`),
-      path.join(dir, `${name}.txt`)
+      path.join(dir, `${name}.txt`),
     ];
 
     // Find the first path that actually exists
@@ -1105,9 +1115,10 @@ class BufferEditor {
   }
 
   async createNotesFile(notesPath, storyPath) {
-    const storyName = path.basename(storyPath, path.extname(storyPath))
+    const storyName = path
+      .basename(storyPath, path.extname(storyPath))
       .replace(/-/g, " ")
-      .replace(/\b\w/g, l => l.toUpperCase());
+      .replace(/\b\w/g, (l) => l.toUpperCase());
 
     const content = `# Notes for "${storyName}"
 
@@ -1233,13 +1244,20 @@ Press Ctrl+T to switch back to your story.
   }
 
   showMessage(message, type = "info") {
+    // Guard against showing messages when editor is not initialized
+    if (!this.infoBar || !this.screen) {
+      return;
+    }
+
     const themedMessage = this.themeManager.formatText(message, type);
     this.infoBar.setContent(` ${themedMessage}`);
     this.screen.render();
 
     setTimeout(() => {
-      this.infoBar.setContent("");
-      this.screen.render();
+      if (this.infoBar && this.screen) {
+        this.infoBar.setContent("");
+        this.screen.render();
+      }
     }, 3000);
   }
 
@@ -1870,16 +1888,18 @@ Press Ctrl+T to switch back to your story.
   setupPomodoroCallbacks() {
     this.pomodoroTimer.setCallbacks({
       onTick: (timeRemaining, phase) => {
-        // Update status bar every second
-        this.render();
+        // Update status bar every second (only if editor is initialized)
+        if (this.editor && this.screen) {
+          this.render();
+        }
       },
       onPhaseComplete: (completedPhase, newPhase) => {
         const phaseNames = {
-          'work': 'Focus session',
-          'break': 'Break'
+          work: "Focus session",
+          break: "Break",
         };
 
-        if (completedPhase === 'work') {
+        if (completedPhase === "work") {
           this.showMessage(`🎉 ${phaseNames.work} complete! Time for a break.`);
         } else {
           this.showMessage(`✍️  Break over! Time to focus.`);
@@ -1891,8 +1911,10 @@ Press Ctrl+T to switch back to your story.
         }, 2000);
       },
       onPomodoroComplete: (completedCount) => {
-        this.showMessage(`🍅 Pomodoro #${completedCount} completed! Great work!`);
-      }
+        this.showMessage(
+          `🍅 Pomodoro #${completedCount} completed! Great work!`,
+        );
+      },
     });
   }
 
@@ -1904,7 +1926,9 @@ Press Ctrl+T to switch back to your story.
 
     if (!status.isRunning) {
       this.pomodoroTimer.start();
-      this.showMessage(`🍅 Pomodoro started: ${this.pomodoroTimer.getPhaseDisplayName()} session`);
+      this.showMessage(
+        `🍅 Pomodoro started: ${this.pomodoroTimer.getPhaseDisplayName()} session`,
+      );
     } else if (status.isPaused) {
       this.pomodoroTimer.resume();
       this.showMessage("▶️  Pomodoro resumed");
@@ -1938,7 +1962,7 @@ Press Ctrl+T to switch back to your story.
 Current Status:
   Phase: ${this.pomodoroTimer.getPhaseDisplayName()}
   Time: ${status.timeFormatted}
-  Status: ${status.isRunning ? (status.isPaused ? 'Paused' : 'Running') : 'Stopped'}
+  Status: ${status.isRunning ? (status.isPaused ? "Paused" : "Running") : "Stopped"}
   Completed: ${status.completedPomodoros} Pomodoros
 
 Configuration:
@@ -1958,7 +1982,7 @@ Tips:
 • Focus sessions help maintain writing flow
 • Take breaks to avoid fatigue and maintain creativity
 
-Current Phase Progress: ${'█'.repeat(Math.floor(status.phaseProgress * 20))}${'░'.repeat(20 - Math.floor(status.phaseProgress * 20))} ${Math.floor(status.phaseProgress * 100)}%
+Current Phase Progress: ${"█".repeat(Math.floor(status.phaseProgress * 20))}${"░".repeat(20 - Math.floor(status.phaseProgress * 20))} ${Math.floor(status.phaseProgress * 100)}%
     `.trim();
 
     await this.dialogs.showInfoDialog(dialogContent, " Pomodoro Timer ");

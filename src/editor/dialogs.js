@@ -565,9 +565,9 @@ View & Themes:
   F1             Show this help
 
 Pomodoro Timer:
-  F3             🍅 Start/pause Pomodoro timer
-  F4             Show timer status and configuration
-  Shift+F3       Reset timer and session count
+  F3 or Ctrl+P   🍅 Start/pause Pomodoro timer
+  F4 or Ctrl+Shift+P Show timer status and configuration
+  Shift+F3 or Ctrl+R Reset timer and session count
 
 Writing Features:
   - 🎨 Beautiful dark & light themes with syntax highlighting
