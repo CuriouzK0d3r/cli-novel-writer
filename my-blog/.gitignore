@@ -1,8 +1,0 @@
-# Writers CLI Blog
-exports/
-.DS_Store
-*.bak
-*.tmp
-session-notes/
-node_modules/
-dist/
