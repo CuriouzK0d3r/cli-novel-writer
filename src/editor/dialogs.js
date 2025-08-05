@@ -560,7 +560,7 @@ Edit Operations:
   Ctrl+C         Copy selection (or current line if no selection)
   Ctrl+V         Paste from clipboard
   Ctrl+X         Cut selection (or current line if no selection)
-  Ctrl+Shift+K   Delete current line
+  dd             Delete current line (navigation mode)
 
 Text Selection:
   Shift+Arrow    Extend selection with arrow keys

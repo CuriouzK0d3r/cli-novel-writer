@@ -1,0 +1,23 @@
+Line 1: This is the first line for testing
+Line 2: Try using 'dd' to delete this line
+Line 3: This line should remain after deleting line 2
+Line 4: Another test line for dd functionality
+Line 5: You can navigate with j/k or arrow keys
+Line 6: Remember to be in navigation mode (NAV in status)
+Line 7: Press 'i' to enter insert mode, Esc to return to nav
+Line 8: Use 'dd' to delete any line quickly
+Line 9: Press Ctrl+Z to undo deletions
+Line 10: Final line for testing the delete feature
+
+Instructions for testing:
+1. Make sure you're in navigation mode (NAV shows in status bar)
+2. Use j/k or arrow keys to move between lines
+3. Position cursor on any line you want to delete
+4. Press 'd' twice quickly (dd) to delete that line
+5. Watch the line disappear and cursor adjust
+6. Try Ctrl+Z to undo the deletion
+7. Test with different lines to verify functionality
+8. Press F1 to see help dialog with updated shortcuts
+9. Exit with Ctrl+X when done testing
+
+Have fun testing the new dd delete line feature!

@@ -82,6 +82,11 @@ class BufferEditor {
 
     // Theme system
     this.themeManager = new ThemeManager();
+
+    // Key sequence tracking for dd (delete line)
+    this.lastKeyPress = null;
+    this.lastKeyTime = 0;
+    this.ddTimeout = 500; // 500ms timeout for dd sequence
   }
 
   async launch(filePath = null) {
@@ -251,7 +256,6 @@ class BufferEditor {
     this.screen.key(["C-c"], () => this.copySelection());
     this.screen.key(["C-v"], () => this.pasteFromClipboard());
     this.screen.key(["C-x"], () => this.cutSelection());
-    this.screen.key(["C-S-k"], () => this.deleteLine());
 
     // Search (work in both modes)
     this.screen.key(["C-f"], () => this.showFindDialog());
@@ -314,6 +318,28 @@ class BufferEditor {
               this.moveCursor(0, 1, key.shift);
               return;
             case "d":
+              // Handle dd sequence for delete line
+              const now = Date.now();
+              if (
+                this.lastKeyPress === "d" &&
+                now - this.lastKeyTime < this.ddTimeout
+              ) {
+                this.deleteLine();
+                this.lastKeyPress = null;
+                return;
+              } else {
+                this.lastKeyPress = "d";
+                this.lastKeyTime = now;
+                // Clear the sequence after timeout
+                setTimeout(() => {
+                  if (this.lastKeyPress === "d") {
+                    this.lastKeyPress = null;
+                  }
+                }, this.ddTimeout);
+                // Execute normal 'd' behavior (right movement)
+                this.moveCursor(1, 0, key.shift);
+                return;
+              }
             case "l":
             case "right":
               this.moveCursor(1, 0, key.shift);
