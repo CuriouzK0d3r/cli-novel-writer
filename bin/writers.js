@@ -8,6 +8,7 @@ const packageJson = require("../package.json");
 const initCommand = require("../src/commands/init");
 const initShortStoryCommand = require("../src/commands/init-shortstory");
 const initShortCommand = require("../src/commands/init-short");
+const initBlogCommand = require("../src/commands/init-blog");
 const newCommand = require("../src/commands/new");
 const writeCommand = require("../src/commands/write");
 const smartWriteCommand = require("../src/commands/smart-write");
@@ -68,11 +69,18 @@ program
   .action(initShortCommand);
 
 program
+  .command("init-blog")
+  .description("Initialize a new blog project")
+  .option("-n, --name <n>", "Project name")
+  .option("-a, --author <author>", "Author name")
+  .action(initBlogCommand);
+
+program
   .command("new")
   .description("Create new content")
   .argument(
     "<type>",
-    "Type of content (chapter, scene, character, shortstory, note)",
+    "Type of content (chapter, scene, character, shortstory, blogpost, note)",
   )
   .argument("[name]", "Name of the new content")
   .option("-t, --template <template>", "Use a specific template")
@@ -83,28 +91,36 @@ program
   .description(
     "Smart write command with auto-discovery and menu (Ctrl+T for notes toggle)",
   )
-  .argument("[story]", "Story name (optional - shows menu if not provided)")
+  .argument("[target]", "Target name (optional - shows menu if not provided)")
   .option(
     "-e, --editor <editor>",
     "Preferred editor (novel-editor, nano, vim, code)",
   )
-  .action(async (story, options) => {
+  .action(async (target, options) => {
     try {
-      // Check if we're in a simplified short story project
+      // Check if we're in a writers project
       const fs = require("fs");
       if (fs.existsSync("writers.config.json")) {
         const config = JSON.parse(
           fs.readFileSync("writers.config.json", "utf8"),
         );
         if (config.type === "simple-short-story") {
-          return await smartWriteCommand(story, options);
+          return await smartWriteCommand(target, options);
+        } else if (config.type === "blog") {
+          // Blog projects default to drafts folder and support blog posts
+          if (!target) {
+            // Show blog posts menu
+            return await smartWriteCommand(target, options);
+          }
+          // Handle blog post writing
+          return await writeCommand(target, options);
         }
       }
       // Fallback to regular write command
-      return await writeCommand(story, options);
+      return await writeCommand(target, options);
     } catch (error) {
       // If there's any error, fallback to regular write
-      return await writeCommand(story, options);
+      return await writeCommand(target, options);
     }
   });
 

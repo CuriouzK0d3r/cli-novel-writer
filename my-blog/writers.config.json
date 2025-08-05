@@ -1,0 +1,15 @@
+{
+  "name": "my-blog",
+  "author": "alexis",
+  "type": "blog",
+  "blog": {
+    "title": "my blog Blog",
+    "description": "My personal blog about thoughts, ideas, and experiences",
+    "url": "",
+    "defaultFormat": "markdown",
+    "useCategories": true,
+    "useTags": true
+  },
+  "created": "2025-08-05T07:34:57.554Z",
+  "version": "2.0"
+}

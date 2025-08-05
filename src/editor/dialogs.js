@@ -327,6 +327,8 @@ class EditorDialogs {
         label: " Go to Line ",
         width: 50,
         height: 8,
+        modal: true,
+        grabKeys: true,
       });
 
       const theme = this.themeManager.getCurrentTheme();
@@ -340,11 +342,11 @@ class EditorDialogs {
         height: 1,
         border: {
           type: "line",
-          fg: colors.border,
+          fg: colors.inputBorder || colors.border,
         },
         style: {
           fg: colors.inputFg || colors.foreground,
-          bg: colors.inputBg || colors.infoBg,
+          bg: colors.inputBg || colors.background,
           focus: {
             fg: colors.inputFg || colors.foreground,
             bg: colors.inputFocusBg || colors.selectionBg,
@@ -354,6 +356,8 @@ class EditorDialogs {
           },
         },
         inputOnFocus: true,
+        keys: true,
+        mouse: true,
       });
 
       const instructions = blessed.text({
@@ -368,7 +372,11 @@ class EditorDialogs {
         },
       });
 
-      input.focus();
+      // Focus the input after a brief delay to ensure proper rendering
+      setImmediate(() => {
+        input.focus();
+        this.screen.render();
+      });
 
       input.key(["enter"], () => {
         const value = parseInt(input.getValue());
@@ -381,7 +389,14 @@ class EditorDialogs {
         }
       });
 
-      input.key(["escape"], () => {
+      input.key(["escape", "C-c"], () => {
+        dialog.destroy();
+        this.screen.render();
+        resolve(null);
+      });
+
+      // Handle dialog-level escape
+      dialog.key(["escape", "C-c"], () => {
         dialog.destroy();
         this.screen.render();
         resolve(null);
@@ -545,6 +560,7 @@ Edit Operations:
   Ctrl+C         Copy selection (or current line if no selection)
   Ctrl+V         Paste from clipboard
   Ctrl+X         Cut selection (or current line if no selection)
+  Ctrl+Shift+K   Delete current line
 
 Text Selection:
   Shift+Arrow    Extend selection with arrow keys

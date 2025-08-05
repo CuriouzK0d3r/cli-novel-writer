@@ -1,0 +1,15 @@
+{
+  "name": "demo-blog-project",
+  "author": "Demo Author",
+  "type": "blog",
+  "blog": {
+    "title": "My Demo Blog",
+    "description": "A demonstration blog created with Writers CLI",
+    "url": "https://myblog.com",
+    "defaultFormat": "markdown",
+    "useCategories": true,
+    "useTags": true
+  },
+  "created": "2025-08-05T07:19:47.140Z",
+  "version": "2.0"
+}

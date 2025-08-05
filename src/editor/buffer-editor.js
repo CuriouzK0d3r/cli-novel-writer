@@ -251,6 +251,7 @@ class BufferEditor {
     this.screen.key(["C-c"], () => this.copySelection());
     this.screen.key(["C-v"], () => this.pasteFromClipboard());
     this.screen.key(["C-x"], () => this.cutSelection());
+    this.screen.key(["C-S-k"], () => this.deleteLine());
 
     // Search (work in both modes)
     this.screen.key(["C-f"], () => this.showFindDialog());
@@ -273,7 +274,7 @@ class BufferEditor {
     this.screen.key(["f4"], () => this.showPomodoroDialog());
     this.screen.key(["C-S-p"], () => this.showPomodoroDialog()); // Alternative to F4
     this.screen.key(["S-f3"], () => this.resetPomodoroTimer());
-    this.screen.key(["C-r"], () => this.resetPomodoroTimer()); // Alternative to Shift+F3
+    // Note: C-r is already used for Replace dialog, using only Shift+F3 for reset
 
     // Handle all character input and navigation
     this.screen.on("keypress", (ch, key) => {
@@ -753,6 +754,41 @@ class BufferEditor {
     for (let i = 0; i < spaces.length; i++) {
       this.insertChar(" ");
     }
+  }
+
+  deleteLine() {
+    // Don't delete if there's only one line and it's empty
+    if (this.lines.length === 1 && this.lines[0] === "") {
+      return;
+    }
+
+    this.pushUndo();
+
+    // If there's only one line, clear it
+    if (this.lines.length === 1) {
+      this.lines[0] = "";
+      this.cursorX = 0;
+    } else {
+      // Remove the current line
+      this.lines.splice(this.cursorY, 1);
+
+      // Adjust cursor position
+      if (this.cursorY >= this.lines.length) {
+        this.cursorY = this.lines.length - 1;
+      }
+
+      // Ensure cursor X is within the line bounds
+      const currentLine = this.lines[this.cursorY];
+      if (this.cursorX > currentLine.length) {
+        this.cursorX = currentLine.length;
+      }
+    }
+
+    this.markDirty();
+    this.resetCursorBlink();
+    this.ensureCursorVisible();
+    this.render();
+    this.updateStatus();
   }
 
   ensureCursorVisible() {
@@ -1318,7 +1354,6 @@ Press Ctrl+T to switch back to your story.
     if (lineNumber) {
       this.goToLine(lineNumber);
     }
-    this.editor.focus();
     this.render();
   }
 

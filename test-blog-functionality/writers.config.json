@@ -1,0 +1,15 @@
+{
+  "name": "test-blog-functionality",
+  "author": "Test Blog Author",
+  "type": "blog",
+  "blog": {
+    "title": "Test Blog",
+    "description": "A test blog for functionality verification",
+    "url": "",
+    "defaultFormat": "markdown",
+    "useCategories": true,
+    "useTags": true
+  },
+  "created": "2025-08-05T07:38:06.685Z",
+  "version": "2.0"
+}

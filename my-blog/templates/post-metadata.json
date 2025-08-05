@@ -1,0 +1,24 @@
+{
+  "title": "Post title for SEO",
+  "description": "Meta description for search engines (150-160 characters)",
+  "keywords": [
+    "keyword1",
+    "keyword2",
+    "keyword3"
+  ],
+  "author": "alexis",
+  "date": "YYYY-MM-DD",
+  "category": "general",
+  "tags": [
+    "tag1",
+    "tag2"
+  ],
+  "featuredImage": "path/to/featured-image.jpg",
+  "socialImage": "path/to/social-sharing-image.jpg",
+  "published": false,
+  "slug": "url-friendly-post-slug",
+  "excerpt": "Brief excerpt for previews and social sharing",
+  "readingTime": "estimated-minutes",
+  "wordCount": 0,
+  "lastModified": "YYYY-MM-DD HH:MM:SS"
+}
