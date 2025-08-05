@@ -1,0 +1,11 @@
+/Users/alexisk/Documents/writers-cli/rust-cli/target/debug/deps/libgetrandom-aafc3c9740331fb8.rmeta: /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/lib.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/backends.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/error.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/util.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/../README.md /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/backends/getentropy.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/backends/../util_libc.rs
+
+/Users/alexisk/Documents/writers-cli/rust-cli/target/debug/deps/getrandom-aafc3c9740331fb8.d: /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/lib.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/backends.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/error.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/util.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/../README.md /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/backends/getentropy.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/backends/../util_libc.rs
+
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/lib.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/backends.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/error.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/util.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/../README.md:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/backends/getentropy.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/getrandom-0.3.3/src/backends/../util_libc.rs:

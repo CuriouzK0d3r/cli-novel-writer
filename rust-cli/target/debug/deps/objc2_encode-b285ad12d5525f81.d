@@ -1,0 +1,10 @@
+/Users/alexisk/Documents/writers-cli/rust-cli/target/debug/deps/libobjc2_encode-b285ad12d5525f81.rmeta: /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/lib.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/encoding.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/encoding_box.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/helper.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/parse.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/static_str.rs
+
+/Users/alexisk/Documents/writers-cli/rust-cli/target/debug/deps/objc2_encode-b285ad12d5525f81.d: /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/lib.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/encoding.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/encoding_box.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/helper.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/parse.rs /Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/static_str.rs
+
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/lib.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/encoding.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/encoding_box.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/helper.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/parse.rs:
+/Users/alexisk/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-encode-4.1.0/src/static_str.rs:

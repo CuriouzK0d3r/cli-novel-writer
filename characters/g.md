@@ -28,6 +28,7 @@
 - **Career Path:**
 - **Relationships:** Family, friends, romantic
 
+
 ## Character Arc
 - **Starting Point:** Where they begin the story
 - **Growth Challenge:** What they must overcome

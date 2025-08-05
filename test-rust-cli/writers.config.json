@@ -1,0 +1,19 @@
+{
+  "name": "Test Novel",
+  "author": "Test Author",
+  "type": "short-story",
+  "version": "1.0.0",
+  "created": "2025-08-05T10:37:38.581942+00:00",
+  "settings": {
+    "default_editor": null,
+    "auto_save": true,
+    "auto_save_interval": 30000,
+    "show_word_count": true,
+    "show_reading_time": true,
+    "tab_size": 2,
+    "wrap_text": false,
+    "typewriter_mode": false,
+    "typewriter_position": 0.66,
+    "typewriter_focus_lines": 1
+  }
+}
