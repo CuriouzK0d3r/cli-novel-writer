@@ -10,15 +10,7 @@
     "start": "node bin/writers.js",
     "test": "jest",
     "dev": "nodemon bin/writers.js",
-    "build": "pkg --config pkg.config.json bin/writers.js",
-    "gui": "node gui-launcher.js",
-    "gui-enhanced": "node gui-enhanced-launcher.js",
-    "gui-debug": "node gui-enhanced-launcher.js --debug",
-    "gui-dev": "node gui-enhanced-launcher.js --dev",
-    "gui-rust": "node rust-gui-launcher.js",
-    "gui-rust-dev": "node rust-gui-launcher.js --dev",
-    "gui-rust-debug": "node rust-gui-launcher.js --debug",
-    "build-rust-gui": "node rust-gui-launcher.js build"
+    "build": "pkg --config pkg.config.json bin/writers.js"
   },
   "keywords": [
     "writing",
