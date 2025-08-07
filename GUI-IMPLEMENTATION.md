@@ -59,13 +59,17 @@ gui/
 - ✅ Modal-based workflows
 - ✅ Toast notifications
 - ✅ Responsive design
+- ✅ Typewriter mode for centered line writing
+- ✅ Focus mode for distraction-free fullscreen writing
 
 ### Enhanced Edition Features
 - ✅ Multiple theme system (6 themes: Dark, Light, Sepia, High Contrast, Nord, Monokai)
 - ✅ Smart writing tools with grammar and style checking
 - ✅ Enhanced configuration system
 - ✅ Collaboration server infrastructure
-- ✅ Focus mode preparation
+- ✅ Vim keybindings with modal editing
+- ✅ Advanced focus mode with auto-save and statistics
+- ✅ Enhanced typewriter mode integration
 - ✅ Pomodoro timer framework
 - ✅ Advanced analytics foundation
 
@@ -89,6 +93,9 @@ gui/
 - Auto-save every 3 seconds
 - Live word count and reading time
 - Syntax highlighting preparation
+- Vim keybindings with visual mode indicators
+- Typewriter mode for centered line writing
+- Focus mode for fullscreen distraction-free writing
 
 ## Technical Implementation
 
@@ -247,6 +254,9 @@ npx electron gui/main.js
 - [ ] Timeline and plot tracking tools
 - [ ] Research panel integration
 - [ ] Version control integration
+- [ ] Customizable typewriter mode positioning
+- [ ] Focus mode timers and goals
+- [ ] Enhanced vim command palette
 
 ### UI/UX Improvements
 - [ ] Drag-and-drop file organization

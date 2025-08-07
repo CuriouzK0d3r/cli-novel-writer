@@ -20,6 +20,9 @@ A modern, feature-rich graphical user interface for the Writers CLI writing tool
 - **Advanced Analytics** - Deep insights into your writing patterns
 - **Collaboration Tools** - Real-time collaborative editing (coming soon)
 - **Enhanced Export** - Additional formats including DOCX and LaTeX
+- **Vim Keybindings** - Full vim-style editing with Normal and Insert modes
+- **Typewriter Mode** - Keep current line centered for distraction-free writing
+- **Focus Mode** - Fullscreen distraction-free writing with enhanced padding and controls
 
 ## Installation
 
@@ -104,6 +107,9 @@ The built-in editor provides:
 - **Live Statistics** - Real-time word count and reading time
 - **Syntax Highlighting** - Markdown syntax highlighting
 - **Distraction-free** - Clean, focused writing environment
+- **Vim Keybindings** - Optional vim-style navigation and editing
+- **Typewriter Mode** - Center current line for focused writing
+- **Focus Mode** - Fullscreen distraction-free environment with auto-save
 
 ## Keyboard Shortcuts
 
@@ -116,7 +122,8 @@ The built-in editor provides:
 - `Ctrl+Shift+H` - New character
 - `Ctrl+E` - Export project
 - `Ctrl+I` - Show statistics
-- `F11` - Toggle fullscreen
+- `F11` - Toggle focus mode
+- `Ctrl+Shift+F` - Toggle focus mode (alternative)
 
 ### Editor Shortcuts
 - `Ctrl+F` - Find text
@@ -126,10 +133,23 @@ The built-in editor provides:
 - `Ctrl+A` - Select all
 
 ### Enhanced Edition Shortcuts
-- `Ctrl+Shift+F` - Focus mode
+- `F11` or `Ctrl+Shift+F` - Toggle focus mode
 - `Ctrl+Shift+T` - Toggle Pomodoro timer
 - `Ctrl+Shift+O` - Toggle outline panel
 - `Ctrl+Shift+R` - Toggle research panel
+
+### Vim Mode Shortcuts (when enabled)
+- `Escape` - Switch to Normal mode
+- `i` - Enter Insert mode at cursor
+- `I` - Insert mode at line beginning
+- `a` - Insert mode after cursor
+- `A` - Insert mode at line end
+- `o` - New line below and insert
+- `O` - New line above and insert
+- `h/j/k/l` - Navigate left/down/up/right
+- `0/$` - Move to line beginning/end
+- `w/b` - Move to next/previous word
+- `x/X` - Delete character after/before cursor
 
 ## Themes
 
@@ -211,6 +231,31 @@ Customize:
    - Auto-save every 3 seconds
    - Live word count and reading time
    - Markdown formatting support
+   - Optional vim keybindings with visual mode indicators
+   - Typewriter mode for centered, focused writing
+
+#### Vim Mode Usage
+- **Toggle**: Use "Vim: ON/OFF" button in editor toolbar
+- **Normal Mode**: Red background tint, hidden cursor, navigation only
+- **Insert Mode**: Green background tint, visible cursor, normal editing
+- **Mode Switching**: Press `Escape` for Normal, `i` for Insert
+- **Help**: Key hints displayed when vim mode is active
+
+#### Typewriter Mode Usage
+- **Toggle**: Use "Typewriter: ON/OFF" button in editor toolbar
+- **Functionality**: Automatically centers your current line in the editor view
+- **Benefits**: Reduces eye strain and maintains focus on current writing position
+- **Compatibility**: Works seamlessly with vim mode and all themes
+- **Indicator**: Shows "TYPEWRITER" status in editor info bar when active
+
+#### Focus Mode Usage
+- **Access**: Use "Focus Mode" button in editor toolbar or press F11
+- **Features**: Fullscreen writing with enhanced padding and minimal distractions
+- **Auto-save**: Automatically saves changes every 2 seconds
+- **Statistics**: Real-time word and character count display
+- **Typewriter**: Independent typewriter mode toggle within focus mode
+- **Exit**: Press F11, Escape, or click "Exit Focus" button
+- **Shortcuts**: Ctrl+S to save manually within focus mode
 
 ### Deleting Files
 
@@ -307,6 +352,12 @@ Navigate to Statistics view for:
 - Check browser compatibility (internal)
 - Reset theme via settings
 
+**Vim Mode Issues**:
+- Toggle vim mode on/off using editor toolbar button
+- Press Escape to ensure you're in Normal mode
+- Check background color: Red = Normal, Green = Insert
+- Browser shortcuts may override some vim keys
+
 ### Debug Mode
 
 For troubleshooting, use debug mode:
@@ -330,10 +381,22 @@ This provides:
 ## Advanced Features (Enhanced Edition)
 
 ### Focus Mode
-- Distraction-free writing environment
-- Hidden interface elements
-- Typewriter mode available
-- Access via `Ctrl+Shift+F`
+- Fullscreen distraction-free writing environment
+- Minimal header with file name and essential controls
+- Independent typewriter mode toggle
+- Auto-save functionality (every 2 seconds)
+- Real-time word and character statistics
+- Enhanced padding and larger font for comfortable writing
+- Access via F11, Ctrl+Shift+F, or "Focus Mode" button
+- Quick keyboard shortcuts (F11/Escape to exit, Ctrl+S to save)
+
+### Typewriter Mode
+- Keeps current line centered vertically in editor
+- Automatically scrolls as you type and navigate
+- Reduces eye strain and improves focus
+- Works with all themes and vim mode
+- Toggle via editor toolbar button
+- Visual indicator in editor status bar
 
 ### Pomodoro Timer
 - 25-minute work sessions
@@ -346,6 +409,13 @@ This provides:
 - Style suggestions
 - Readability analysis
 - Word choice improvements
+
+### Vim Keybindings
+- Two-mode editing (Normal/Insert)
+- Visual mode indicators
+- Familiar vim navigation
+- Toggle on/off per session
+- Seamless integration with auto-save
 
 ### Collaboration (Coming Soon)
 - Real-time collaborative editing

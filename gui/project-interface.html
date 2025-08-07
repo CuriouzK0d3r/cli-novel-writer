@@ -1,522 +1,772 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Writers CLI - Project Interface</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body class="theme-light">
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <h2>Loading Writers CLI</h2>
-            <p>Setting up your writing environment...</p>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Writers CLI - Project Interface</title>
+        <link rel="stylesheet" href="assets/css/styles.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        />
+    </head>
+    <body class="theme-light">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <h2>Loading Writers CLI</h2>
+                <p>Setting up your writing environment...</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Main Application -->
-    <div id="app" class="app hidden">
-        <!-- Top Navigation Bar -->
-        <nav class="navbar">
-            <div class="navbar-brand">
-                <i class="fas fa-pen-fancy"></i>
-                <span class="brand-text">Writers CLI</span>
-            </div>
-            <div class="navbar-project">
-                <span id="project-name">No Project</span>
-                <span id="project-author"></span>
-            </div>
-            <div class="navbar-actions">
-                <button id="theme-toggle" class="navbar-btn" title="Toggle Dark Mode">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button id="settings-btn" class="navbar-btn" title="Project Settings">
-                    <i class="fas fa-cog"></i>
-                </button>
-            </div>
-        </nav>
-
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">
-                    <i class="fas fa-home"></i>
-                    Project Overview
-                </h3>
-                <button class="sidebar-item active" data-view="dashboard">
-                    <i class="fas fa-tachometer-alt"></i>
-                    Dashboard
-                </button>
-            </div>
-
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">
-                    <i class="fas fa-folder"></i>
-                    Content
-                </h3>
-                <button class="sidebar-item" data-view="chapters">
-                    <i class="fas fa-book"></i>
-                    Chapters
-                    <span class="count" id="chapters-count">0</span>
-                </button>
-                <button class="sidebar-item" data-view="scenes">
-                    <i class="fas fa-film"></i>
-                    Scenes
-                    <span class="count" id="scenes-count">0</span>
-                </button>
-                <button class="sidebar-item" data-view="characters">
-                    <i class="fas fa-users"></i>
-                    Characters
-                    <span class="count" id="characters-count">0</span>
-                </button>
-                <button class="sidebar-item" data-view="notes">
-                    <i class="fas fa-sticky-note"></i>
-                    Notes
-                    <span class="count" id="notes-count">0</span>
-                </button>
-                <button class="sidebar-item" data-view="shortstories">
-                    <i class="fas fa-book-open"></i>
-                    Short Stories
-                    <span class="count" id="shortstories-count">0</span>
-                </button>
-            </div>
-
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">
-                    <i class="fas fa-tools"></i>
-                    Tools
-                </h3>
-                <button class="sidebar-item" data-view="statistics">
-                    <i class="fas fa-chart-bar"></i>
-                    Statistics
-                </button>
-                <button class="sidebar-item" data-view="export">
-                    <i class="fas fa-download"></i>
-                    Export
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Dashboard View -->
-            <div id="dashboard-view" class="content-view active">
-                <header class="content-header">
-                    <h1><i class="fas fa-tachometer-alt"></i> Project Dashboard</h1>
-                    <div class="header-actions">
-                        <button id="refresh-btn" class="btn btn-secondary">
-                            <i class="fas fa-sync-alt"></i>
-                            Refresh
-                        </button>
-                    </div>
-                </header>
-
-                <div class="dashboard-grid">
-                    <!-- Progress Card -->
-                    <div class="card progress-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-target"></i> Writing Progress</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="progress-stats">
-                                <div class="stat">
-                                    <span class="stat-value" id="total-words">0</span>
-                                    <span class="stat-label">Total Words</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-value" id="word-goal">50,000</span>
-                                    <span class="stat-label">Word Goal</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-value" id="progress-percent">0%</span>
-                                    <span class="stat-label">Progress</span>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-                            </div>
-                            <div class="progress-info">
-                                <span id="words-remaining">50,000 words remaining</span>
-                                <span id="estimated-completion">-</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Stats -->
-                    <div class="card stats-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-chart-pie"></i> Quick Stats</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="quick-stats">
-                                <div class="quick-stat">
-                                    <i class="fas fa-book stat-icon"></i>
-                                    <div class="stat-info">
-                                        <span class="stat-number" id="total-chapters">0</span>
-                                        <span class="stat-text">Chapters</span>
-                                    </div>
-                                </div>
-                                <div class="quick-stat">
-                                    <i class="fas fa-film stat-icon"></i>
-                                    <div class="stat-info">
-                                        <span class="stat-number" id="total-scenes">0</span>
-                                        <span class="stat-text">Scenes</span>
-                                    </div>
-                                </div>
-                                <div class="quick-stat">
-                                    <i class="fas fa-users stat-icon"></i>
-                                    <div class="stat-info">
-                                        <span class="stat-number" id="total-characters">0</span>
-                                        <span class="stat-text">Characters</span>
-                                    </div>
-                                </div>
-                                <div class="quick-stat">
-                                    <i class="fas fa-sticky-note stat-icon"></i>
-                                    <div class="stat-info">
-                                        <span class="stat-number" id="total-notes">0</span>
-                                        <span class="stat-text">Notes</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="card activity-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-clock"></i> Recent Activity</h3>
-                        </div>
-                        <div class="card-content">
-                            <div id="recent-files" class="recent-files">
-                                <div class="no-content">
-                                    <i class="fas fa-inbox"></i>
-                                    <p>No recent activity</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="card actions-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="quick-actions">
-                                <button class="action-btn" id="new-chapter-btn">
-                                    <i class="fas fa-plus"></i>
-                                    New Chapter
-                                </button>
-                                <button class="action-btn" id="new-scene-btn">
-                                    <i class="fas fa-plus"></i>
-                                    New Scene
-                                </button>
-                                <button class="action-btn" id="new-character-btn">
-                                    <i class="fas fa-plus"></i>
-                                    New Character
-                                </button>
-                                <button class="action-btn" id="backup-btn">
-                                    <i class="fas fa-save"></i>
-                                    Create Backup
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Main Application -->
+        <div id="app" class="app hidden">
+            <!-- Top Navigation Bar -->
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <i class="fas fa-pen-fancy"></i>
+                    <span class="brand-text">Writers CLI</span>
                 </div>
-            </div>
-
-            <!-- Content List Views -->
-            <div id="chapters-view" class="content-view">
-                <header class="content-header">
-                    <h1><i class="fas fa-book"></i> Chapters</h1>
-                    <div class="header-actions">
-                        <button id="new-chapter-modal-btn" class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            New Chapter
-                        </button>
-                    </div>
-                </header>
-                <div id="chapters-content" class="content-list"></div>
-            </div>
-
-            <div id="scenes-view" class="content-view">
-                <header class="content-header">
-                    <h1><i class="fas fa-film"></i> Scenes</h1>
-                    <div class="header-actions">
-                        <button id="new-scene-modal-btn" class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            New Scene
-                        </button>
-                    </div>
-                </header>
-                <div id="scenes-content" class="content-list"></div>
-            </div>
-
-            <div id="characters-view" class="content-view">
-                <header class="content-header">
-                    <h1><i class="fas fa-users"></i> Characters</h1>
-                    <div class="header-actions">
-                        <button id="new-character-modal-btn" class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            New Character
-                        </button>
-                    </div>
-                </header>
-                <div id="characters-content" class="content-list"></div>
-            </div>
-
-            <div id="notes-view" class="content-view">
-                <header class="content-header">
-                    <h1><i class="fas fa-sticky-note"></i> Notes</h1>
-                    <div class="header-actions">
-                        <button id="new-note-modal-btn" class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            New Note
-                        </button>
-                    </div>
-                </header>
-                <div id="notes-content" class="content-list"></div>
-            </div>
-
-            <div id="shortstories-view" class="content-view">
-                <header class="content-header">
-                    <h1><i class="fas fa-book-open"></i> Short Stories</h1>
-                    <div class="header-actions">
-                        <button id="new-shortstory-modal-btn" class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            New Short Story
-                        </button>
-                    </div>
-                </header>
-                <div id="shortstories-content" class="content-list"></div>
-            </div>
-
-            <!-- Statistics View -->
-            <div id="statistics-view" class="content-view">
-                <header class="content-header">
-                    <h1><i class="fas fa-chart-bar"></i> Project Statistics</h1>
-                </header>
-                <div class="statistics-content">
-                    <div class="stats-grid">
-                        <!-- Detailed stats will be populated by JavaScript -->
-                    </div>
+                <div class="navbar-project">
+                    <span id="project-name">No Project</span>
+                    <span id="project-author"></span>
                 </div>
-            </div>
+                <div class="navbar-actions">
+                    <button
+                        id="theme-toggle"
+                        class="navbar-btn"
+                        title="Toggle Dark Mode"
+                    >
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button
+                        id="settings-btn"
+                        class="navbar-btn"
+                        title="Project Settings"
+                    >
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </nav>
 
-            <!-- Export View -->
-            <div id="export-view" class="content-view">
-                <header class="content-header">
-                    <h1><i class="fas fa-download"></i> Export Project</h1>
-                </header>
-                <div class="export-content">
-                    <div class="export-options">
-                        <div class="card">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-home"></i>
+                        Project Overview
+                    </h3>
+                    <button class="sidebar-item active" data-view="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-folder"></i>
+                        Content
+                    </h3>
+                    <button class="sidebar-item" data-view="chapters">
+                        <i class="fas fa-book"></i>
+                        Chapters
+                        <span class="count" id="chapters-count">0</span>
+                    </button>
+                    <button class="sidebar-item" data-view="scenes">
+                        <i class="fas fa-film"></i>
+                        Scenes
+                        <span class="count" id="scenes-count">0</span>
+                    </button>
+                    <button class="sidebar-item" data-view="characters">
+                        <i class="fas fa-users"></i>
+                        Characters
+                        <span class="count" id="characters-count">0</span>
+                    </button>
+                    <button class="sidebar-item" data-view="notes">
+                        <i class="fas fa-sticky-note"></i>
+                        Notes
+                        <span class="count" id="notes-count">0</span>
+                    </button>
+                    <button class="sidebar-item" data-view="shortstories">
+                        <i class="fas fa-book-open"></i>
+                        Short Stories
+                        <span class="count" id="shortstories-count">0</span>
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-tools"></i>
+                        Tools
+                    </h3>
+                    <button class="sidebar-item" data-view="statistics">
+                        <i class="fas fa-chart-bar"></i>
+                        Statistics
+                    </button>
+                    <button class="sidebar-item" data-view="export">
+                        <i class="fas fa-download"></i>
+                        Export
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <!-- Dashboard View -->
+                <div id="dashboard-view" class="content-view active">
+                    <header class="content-header">
+                        <h1>
+                            <i class="fas fa-tachometer-alt"></i> Project
+                            Dashboard
+                        </h1>
+                        <div class="header-actions">
+                            <button id="refresh-btn" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="dashboard-grid">
+                        <!-- Progress Card -->
+                        <div class="card progress-card">
                             <div class="card-header">
-                                <h3>Export Format</h3>
+                                <h3>
+                                    <i class="fas fa-target"></i> Writing
+                                    Progress
+                                </h3>
                             </div>
                             <div class="card-content">
-                                <div class="format-options">
-                                    <label class="format-option">
-                                        <input type="radio" name="export-format" value="html" checked>
-                                        <div class="format-info">
-                                            <i class="fas fa-globe"></i>
-                                            <div>
-                                                <h4>HTML</h4>
-                                                <p>Web-ready format with styling</p>
-                                            </div>
-                                        </div>
-                                    </label>
-                                    <label class="format-option">
-                                        <input type="radio" name="export-format" value="pdf">
-                                        <div class="format-info">
-                                            <i class="fas fa-file-pdf"></i>
-                                            <div>
-                                                <h4>PDF</h4>
-                                                <p>Portable document format</p>
-                                            </div>
-                                        </div>
-                                    </label>
-                                    <label class="format-option">
-                                        <input type="radio" name="export-format" value="epub">
-                                        <div class="format-info">
-                                            <i class="fas fa-book"></i>
-                                            <div>
-                                                <h4>EPUB</h4>
-                                                <p>E-book format</p>
-                                            </div>
-                                        </div>
-                                    </label>
+                                <div class="progress-stats">
+                                    <div class="stat">
+                                        <span
+                                            class="stat-value"
+                                            id="total-words"
+                                            >0</span
+                                        >
+                                        <span class="stat-label"
+                                            >Total Words</span
+                                        >
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-value" id="word-goal"
+                                            >50,000</span
+                                        >
+                                        <span class="stat-label"
+                                            >Word Goal</span
+                                        >
+                                    </div>
+                                    <div class="stat">
+                                        <span
+                                            class="stat-value"
+                                            id="progress-percent"
+                                            >0%</span
+                                        >
+                                        <span class="stat-label">Progress</span>
+                                    </div>
                                 </div>
-                                <button id="export-project-btn" class="btn btn-primary">
-                                    <i class="fas fa-download"></i>
-                                    Export Project
-                                </button>
+                                <div class="progress-bar">
+                                    <div
+                                        class="progress-fill"
+                                        id="progress-fill"
+                                        style="width: 0%"
+                                    ></div>
+                                </div>
+                                <div class="progress-info">
+                                    <span id="words-remaining"
+                                        >50,000 words remaining</span
+                                    >
+                                    <span id="estimated-completion">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats -->
+                        <div class="card stats-card">
+                            <div class="card-header">
+                                <h3>
+                                    <i class="fas fa-chart-pie"></i> Quick Stats
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="quick-stats">
+                                    <div class="quick-stat">
+                                        <i class="fas fa-book stat-icon"></i>
+                                        <div class="stat-info">
+                                            <span
+                                                class="stat-number"
+                                                id="total-chapters"
+                                                >0</span
+                                            >
+                                            <span class="stat-text"
+                                                >Chapters</span
+                                            >
+                                        </div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <i class="fas fa-film stat-icon"></i>
+                                        <div class="stat-info">
+                                            <span
+                                                class="stat-number"
+                                                id="total-scenes"
+                                                >0</span
+                                            >
+                                            <span class="stat-text"
+                                                >Scenes</span
+                                            >
+                                        </div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <i class="fas fa-users stat-icon"></i>
+                                        <div class="stat-info">
+                                            <span
+                                                class="stat-number"
+                                                id="total-characters"
+                                                >0</span
+                                            >
+                                            <span class="stat-text"
+                                                >Characters</span
+                                            >
+                                        </div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <i
+                                            class="fas fa-sticky-note stat-icon"
+                                        ></i>
+                                        <div class="stat-info">
+                                            <span
+                                                class="stat-number"
+                                                id="total-notes"
+                                                >0</span
+                                            >
+                                            <span class="stat-text">Notes</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="card activity-card">
+                            <div class="card-header">
+                                <h3>
+                                    <i class="fas fa-clock"></i> Recent Activity
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div id="recent-files" class="recent-files">
+                                    <div class="no-content">
+                                        <i class="fas fa-inbox"></i>
+                                        <p>No recent activity</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card actions-card">
+                            <div class="card-header">
+                                <h3>
+                                    <i class="fas fa-bolt"></i> Quick Actions
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="quick-actions">
+                                    <button
+                                        class="action-btn"
+                                        id="new-chapter-btn"
+                                    >
+                                        <i class="fas fa-plus"></i>
+                                        New Chapter
+                                    </button>
+                                    <button
+                                        class="action-btn"
+                                        id="new-scene-btn"
+                                    >
+                                        <i class="fas fa-plus"></i>
+                                        New Scene
+                                    </button>
+                                    <button
+                                        class="action-btn"
+                                        id="new-character-btn"
+                                    >
+                                        <i class="fas fa-plus"></i>
+                                        New Character
+                                    </button>
+                                    <button class="action-btn" id="backup-btn">
+                                        <i class="fas fa-save"></i>
+                                        Create Backup
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
 
-    <!-- Editor Modal -->
-    <div id="editor-modal" class="modal">
-        <div class="modal-content editor-content">
-            <div class="modal-header">
-                <h3 id="editor-title">Edit File</h3>
-                <div class="editor-toolbar">
-                    <button id="editor-save-btn" class="btn btn-primary">
+                <!-- Content List Views -->
+                <div id="chapters-view" class="content-view">
+                    <header class="content-header">
+                        <h1><i class="fas fa-book"></i> Chapters</h1>
+                        <div class="header-actions">
+                            <button
+                                id="new-chapter-modal-btn"
+                                class="btn btn-primary"
+                            >
+                                <i class="fas fa-plus"></i>
+                                New Chapter
+                            </button>
+                        </div>
+                    </header>
+                    <div id="chapters-content" class="content-list"></div>
+                </div>
+
+                <div id="scenes-view" class="content-view">
+                    <header class="content-header">
+                        <h1><i class="fas fa-film"></i> Scenes</h1>
+                        <div class="header-actions">
+                            <button
+                                id="new-scene-modal-btn"
+                                class="btn btn-primary"
+                            >
+                                <i class="fas fa-plus"></i>
+                                New Scene
+                            </button>
+                        </div>
+                    </header>
+                    <div id="scenes-content" class="content-list"></div>
+                </div>
+
+                <div id="characters-view" class="content-view">
+                    <header class="content-header">
+                        <h1><i class="fas fa-users"></i> Characters</h1>
+                        <div class="header-actions">
+                            <button
+                                id="new-character-modal-btn"
+                                class="btn btn-primary"
+                            >
+                                <i class="fas fa-plus"></i>
+                                New Character
+                            </button>
+                        </div>
+                    </header>
+                    <div id="characters-content" class="content-list"></div>
+                </div>
+
+                <div id="notes-view" class="content-view">
+                    <header class="content-header">
+                        <h1><i class="fas fa-sticky-note"></i> Notes</h1>
+                        <div class="header-actions">
+                            <button
+                                id="new-note-modal-btn"
+                                class="btn btn-primary"
+                            >
+                                <i class="fas fa-plus"></i>
+                                New Note
+                            </button>
+                        </div>
+                    </header>
+                    <div id="notes-content" class="content-list"></div>
+                </div>
+
+                <div id="shortstories-view" class="content-view">
+                    <header class="content-header">
+                        <h1><i class="fas fa-book-open"></i> Short Stories</h1>
+                        <div class="header-actions">
+                            <button
+                                id="new-shortstory-modal-btn"
+                                class="btn btn-primary"
+                            >
+                                <i class="fas fa-plus"></i>
+                                New Short Story
+                            </button>
+                        </div>
+                    </header>
+                    <div id="shortstories-content" class="content-list"></div>
+                </div>
+
+                <!-- Statistics View -->
+                <div id="statistics-view" class="content-view">
+                    <header class="content-header">
+                        <h1>
+                            <i class="fas fa-chart-bar"></i> Project Statistics
+                        </h1>
+                    </header>
+                    <div class="statistics-content">
+                        <div class="stats-grid">
+                            <!-- Detailed stats will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export View -->
+                <div id="export-view" class="content-view">
+                    <header class="content-header">
+                        <h1><i class="fas fa-download"></i> Export Project</h1>
+                    </header>
+                    <div class="export-content">
+                        <div class="export-options">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Export Format</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div class="format-options">
+                                        <label class="format-option">
+                                            <input
+                                                type="radio"
+                                                name="export-format"
+                                                value="html"
+                                                checked
+                                            />
+                                            <div class="format-info">
+                                                <i class="fas fa-globe"></i>
+                                                <div>
+                                                    <h4>HTML</h4>
+                                                    <p>
+                                                        Web-ready format with
+                                                        styling
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <label class="format-option">
+                                            <input
+                                                type="radio"
+                                                name="export-format"
+                                                value="pdf"
+                                            />
+                                            <div class="format-info">
+                                                <i class="fas fa-file-pdf"></i>
+                                                <div>
+                                                    <h4>PDF</h4>
+                                                    <p>
+                                                        Portable document format
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <label class="format-option">
+                                            <input
+                                                type="radio"
+                                                name="export-format"
+                                                value="epub"
+                                            />
+                                            <div class="format-info">
+                                                <i class="fas fa-book"></i>
+                                                <div>
+                                                    <h4>EPUB</h4>
+                                                    <p>E-book format</p>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <button
+                                        id="export-project-btn"
+                                        class="btn btn-primary"
+                                    >
+                                        <i class="fas fa-download"></i>
+                                        Export Project
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Editor Modal -->
+        <div id="editor-modal" class="modal">
+            <div class="modal-content editor-content">
+                <div class="modal-header">
+                    <h3 id="editor-title">Edit File</h3>
+                    <div class="editor-toolbar">
+                        <button id="editor-save-btn" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Save
+                        </button>
+                        <button id="vim-toggle-btn" class="btn btn-secondary">
+                            <i class="fas fa-keyboard"></i>
+                            Vim: ON
+                        </button>
+                        <button
+                            id="typewriter-toggle-btn"
+                            class="btn btn-secondary"
+                        >
+                            <i class="fas fa-align-center"></i>
+                            Typewriter: OFF
+                        </button>
+                        <button id="focus-mode-btn" class="btn btn-secondary">
+                            <i class="fas fa-eye"></i>
+                            Focus Mode
+                        </button>
+                        <button id="editor-close-btn" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Close
+                        </button>
+                    </div>
+                </div>
+                <div class="editor-body">
+                    <div class="editor-info">
+                        <span id="editor-word-count">0 words</span>
+                        <span id="editor-reading-time">0 min read</span>
+                        <span id="editor-status">NORMAL</span>
+                        <span id="typewriter-indicator" style="display: none">
+                            <i class="fas fa-align-center"></i>
+                            TYPEWRITER
+                        </span>
+                        <span id="vim-help"
+                            >ESC: Normal | i: Insert | h/j/k/l: Navigate</span
+                        >
+                    </div>
+                    <textarea
+                        id="editor-textarea"
+                        class="editor-textarea"
+                        placeholder="Start writing..."
+                    ></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Focus Mode -->
+        <div id="focus-mode" class="focus-mode">
+            <div class="focus-mode-header">
+                <div class="focus-mode-left">
+                    <div class="focus-mode-title" id="focus-mode-title">
+                        Focus Mode
+                    </div>
+                    <div class="focus-mode-shortcuts">
+                        <span>F11 or Esc to exit • Ctrl+S to save</span>
+                    </div>
+                </div>
+                <div class="focus-mode-controls">
+                    <div class="focus-mode-stats">
+                        <span id="focus-word-count">0 words</span>
+                        <span id="focus-char-count">0 chars</span>
+                    </div>
+                    <button
+                        id="focus-typewriter-toggle-btn"
+                        class="btn btn-secondary"
+                    >
+                        <i class="fas fa-align-center"></i>
+                        Typewriter: OFF
+                    </button>
+                    <button id="focus-save-btn" class="btn btn-primary">
                         <i class="fas fa-save"></i>
                         Save
                     </button>
-                    <button id="editor-close-btn" class="btn btn-secondary">
+                    <button id="focus-exit-btn" class="btn btn-secondary">
                         <i class="fas fa-times"></i>
-                        Close
+                        Exit Focus
                     </button>
                 </div>
             </div>
-            <div class="editor-body">
-                <div class="editor-info">
-                    <span id="editor-word-count">0 words</span>
-                    <span id="editor-reading-time">0 min read</span>
-                    <span id="editor-status">Ready</span>
+            <textarea
+                id="focus-mode-textarea"
+                class="focus-mode-textarea"
+                placeholder="Enter focus mode and start writing..."
+            ></textarea>
+        </div>
+
+        <!-- Create Content Modal -->
+        <div id="create-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="create-modal-title">Create New Content</h3>
+                    <button class="modal-close" id="create-modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <textarea id="editor-textarea" class="editor-textarea" placeholder="Start writing..."></textarea>
-            </div>
-        </div>
-    </div>
-
-    <!-- Create Content Modal -->
-    <div id="create-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="create-modal-title">Create New Content</h3>
-                <button class="modal-close" id="create-modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="create-form">
-                    <div class="form-group">
-                        <label for="create-name">Name</label>
-                        <input type="text" id="create-name" class="form-input" placeholder="Enter name..." required>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" id="create-cancel">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Project Settings</h3>
-                <button class="modal-close" id="settings-modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="settings-form">
-                    <div class="form-group">
-                        <label for="settings-name">Project Name</label>
-                        <input type="text" id="settings-name" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label for="settings-author">Author</label>
-                        <input type="text" id="settings-author" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label for="settings-word-goal">Word Goal</label>
-                        <input type="number" id="settings-word-goal" class="form-input" min="1000" step="1000">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" id="settings-cancel">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Settings</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Welcome Modal (for new projects) -->
-    <div id="welcome-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Welcome to Writers CLI</h3>
-            </div>
-            <div class="modal-body welcome-body">
-                <p>It looks like you don't have a project open. Would you like to:</p>
-                <div class="welcome-actions">
-                    <button id="create-project-btn" class="welcome-btn">
-                        <i class="fas fa-plus-circle"></i>
-                        <div>
-                            <h4>Create New Project</h4>
-                            <p>Start a new novel, short story, or blog</p>
+                <div class="modal-body">
+                    <form id="create-form">
+                        <div class="form-group">
+                            <label for="create-name">Name</label>
+                            <input
+                                type="text"
+                                id="create-name"
+                                class="form-input"
+                                placeholder="Enter name..."
+                                required
+                            />
                         </div>
-                    </button>
-                    <button id="open-project-btn" class="welcome-btn">
-                        <i class="fas fa-folder-open"></i>
-                        <div>
-                            <h4>Open Existing Project</h4>
-                            <p>Navigate to an existing Writers CLI project</p>
+                        <div class="form-actions">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="create-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Create
+                            </button>
                         </div>
-                    </button>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Project Creation Modal -->
-    <div id="project-creation-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Create New Project</h3>
-                <button class="modal-close" id="project-creation-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="project-creation-form">
-                    <div class="form-group">
-                        <label for="project-name">Project Name</label>
-                        <input type="text" id="project-name" class="form-input" placeholder="My Novel" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="project-author">Author Name</label>
-                        <input type="text" id="project-author" class="form-input" placeholder="Your Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="project-type">Project Type</label>
-                        <select id="project-type" class="form-input">
-                            <option value="novel">Novel</option>
-                            <option value="short-story">Short Story Collection</option>
-                            <option value="blog">Blog</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="project-word-goal">Word Goal</label>
-                        <input type="number" id="project-word-goal" class="form-input" value="50000" min="1000" step="1000">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" id="project-creation-cancel">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create Project</button>
-                    </div>
-                </form>
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Project Settings</h3>
+                    <button class="modal-close" id="settings-modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="settings-form">
+                        <div class="form-group">
+                            <label for="settings-name">Project Name</label>
+                            <input
+                                type="text"
+                                id="settings-name"
+                                class="form-input"
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-author">Author</label>
+                            <input
+                                type="text"
+                                id="settings-author"
+                                class="form-input"
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-word-goal">Word Goal</label>
+                            <input
+                                type="number"
+                                id="settings-word-goal"
+                                class="form-input"
+                                min="1000"
+                                step="1000"
+                            />
+                        </div>
+                        <div class="form-actions">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="settings-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Save Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Toast Notifications -->
-    <div id="toast-container" class="toast-container"></div>
+        <!-- Welcome Modal (for new projects) -->
+        <div id="welcome-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Welcome to Writers CLI</h3>
+                </div>
+                <div class="modal-body welcome-body">
+                    <p>
+                        It looks like you don't have a project open. Would you
+                        like to:
+                    </p>
+                    <div class="welcome-actions">
+                        <button id="create-project-btn" class="welcome-btn">
+                            <i class="fas fa-plus-circle"></i>
+                            <div>
+                                <h4>Create New Project</h4>
+                                <p>Start a new novel, short story, or blog</p>
+                            </div>
+                        </button>
+                        <button id="open-project-btn" class="welcome-btn">
+                            <i class="fas fa-folder-open"></i>
+                            <div>
+                                <h4>Open Existing Project</h4>
+                                <p>
+                                    Navigate to an existing Writers CLI project
+                                </p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <!-- Scripts -->
-    <script src="assets/js/app.js"></script>
-</body>
+        <!-- Project Creation Modal -->
+        <div id="project-creation-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create New Project</h3>
+                    <button class="modal-close" id="project-creation-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="project-creation-form">
+                        <div class="form-group">
+                            <label for="project-name">Project Name</label>
+                            <input
+                                type="text"
+                                id="project-name"
+                                class="form-input"
+                                placeholder="My Novel"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="project-author">Author Name</label>
+                            <input
+                                type="text"
+                                id="project-author"
+                                class="form-input"
+                                placeholder="Your Name"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="project-type">Project Type</label>
+                            <select id="project-type" class="form-input">
+                                <option value="novel">Novel</option>
+                                <option value="short-story">
+                                    Short Story Collection
+                                </option>
+                                <option value="blog">Blog</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-word-goal">Word Goal</label>
+                            <input
+                                type="number"
+                                id="project-word-goal"
+                                class="form-input"
+                                value="50000"
+                                min="1000"
+                                step="1000"
+                            />
+                        </div>
+                        <div class="form-actions">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="project-creation-cancel"
+                            >
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Create Project
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Scripts -->
+        <script src="assets/js/app.js"></script>
+    </body>
 </html>
