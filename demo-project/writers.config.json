@@ -1,0 +1,25 @@
+{
+  "name": "My First Novel",
+  "author": "John Doe",
+  "created": "2024-12-19T20:30:00.000Z",
+  "version": "1.0.0",
+  "wordGoal": 50000,
+  "settings": {
+    "autoSave": true,
+    "backups": true,
+    "defaultEditor": "nano"
+  },
+  "structure": {
+    "chapters": "chapters",
+    "scenes": "scenes",
+    "characters": "characters",
+    "notes": "notes",
+    "shortstories": "shortstories",
+    "stories": "stories",
+    "drafts": "drafts",
+    "submission-ready": "submission-ready",
+    "exercises": "exercises",
+    "prompts": "prompts",
+    "exports": "exports"
+  }
+}

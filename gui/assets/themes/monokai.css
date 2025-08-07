@@ -1,0 +1,14 @@
+
+/* Monokai Theme */
+:root.theme-monokai {
+  --primary-color: #fd971f;
+  --primary-hover: #f92672;
+  --background-color: #272822;
+  --surface-color: #383830;
+  --surface-hover: #49483e;
+  --border-color: #75715e;
+  --text-primary: #f8f8f2;
+  --text-secondary: #cfcfc2;
+  --text-muted: #a6e22e;
+}
+    

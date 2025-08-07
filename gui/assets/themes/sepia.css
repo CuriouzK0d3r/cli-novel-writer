@@ -1,0 +1,14 @@
+
+/* Sepia Theme */
+:root.theme-sepia {
+  --primary-color: #8b4513;
+  --primary-hover: #a0522d;
+  --background-color: #f4f1e8;
+  --surface-color: #ede5d3;
+  --surface-hover: #e6dcc6;
+  --border-color: #d2c5a7;
+  --text-primary: #3e2723;
+  --text-secondary: #5d4037;
+  --text-muted: #8d6e63;
+}
+    

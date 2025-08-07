@@ -1,0 +1,84 @@
+{
+  "version": "2.0.0",
+  "features": {
+    "themes": {
+      "enabled": true,
+      "default": "auto",
+      "available": [
+        "dark",
+        "light",
+        "sepia",
+        "high-contrast",
+        "nord",
+        "monokai"
+      ]
+    },
+    "collaboration": {
+      "enabled": true,
+      "server": "localhost:3001",
+      "encryption": true
+    },
+    "smartTools": {
+      "enabled": true,
+      "suggestions": true,
+      "grammarCheck": true,
+      "styleAnalysis": true
+    },
+    "export": {
+      "enabled": true,
+      "formats": [
+        "html",
+        "pdf",
+        "epub",
+        "docx",
+        "tex",
+        "indd"
+      ]
+    },
+    "analytics": {
+      "enabled": true,
+      "trackingLevel": "detailed",
+      "insights": true
+    },
+    "focus": {
+      "enabled": true,
+      "modes": [
+        "typewriter",
+        "zen",
+        "immersive"
+      ]
+    },
+    "pomodoro": {
+      "enabled": true,
+      "workDuration": 25,
+      "breakDuration": 5,
+      "longBreakDuration": 30
+    }
+  },
+  "ui": {
+    "sidebar": {
+      "collapsed": false,
+      "width": 300
+    },
+    "editor": {
+      "font": "Cascadia Code",
+      "fontSize": 14,
+      "lineHeight": 1.6,
+      "wordWrap": true,
+      "minimap": true
+    },
+    "panels": {
+      "outline": true,
+      "wordCount": true,
+      "timeline": true,
+      "research": true
+    }
+  },
+  "shortcuts": {
+    "Ctrl+Shift+F": "focusMode",
+    "Ctrl+Shift+T": "toggleTimer",
+    "Ctrl+Shift+O": "toggleOutline",
+    "Ctrl+Shift+R": "toggleResearch",
+    "F11": "fullscreen"
+  }
+}

@@ -8,6 +8,9 @@
   },
   "scripts": {
     "start": "node bin/writers.js",
+    "gui": "node gui-enhanced-launcher.js",
+    "gui-classic": "electron gui/main.js",
+    "gui-dev": "nodemon --exec 'electron gui/main.js'",
     "test": "jest",
     "dev": "nodemon bin/writers.js",
     "build": "pkg --config pkg.config.json bin/writers.js"

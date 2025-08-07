@@ -1,0 +1,14 @@
+
+/* High Contrast Theme */
+:root.theme-high-contrast {
+  --primary-color: #ffff00;
+  --primary-hover: #ffff33;
+  --background-color: #000000;
+  --surface-color: #1a1a1a;
+  --surface-hover: #333333;
+  --border-color: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: #ffff00;
+  --text-muted: #cccccc;
+}
+    
