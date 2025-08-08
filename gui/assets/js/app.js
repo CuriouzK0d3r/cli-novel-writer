@@ -1513,9 +1513,16 @@ class WritersApp {
       if (this.typewriterEnabled) {
         this.setupTypewriterMode();
         this.showToast("Typewriter mode enabled", "info");
+        // Enable debug mode temporarily
+        window.WritersDebug = true;
+        console.log(
+          "Typewriter debug enabled - check console for scroll calculations",
+        );
       } else {
         this.disableTypewriterMode();
         this.showToast("Typewriter mode disabled", "info");
+        // Disable debug mode
+        window.WritersDebug = false;
       }
     }
   }
@@ -1544,15 +1551,14 @@ class WritersApp {
     this.editorElement.classList.add("typewriter-mode");
     this.updateTypewriterIndicator();
 
+    // Create stable bound handlers so we can remove them later
+    if (!this._onTypewriterScroll) {
+      this._onTypewriterScroll = this.handleTypewriterScroll.bind(this);
+    }
+
     // Add scroll event listener for centering
-    this.editorElement.addEventListener(
-      "keyup",
-      this.handleTypewriterScroll.bind(this),
-    );
-    this.editorElement.addEventListener(
-      "click",
-      this.handleTypewriterScroll.bind(this),
-    );
+    this.editorElement.addEventListener("keyup", this._onTypewriterScroll);
+    this.editorElement.addEventListener("click", this._onTypewriterScroll);
 
     // Initial center
     setTimeout(() => {
@@ -1566,15 +1572,12 @@ class WritersApp {
     this.editorElement.classList.remove("typewriter-mode");
     this.updateTypewriterIndicator();
 
-    // Remove scroll event listeners
-    this.editorElement.removeEventListener(
-      "keyup",
-      this.handleTypewriterScroll.bind(this),
-    );
-    this.editorElement.removeEventListener(
-      "click",
-      this.handleTypewriterScroll.bind(this),
-    );
+    // Remove scroll event listeners using the stored handler
+    if (this._onTypewriterScroll) {
+      this.editorElement.removeEventListener("keyup", this._onTypewriterScroll);
+      this.editorElement.removeEventListener("click", this._onTypewriterScroll);
+      this._onTypewriterScroll = null;
+    }
 
     // Clear any pending timeouts
     if (this.typewriterScrollTimeout) {
@@ -1611,34 +1614,78 @@ class WritersApp {
     const lineHeight =
       parseFloat(styles.lineHeight) || parseFloat(styles.fontSize) * 1.2;
 
-    // Calculate the pixel position of the current line
-    const currentLineTop = linesBeforeCursor * lineHeight;
+    // Get padding-top added by typewriter mode - convert vh to pixels if needed
+    let paddingTop = parseFloat(styles.paddingTop) || 0;
+
+    // If padding is in vh units, convert to pixels
+    if (styles.paddingTop && styles.paddingTop.includes("vh")) {
+      const vhValue = parseFloat(styles.paddingTop);
+      paddingTop = (vhValue / 100) * window.innerHeight;
+    }
+
+    // Calculate the pixel position of the current line within the content area
+    const contentLineTop = linesBeforeCursor * lineHeight;
 
     // Calculate target scroll to center the current line
     const textareaHeight = textarea.clientHeight;
     const targetScrollTop =
-      currentLineTop - textareaHeight / 2 + lineHeight / 2;
+      paddingTop + contentLineTop - textareaHeight / 2 + lineHeight / 2;
 
     // Apply scroll with bounds checking
     const maxScrollTop = Math.max(0, textarea.scrollHeight - textareaHeight);
     const finalScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
 
-    textarea.scrollTop = finalScrollTop;
+    // Debug logging (can be removed in production)
+    if (window.WritersDebug) {
+      console.log("Typewriter scroll debug:", {
+        linesBeforeCursor,
+        lineHeight,
+        paddingTop,
+        contentLineTop,
+        textareaHeight,
+        targetScrollTop,
+        finalScrollTop,
+        scrollHeight: textarea.scrollHeight,
+      });
+    }
+
+    textarea.scrollTo({
+      top: finalScrollTop,
+      behavior: "smooth",
+    });
   }
 
-  updateTypewriterIndicator() {
-    const indicator = document.getElementById("typewriter-indicator");
-    if (indicator) {
-      indicator.style.display = this.typewriterEnabled ? "inline" : "none";
-      indicator.style.color = this.typewriterEnabled
-        ? "var(--primary-color)"
-        : "var(--text-secondary)";
-      indicator.style.fontWeight = this.typewriterEnabled ? "bold" : "normal";
+  // Debug helper for typewriter mode
+  debugTypewriter() {
+    if (!this.editorElement) {
+      console.log("No editor element available");
+      return;
     }
+
+    const textarea = this.editorElement;
+    const cursorPosition = textarea.selectionStart;
+    const textBeforeCursor = textarea.value.substring(0, cursorPosition);
+    const linesBeforeCursor = textBeforeCursor.split("\n").length - 1;
+    const styles = window.getComputedStyle(textarea);
+
+    console.log("Typewriter Debug Info:", {
+      typewriterEnabled: this.typewriterEnabled,
+      cursorPosition,
+      linesBeforeCursor,
+      scrollTop: textarea.scrollTop,
+      scrollHeight: textarea.scrollHeight,
+      clientHeight: textarea.clientHeight,
+      paddingTop: styles.paddingTop,
+      lineHeight: styles.lineHeight,
+      fontSize: styles.fontSize,
+      hasTypewriterClass: textarea.classList.contains("typewriter-mode"),
+    });
   }
 
   // Global keyboard shortcuts
   setupGlobalKeyboardShortcuts() {
+    // Make debug function globally accessible
+    window.debugTypewriter = () => this.debugTypewriter();
     document.addEventListener("keydown", (e) => {
       // Focus mode toggle (F11 or Ctrl+Shift+F)
       if (e.key === "F11" || (e.ctrlKey && e.shiftKey && e.key === "F")) {
@@ -1778,15 +1825,14 @@ class WritersApp {
 
     this.focusModeElement.classList.add("typewriter-mode");
 
+    // Create stable bound handlers so we can remove them later
+    if (!this._onFocusTypewriterScroll) {
+      this._onFocusTypewriterScroll = this.handleFocusTypewriterScroll.bind(this);
+    }
+
     // Add scroll event listeners
-    this.focusModeElement.addEventListener(
-      "keyup",
-      this.handleFocusTypewriterScroll.bind(this),
-    );
-    this.focusModeElement.addEventListener(
-      "click",
-      this.handleFocusTypewriterScroll.bind(this),
-    );
+    this.focusModeElement.addEventListener("keyup", this._onFocusTypewriterScroll);
+    this.focusModeElement.addEventListener("click", this._onFocusTypewriterScroll);
 
     // Initial center
     setTimeout(() => {
@@ -1799,15 +1845,12 @@ class WritersApp {
 
     this.focusModeElement.classList.remove("typewriter-mode");
 
-    // Remove event listeners
-    this.focusModeElement.removeEventListener(
-      "keyup",
-      this.handleFocusTypewriterScroll.bind(this),
-    );
-    this.focusModeElement.removeEventListener(
-      "click",
-      this.handleFocusTypewriterScroll.bind(this),
-    );
+    // Remove event listeners using the stored handler
+    if (this._onFocusTypewriterScroll) {
+      this.focusModeElement.removeEventListener("keyup", this._onFocusTypewriterScroll);
+      this.focusModeElement.removeEventListener("click", this._onFocusTypewriterScroll);
+      this._onFocusTypewriterScroll = null;
+    }
 
     // Clear any pending timeouts
     if (this.focusTypewriterScrollTimeout) {
@@ -1849,17 +1892,45 @@ class WritersApp {
     const lineHeight =
       parseFloat(styles.lineHeight) || parseFloat(styles.fontSize) * 1.2;
 
-    // Calculate the pixel position of the current line
-    const currentLineTop = linesBeforeCursor * lineHeight;
+    // Get padding-top added by typewriter mode - convert vh to pixels if needed
+    let paddingTop = parseFloat(styles.paddingTop) || 0;
+
+    // If padding is in vh units, convert to pixels
+    if (styles.paddingTop && styles.paddingTop.includes("vh")) {
+      const vhValue = parseFloat(styles.paddingTop);
+      paddingTop = (vhValue / 100) * window.innerHeight;
+    }
+
+    // Calculate the pixel position of the current line within the content area
+    const contentLineTop = linesBeforeCursor * lineHeight;
 
     // Calculate target scroll to center the current line
     const textareaHeight = textarea.clientHeight;
     const targetScrollTop =
-      currentLineTop - textareaHeight / 2 + lineHeight / 2;
+      paddingTop + contentLineTop - textareaHeight / 2 + lineHeight / 2;
 
     // Apply scroll with bounds checking
     const maxScrollTop = Math.max(0, textarea.scrollHeight - textareaHeight);
-    textarea.scrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
+    const finalScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
+
+    // Debug logging (can be removed in production)
+    if (window.WritersDebug) {
+      console.log("Focus typewriter scroll debug:", {
+        linesBeforeCursor,
+        lineHeight,
+        paddingTop,
+        contentLineTop,
+        textareaHeight,
+        targetScrollTop,
+        finalScrollTop,
+        scrollHeight: textarea.scrollHeight,
+      });
+    }
+
+    textarea.scrollTo({
+      top: finalScrollTop,
+      behavior: "smooth",
+    });
   }
 
   updateFocusStats() {

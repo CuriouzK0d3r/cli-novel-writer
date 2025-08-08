@@ -81,3 +81,28 @@ When typewriter mode is enabled:
 - The typewriter indicator should be visible in the editor info bar
 
 Test by placing your cursor on different lines and observing the centering behavior.
+
+## Troubleshooting Typewriter Mode
+
+If typewriter mode is not working correctly (e.g., scrolling in the wrong direction), try these steps:
+
+### Debug Steps
+1. Open the browser's Developer Tools (F12)
+2. Go to the Console tab
+3. Enable typewriter mode in the editor
+4. Type `debugTypewriter()` in the console and press Enter
+5. This will show detailed information about the current state
+
+### Common Issues
+- **Scrolling in opposite direction**: This was a bug in the scroll calculation that has been fixed
+- **Not centering properly**: Make sure your browser zoom is at 100%
+- **Jumpy scrolling**: The system now uses smooth scrolling to improve the experience
+
+### Debug Information
+When typewriter mode is enabled, debug information will be logged to the console showing:
+- Current cursor position
+- Number of lines before cursor
+- Calculated scroll positions
+- Padding and height values
+
+Use this information to verify that the calculations are working correctly.
