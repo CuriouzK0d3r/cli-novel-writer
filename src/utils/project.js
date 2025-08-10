@@ -1,10 +1,12 @@
 const fs = require("fs-extra");
 const path = require("path");
+const os = require("os");
 const chalk = require("chalk");
 
 class ProjectManager {
   constructor() {
     this.configFile = "writers.config.json";
+    this.baseDir = process.env.WRITERS_PROJECT_DIR || process.cwd();
     this.projectStructure = {
       chapters: "chapters",
       scenes: "scenes",
@@ -21,10 +23,26 @@ class ProjectManager {
   }
 
   /**
+   * Resolve a path relative to the current project base directory
+   */
+  resolvePath(...segments) {
+    return path.resolve(this.baseDir, ...segments);
+  }
+
+  /**
+   * Set the project base directory at runtime (e.g., from GUI)
+   */
+  setBaseDir(dir) {
+    if (dir && typeof dir === "string") {
+      this.baseDir = dir;
+    }
+  }
+
+  /**
    * Check if current directory is a writers project
    */
   isWritersProject() {
-    return fs.existsSync(this.configFile);
+    return fs.existsSync(this.resolvePath(this.configFile));
   }
 
   /**
@@ -38,7 +56,7 @@ class ProjectManager {
     }
 
     try {
-      const config = await fs.readJson(this.configFile);
+      const config = await fs.readJson(this.resolvePath(this.configFile));
       return config;
     } catch (error) {
       throw new Error("Failed to read project configuration.");
@@ -51,7 +69,9 @@ class ProjectManager {
   async updateConfig(updates) {
     const config = await this.getConfig();
     const newConfig = { ...config, ...updates };
-    await fs.writeJson(this.configFile, newConfig, { spaces: 2 });
+    await fs.writeJson(this.resolvePath(this.configFile), newConfig, {
+      spaces: 2,
+    });
     return newConfig;
   }
 
@@ -60,7 +80,7 @@ class ProjectManager {
    */
   async createProjectStructure() {
     for (const dir of Object.values(this.projectStructure)) {
-      await fs.ensureDir(dir);
+      await fs.ensureDir(this.resolvePath(dir));
     }
   }
 
@@ -86,12 +106,14 @@ class ProjectManager {
       structure: this.projectStructure,
     };
 
-    await fs.writeJson(this.configFile, config, { spaces: 2 });
+    await fs.writeJson(this.resolvePath(this.configFile), config, {
+      spaces: 2,
+    });
     await this.createProjectStructure();
 
     // Create initial README
     const readme = this.generateReadme(config);
-    await fs.writeFile("README.md", readme);
+    await fs.writeFile(this.resolvePath("README.md"), readme);
 
     return config;
   }
@@ -138,14 +160,14 @@ Use \`writers stats\` to track your progress toward your ${config.wordGoal.toLoc
    */
   async getFiles(type) {
     const dir = this.projectStructure[type] || type;
-    if (!(await fs.pathExists(dir))) {
+    if (!(await fs.pathExists(this.resolvePath(dir)))) {
       return [];
     }
 
-    const files = await fs.readdir(dir);
+    const files = await fs.readdir(this.resolvePath(dir));
     const fileStats = await Promise.all(
       files.map(async (file) => {
-        const filePath = path.join(dir, file);
+        const filePath = this.resolvePath(dir, file);
         try {
           const stats = await fs.stat(filePath);
           return {
@@ -176,9 +198,9 @@ Use \`writers stats\` to track your progress toward your ${config.wordGoal.toLoc
   async createFile(type, name, template = "") {
     const dir = this.projectStructure[type] || type;
 
-    await fs.ensureDir(dir);
+    await fs.ensureDir(this.resolvePath(dir));
     const fileName = `${this.sanitizeFileName(name)}.md`;
-    const filePath = path.join(dir, fileName);
+    const filePath = this.resolvePath(dir, fileName);
 
     if (await fs.pathExists(filePath)) {
       throw new Error(`${type} "${name}" already exists.`);

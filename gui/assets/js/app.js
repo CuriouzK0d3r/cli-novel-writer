@@ -877,9 +877,7 @@ class WritersApp {
       });
 
       if (!result.canceled && result.filePaths.length > 0) {
-        const projectPath = result.filePaths[0];
-        // Change working directory and reload
-        process.chdir(projectPath);
+        // Base directory is set in the main process; just reload the project
         await this.loadProject();
         this.hideModal("welcome-modal");
       }
@@ -1827,12 +1825,19 @@ class WritersApp {
 
     // Create stable bound handlers so we can remove them later
     if (!this._onFocusTypewriterScroll) {
-      this._onFocusTypewriterScroll = this.handleFocusTypewriterScroll.bind(this);
+      this._onFocusTypewriterScroll =
+        this.handleFocusTypewriterScroll.bind(this);
     }
 
     // Add scroll event listeners
-    this.focusModeElement.addEventListener("keyup", this._onFocusTypewriterScroll);
-    this.focusModeElement.addEventListener("click", this._onFocusTypewriterScroll);
+    this.focusModeElement.addEventListener(
+      "keyup",
+      this._onFocusTypewriterScroll,
+    );
+    this.focusModeElement.addEventListener(
+      "click",
+      this._onFocusTypewriterScroll,
+    );
 
     // Initial center
     setTimeout(() => {
@@ -1847,8 +1852,14 @@ class WritersApp {
 
     // Remove event listeners using the stored handler
     if (this._onFocusTypewriterScroll) {
-      this.focusModeElement.removeEventListener("keyup", this._onFocusTypewriterScroll);
-      this.focusModeElement.removeEventListener("click", this._onFocusTypewriterScroll);
+      this.focusModeElement.removeEventListener(
+        "keyup",
+        this._onFocusTypewriterScroll,
+      );
+      this.focusModeElement.removeEventListener(
+        "click",
+        this._onFocusTypewriterScroll,
+      );
       this._onFocusTypewriterScroll = null;
     }
 
