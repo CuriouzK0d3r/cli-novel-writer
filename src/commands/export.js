@@ -70,6 +70,29 @@ async function exportCommand(format, options) {
 }
 
 async function getExportOptions(format, options) {
+  // Normalize options
+  options = options || {};
+
+  // Non-interactive path for GUI: if an explicit output path is provided, skip prompts and use defaults
+  if (options.output) {
+    const defaults = {
+      includeScenes: false,
+      includeCharacters: false,
+      includeShortStories: false,
+      includeNotes: false,
+      includeTableOfContents: format === "html" || format === "markdown",
+      includeTitlePage: true,
+    };
+    return {
+      selectedChapters: options.chapters ? options.chapters.split(",") : [],
+      ...defaults,
+      outputFilename: path.basename(
+        options.output,
+        path.extname(options.output),
+      ),
+      output: options.output,
+    };
+  }
   const questions = [];
 
   // Specific chapters
@@ -758,12 +781,21 @@ function generateJsonExport(content, exportOptions, config) {
 }
 
 async function saveExport(exportData, format, exportOptions) {
-  await fs.ensureDir("exports");
+  // If an explicit output path is provided, write directly there
+  if (exportOptions && exportOptions.output) {
+    const outPath = exportOptions.output;
+    await fs.ensureDir(path.dirname(outPath));
+    await fs.writeFile(outPath, exportData, "utf8");
+    return outPath;
+  }
+
+  // Otherwise, write into the project's exports directory
+  await fs.ensureDir(projectManager.resolvePath("exports"));
 
   const timestamp = new Date().toISOString().split("T")[0];
   const extension = format === "text" ? "txt" : format;
   const filename = `${exportOptions.outputFilename}-${timestamp}.${extension}`;
-  const outputPath = path.join("exports", filename);
+  const outputPath = projectManager.resolvePath("exports", filename);
 
   await fs.writeFile(outputPath, exportData, "utf8");
 

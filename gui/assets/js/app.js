@@ -31,9 +31,9 @@ class WritersApp {
 
   async init() {
     this.setupGlobalKeyboardShortcuts();
+    this.setupEventListeners();
     try {
       await this.loadProject();
-      this.setupEventListeners();
       this.hideLoading();
     } catch (error) {
       console.error("Initialization error:", error);
