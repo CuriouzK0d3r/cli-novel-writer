@@ -2,7 +2,7 @@
   "name": "writers-cli",
   "version": "1.0.0",
   "description": "A CLI tool for writing novels and short stories with markdown support",
-  "main": "index.js",
+  "main": "gui/main.js",
   "bin": {
     "writers": "./bin/writers.js"
   },
@@ -13,7 +13,10 @@
     "gui-dev": "nodemon --exec 'electron gui/main.js'",
     "test": "jest",
     "dev": "nodemon bin/writers.js",
-    "build": "pkg --config pkg.config.json bin/writers.js"
+    "build": "pkg --config pkg.config.json bin/writers.js",
+    "pack:mac": "electron-packager . \"My Novel\" --platform=darwin --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$'",
+    "pack:mac:arm64": "electron-packager . \"My Novel\" --platform=darwin --arch=arm64 --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$'",
+    "pack:mac:x64": "electron-packager . \"My Novel\" --platform=darwin --arch=x64 --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$'"
   },
   "keywords": [
     "writing",
