@@ -1381,11 +1381,9 @@ class WritersApp {
 
     if (this.editorElement) {
       if (mode === "normal") {
-        this.editorElement.style.caretColor = "transparent";
         this.editorElement.classList.add("vim-normal-mode");
         this.editorElement.classList.remove("vim-insert-mode");
       } else {
-        this.editorElement.style.caretColor = "";
         this.editorElement.classList.add("vim-insert-mode");
         this.editorElement.classList.remove("vim-normal-mode");
       }
