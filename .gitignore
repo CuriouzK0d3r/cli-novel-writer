@@ -1,1 +1,47 @@
 node_modules/
+
+# Logs
+logs/
+*.log
+
+# Dependencies / package managers
+pnpm-lock.yaml
+.yarn/*
+.pnp.*
+.pnpm-debug.log
+
+# Build & distribution
+dist/
+build/
+out/
+release/
+installer/
+
+# Electron / packaging artifacts
+*.asar
+
+# Rust build
+target/
+rust-cli/target/
+rust-gui/
+rust-gui/target/
+
+# Backups / exports / generated
+backups/
+exports/
+
+# Cache / temp
+.tmp/
+.temp/
+.cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Coverage (future)
+coverage/
+*.lcov
