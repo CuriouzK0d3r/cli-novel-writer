@@ -6,6 +6,35 @@ const { marked } = require("marked");
 const projectManager = require("../utils/project");
 const markdownUtils = require("../utils/markdown");
 
+// Fallback PDF generator using Electron's BrowserWindow if Puppeteer fails
+async function generatePdfWithElectron(html, outputPath) {
+  try {
+    const { app, BrowserWindow } = require("electron");
+    if (app && !app.isReady()) {
+      await app.whenReady();
+    }
+    const win = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        offscreen: true,
+      },
+    });
+    await win.loadURL(
+      "data:text/html;charset=utf-8," + encodeURIComponent(html),
+    );
+    const pdfBuffer = await win.webContents.printToPDF({
+      printBackground: true,
+      marginsType: 0,
+      pageSize: "A4",
+    });
+    await fs.writeFile(outputPath, pdfBuffer);
+    win.destroy();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function exportCommand(format, options) {
   try {
     // Check if in a writers project
@@ -25,7 +54,7 @@ async function exportCommand(format, options) {
     const config = await projectManager.getConfig();
 
     // Validate format
-    const supportedFormats = ["html", "markdown", "text", "json"];
+    const supportedFormats = ["html", "markdown", "text", "json", "pdf"];
     if (!supportedFormats.includes(format.toLowerCase())) {
       console.log(chalk.red(`❌ Unsupported format: ${format}`));
       console.log(
@@ -65,7 +94,9 @@ async function exportCommand(format, options) {
     // Show export statistics
     showExportStats(content, exportData);
   } catch (error) {
-    console.error(chalk.red("❌ Error during export:"), error.message);
+    // Log full error (stack) for better diagnostics and rethrow so GUI can surface it
+    console.error(chalk.red("❌ Error during export:"), error);
+    throw error;
   }
 }
 
@@ -215,14 +246,17 @@ async function collectContent(exportOptions) {
     notes: [],
   };
 
-  // Collect chapters
-  const allChapters = await projectManager.getFiles("chapters");
+  // Collect primary documents (chapters for fiction, posts for blog)
+  const config = await projectManager.getConfig();
+  const isBlog = (config.type || "").toLowerCase() === "blog";
+  const primaryType = isBlog ? "posts" : "chapters";
+  const allPrimary = await projectManager.getFiles(primaryType);
   const chaptersToExport =
     exportOptions.selectedChapters.length > 0
-      ? allChapters.filter((c) =>
+      ? allPrimary.filter((c) =>
           exportOptions.selectedChapters.includes(c.name),
         )
-      : allChapters;
+      : allPrimary;
 
   for (const chapter of chaptersToExport) {
     try {
@@ -338,6 +372,9 @@ async function collectContent(exportOptions) {
 async function generateExport(content, format, exportOptions, config) {
   switch (format.toLowerCase()) {
     case "html":
+      return generateHtmlExport(content, exportOptions, config);
+    case "pdf":
+      // Generate HTML now; conversion to PDF occurs in saveExport
       return generateHtmlExport(content, exportOptions, config);
     case "markdown":
       return generateMarkdownExport(content, exportOptions, config);
@@ -785,7 +822,56 @@ async function saveExport(exportData, format, exportOptions) {
   if (exportOptions && exportOptions.output) {
     const outPath = exportOptions.output;
     await fs.ensureDir(path.dirname(outPath));
-    await fs.writeFile(outPath, exportData, "utf8");
+    if (format === "pdf") {
+      try {
+        const html =
+          typeof exportData === "string" ? exportData : exportData.toString();
+        let puppeteer;
+        try {
+          puppeteer = require("puppeteer");
+        } catch (err) {
+          throw new Error(
+            "Puppeteer dependency not found. Install it (npm install puppeteer) to enable PDF export.",
+          );
+        }
+        const browser = await puppeteer.launch({
+          headless: "new",
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: "networkidle0" });
+        const pdfBuffer = await page.pdf({
+          format: "A4",
+          printBackground: true,
+          margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
+        });
+        await browser.close();
+        await fs.writeFile(outPath, pdfBuffer);
+      } catch (err) {
+        // Attempt Electron BrowserWindow fallback before giving up
+        try {
+          const htmlFallback =
+            typeof exportData === "string" ? exportData : exportData.toString();
+          const success = await generatePdfWithElectron(htmlFallback, outPath);
+          if (success) {
+            return outPath;
+          }
+        } catch (_) {
+          // ignore and proceed to final fallback
+        }
+        // Final fallback: write HTML for inspection
+        try {
+          await fs.writeFile(
+            outPath.replace(/\.pdf$/i, ".html"),
+            exportData,
+            "utf8",
+          );
+        } catch (_) {}
+        throw new Error(`Failed to generate PDF: ${err.message}`);
+      }
+    } else {
+      await fs.writeFile(outPath, exportData, "utf8");
+    }
     return outPath;
   }
 
@@ -797,7 +883,56 @@ async function saveExport(exportData, format, exportOptions) {
   const filename = `${exportOptions.outputFilename}-${timestamp}.${extension}`;
   const outputPath = projectManager.resolvePath("exports", filename);
 
-  await fs.writeFile(outputPath, exportData, "utf8");
+  if (format === "pdf") {
+    try {
+      const html =
+        typeof exportData === "string" ? exportData : exportData.toString();
+      let puppeteer;
+      try {
+        puppeteer = require("puppeteer");
+      } catch (err) {
+        throw new Error(
+          "Puppeteer dependency not found. Install it (npm install puppeteer) to enable PDF export.",
+        );
+      }
+      const browser = await puppeteer.launch({
+        headless: "new",
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: "networkidle0" });
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" },
+      });
+      await browser.close();
+      await fs.writeFile(outputPath, pdfBuffer);
+    } catch (err) {
+      // Attempt Electron BrowserWindow fallback before giving up
+      try {
+        const htmlFallback =
+          typeof exportData === "string" ? exportData : exportData.toString();
+        const success = await generatePdfWithElectron(htmlFallback, outputPath);
+        if (success) {
+          return outputPath;
+        }
+      } catch (_) {
+        // ignore and proceed to final fallback
+      }
+      // Final fallback: write HTML artifact for debugging
+      try {
+        await fs.writeFile(
+          outputPath.replace(/\.pdf$/i, ".html"),
+          exportData,
+          "utf8",
+        );
+      } catch (_) {}
+      throw new Error(`Failed to generate PDF: ${err.message}`);
+    }
+  } else {
+    await fs.writeFile(outputPath, exportData, "utf8");
+  }
 
   return outputPath;
 }
@@ -814,7 +949,9 @@ function showExportStats(content, exportData) {
     content.chapters.reduce((sum, c) => sum + c.words, 0) +
     content.scenes.reduce((sum, s) => sum + s.words, 0);
 
-  const fileSize = Buffer.byteLength(exportData, "utf8");
+  const fileSize = Buffer.isBuffer(exportData)
+    ? exportData.length
+    : Buffer.byteLength(exportData, "utf8");
   const fileSizeKB = Math.round(fileSize / 1024);
 
   console.log(`   Chapters: ${chalk.cyan(totalChapters)}`);

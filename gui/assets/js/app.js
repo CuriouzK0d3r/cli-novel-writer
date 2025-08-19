@@ -101,7 +101,12 @@ class WritersApp {
       document.getElementById("notes-count").textContent = counts.notes || 0;
       document.getElementById("shortstories-count").textContent =
         counts.shortstories || 0;
+      const postsCountEl = document.getElementById("posts-count");
+      if (postsCountEl) postsCountEl.textContent = counts.posts || 0;
     }
+
+    // Apply visibility rules based on project type (e.g., hide chapters/scenes for short story collections)
+    this.applyProjectTypeVisibility();
   }
 
   loadDashboard() {
@@ -211,6 +216,7 @@ class WritersApp {
       characters: "fa-user",
       notes: "fa-sticky-note",
       shortstories: "fa-book-open",
+      posts: "fa-newspaper",
     };
 
     const timeAgo = this.getTimeAgo(new Date(file.modified));
@@ -253,6 +259,124 @@ class WritersApp {
 
   capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  // Return a human-readable singular form for a content type
+  humanReadableType(type) {
+    const map = {
+      chapters: "Chapter",
+      scenes: "Scene",
+      characters: "Character",
+      notes: "Note",
+      shortstories: "Short Story",
+      posts: "Post",
+      stories: "Story",
+      drafts: "Draft",
+      "submission-ready": "Submission Ready",
+      exercises: "Exercise",
+      prompts: "Prompt",
+    };
+
+    if (map[type]) return map[type];
+
+    // fallback: try to singularize by removing trailing 's' and capitalizing
+    const singular = type.endsWith("s") ? type.slice(0, -1) : type;
+    return this.capitalize(singular.replace(/[-_]/g, " "));
+  }
+
+  // Hide/show sidebar items depending on project type
+  applyProjectTypeVisibility() {
+    if (!this.currentProject) return;
+
+    const type = (this.currentProject.type || "").toLowerCase();
+    const isShortStory = [
+      "short-story",
+      "shortstories",
+      "shortstory",
+      "short_story",
+    ].includes(type);
+    const isBlog = type === "blog";
+
+    const chaptersBtn = document.querySelector(
+      '.sidebar-item[data-view="chapters"]',
+    );
+    const scenesBtn = document.querySelector(
+      '.sidebar-item[data-view="scenes"]',
+    );
+    const charactersBtn = document.querySelector(
+      '.sidebar-item[data-view="characters"]',
+    );
+    const shortStoriesBtn = document.querySelector(
+      '.sidebar-item[data-view="shortstories"]',
+    );
+    const postsBtn = document.getElementById("posts-sidebar-item");
+
+    if (isBlog) {
+      // Blog: show Posts + Notes only; hide all other fiction-specific sections
+      if (postsBtn) postsBtn.style.display = "";
+      if (chaptersBtn) chaptersBtn.style.display = "none";
+      if (scenesBtn) scenesBtn.style.display = "none";
+      if (charactersBtn) charactersBtn.style.display = "none";
+      if (shortStoriesBtn) shortStoriesBtn.style.display = "none";
+
+      // Adjust quick action buttons (replace New Chapter/Scene/Character with New Post)
+      const newChapterBtn = document.getElementById("new-chapter-btn");
+      const newSceneBtn = document.getElementById("new-scene-btn");
+      const newCharacterBtn = document.getElementById("new-character-btn");
+      let newPostQuickBtn = document.getElementById("new-post-btn");
+
+      if (newChapterBtn) newChapterBtn.style.display = "none";
+      if (newSceneBtn) newSceneBtn.style.display = "none";
+      if (newCharacterBtn) newCharacterBtn.style.display = "none";
+
+      if (!newPostQuickBtn) {
+        const actionsContainer = document.querySelector(".quick-actions");
+        if (actionsContainer) {
+          newPostQuickBtn = document.createElement("button");
+          newPostQuickBtn.id = "new-post-btn";
+          newPostQuickBtn.className = "action-btn";
+          newPostQuickBtn.innerHTML = '<i class="fas fa-plus"></i> New Post';
+          newPostQuickBtn.addEventListener("click", () => {
+            this.showCreateModal("posts", "New Post");
+          });
+          // Prepend so it appears first
+          actionsContainer.prepend(newPostQuickBtn);
+        }
+      } else {
+        newPostQuickBtn.style.display = "";
+      }
+
+      // If current view is now hidden, switch to posts or notes
+      const hiddenViews = ["chapters", "scenes", "characters", "shortstories"];
+      if (hiddenViews.includes(this.currentView)) {
+        if (postsBtn) {
+          this.switchView("posts");
+        } else {
+          this.switchView("notes");
+        }
+      }
+      return;
+    }
+
+    // Short story collection: hide chapters/scenes
+    if (chaptersBtn) {
+      chaptersBtn.style.display = isShortStory ? "none" : "";
+    }
+    if (scenesBtn) {
+      scenesBtn.style.display = isShortStory ? "none" : "";
+    }
+    if (postsBtn) {
+      // Not a blog: hide posts button
+      postsBtn.style.display = "none";
+    }
+
+    // If current view is hidden, switch back to dashboard
+    if (
+      isShortStory &&
+      (this.currentView === "chapters" || this.currentView === "scenes")
+    ) {
+      this.switchView("dashboard");
+    }
   }
 
   setupEventListeners() {
@@ -328,6 +452,12 @@ class WritersApp {
       .addEventListener("click", () => {
         this.showCreateModal("shortstories", "New Short Story");
       });
+    const newPostModalBtn = document.getElementById("new-post-modal-btn");
+    if (newPostModalBtn) {
+      newPostModalBtn.addEventListener("click", () => {
+        this.showCreateModal("posts", "New Post");
+      });
+    }
 
     // Export button
     document
@@ -528,6 +658,7 @@ class WritersApp {
       case "dashboard":
         this.loadDashboard();
         break;
+      case "posts":
       case "chapters":
       case "scenes":
       case "characters":
@@ -552,15 +683,15 @@ class WritersApp {
 
       if (files.length === 0) {
         container.innerHTML = `
-          <div class="no-content">
-            <i class="fas fa-inbox"></i>
-            <p>No ${type} found</p>
-            <button class="btn btn-primary" onclick="app.showCreateModal('${type}', 'New ${this.capitalize(type.slice(0, -1))}')">
-              <i class="fas fa-plus"></i>
-              Create Your First ${this.capitalize(type.slice(0, -1))}
-            </button>
-          </div>
-        `;
+            <div class="no-content">
+              <i class="fas fa-inbox"></i>
+              <p>No ${type} found</p>
+              <button class="btn btn-primary" onclick="app.showCreateModal('${type}', 'New ${this.humanReadableType(type)}')">
+                <i class="fas fa-plus"></i>
+                Create your First ${this.humanReadableType(type)}
+              </button>
+            </div>
+          `;
         return;
       }
 
@@ -568,6 +699,7 @@ class WritersApp {
       files.sort((a, b) => new Date(b.modified) - new Date(a.modified));
 
       const iconMap = {
+        posts: "fa-newspaper",
         chapters: "fa-book",
         scenes: "fa-film",
         characters: "fa-user",
@@ -799,7 +931,7 @@ class WritersApp {
       await ipcRenderer.invoke("create-file", type, name);
       this.hideModal("create-modal");
       this.showToast(
-        `${this.capitalize(type.slice(0, -1))} created successfully`,
+        `${this.humanReadableType(type)} created successfully`,
         "success",
       );
 
@@ -857,6 +989,9 @@ class WritersApp {
     try {
       const options = { name, author, wordGoal, type };
       this.currentProject = await ipcRenderer.invoke("init-project", options);
+      // Persist chosen type locally (config from backend may not include it yet)
+      this.currentProject.type = type;
+      this.applyProjectTypeVisibility();
 
       this.hideModal("project-creation-modal");
       this.showToast("Project created successfully", "success");
@@ -1002,21 +1137,63 @@ class WritersApp {
       'input[name="export-format"]:checked',
     ).value;
 
+    const exportBtn = document.getElementById("export-project-btn");
+    const originalBtnHtml = exportBtn ? exportBtn.innerHTML : null;
+
     try {
+      if (exportBtn) {
+        exportBtn.disabled = true;
+        exportBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+      }
+
+      if (format === "pdf") {
+        this.showToast(
+          "Generating PDF (this may take a few seconds)...",
+          "info",
+        );
+      }
+
       const result = await ipcRenderer.invoke("show-save-dialog", {
         defaultPath: `${this.currentProject.name}.${format}`,
         filters: [{ name: format.toUpperCase(), extensions: [format] }],
       });
 
-      if (!result.canceled) {
-        await ipcRenderer.invoke("export-project", format, {
-          output: result.filePath,
-        });
-        this.showToast("Project exported successfully", "success");
+      if (result.canceled) {
+        this.showToast("Export canceled", "info");
+        return;
       }
+
+      await ipcRenderer.invoke("export-project", format, {
+        output: result.filePath,
+      });
+
+      this.showToast(
+        `${format.toUpperCase()} export saved: ${result.filePath}`,
+        "success",
+      );
     } catch (error) {
       console.error("Error exporting project:", error);
-      this.showToast("Error exporting project", "error");
+      const message =
+        (error && error.message) ||
+        "Error exporting project. See console for details.";
+      // Surface more specific PDF errors (e.g., Puppeteer not installed)
+      if (
+        /puppeteer/i.test(message) ||
+        /Failed to generate PDF/i.test(message)
+      ) {
+        this.showToast(
+          `PDF export failed: ${message.replace(/^Error:\\s*/i, "")}`,
+          "error",
+        );
+      } else {
+        this.showToast(message, "error");
+      }
+    } finally {
+      if (exportBtn) {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = originalBtnHtml;
+      }
     }
   }
 

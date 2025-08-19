@@ -14,8 +14,8 @@
     "test": "jest",
     "dev": "nodemon bin/writers.js",
     "build": "pkg --config pkg.config.json bin/writers.js",
-    "pack:mac": "electron-packager . \"My Novel\" --platform=darwin --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$'",
-    "pack:mac:arm64": "electron-packager . \"My Novel\" --platform=darwin --arch=arm64 --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$'",
+    "pack:mac": "electron-packager . \"My Novel\" --platform=darwin --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$' --icon gui-logo.png",
+    "pack:mac:arm64": "electron-packager . \"My Novel\" --platform=darwin --arch=arm64 --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$' --icon gui-logo.png",
     "pack:mac:x64": "electron-packager . \"My Novel\" --platform=darwin --arch=x64 --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$'"
   },
   "keywords": [
@@ -32,7 +32,6 @@
   "license": "MIT",
   "dependencies": {
     "archiver": "^5.3.1",
-    "archiver-utils": "^5.0.2",
     "blessed": "^0.1.81",
     "boxen": "^5.1.2",
     "chalk": "^4.1.2",

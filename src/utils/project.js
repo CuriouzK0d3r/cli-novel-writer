@@ -97,14 +97,35 @@ class ProjectManager {
       author: options.author || "Unknown Author",
       created: new Date().toISOString(),
       version: "1.0.0",
+      type: options.type || "novel",
       wordGoal: options.wordGoal || 50000,
       settings: {
         autoSave: true,
         backups: true,
         defaultEditor: options.editor || "nano",
       },
-      structure: this.projectStructure,
+      structure:
+        options.type === "blog"
+          ? {
+              posts: "posts",
+              notes: "notes",
+              exports: "exports",
+              assets: "assets/images",
+              templates: "templates",
+            }
+          : this.projectStructure,
     };
+
+    // If blog project, override internal projectStructure so later calls use it
+    if (options.type === "blog") {
+      this.projectStructure = {
+        posts: "posts",
+        notes: "notes",
+        exports: "exports",
+        assets: "assets/images",
+        templates: "templates",
+      };
+    }
 
     await fs.writeJson(this.resolvePath(this.configFile), config, {
       spaces: 2,
@@ -122,6 +143,34 @@ class ProjectManager {
    * Generate project README
    */
   generateReadme(config) {
+    if ((config.type || "").toLowerCase() === "blog") {
+      return `# ${config.name}
+
+**Author:** ${config.author}
+**Created:** ${new Date(config.created).toLocaleDateString()}
+**Type:** Blog
+**Word Goal:** ${config.wordGoal.toLocaleString()} words
+
+Welcome to your blog project. Use the GUI or CLI to create and manage posts.
+
+## Project Structure
+
+- \`posts/\` - Your blog posts (Markdown). Each file represents a post.
+- \`notes/\` - Ideas, outlines, research, and drafts not yet promoted to posts.
+- \`assets/images/\` - Images and media you embed in posts.
+- \`templates/\` - (Optional) Content or metadata templates.
+- \`exports/\` - Generated/exported versions (HTML, PDF, etc.).
+
+## Getting Started
+
+1. Create a new post: \`writers new post "My First Post"\` or click "New Post" in the GUI.
+2. Draft and edit in the GUI editor.
+3. Export when ready.
+
+Happy blogging!
+`;
+    }
+
     return `# ${config.name}
 
 **Author:** ${config.author}
@@ -441,6 +490,7 @@ Write your polished story here...
    */
   async getProjectStats() {
     const config = await this.getConfig();
+    const isBlog = (config.type || "").toLowerCase() === "blog";
     const stats = {
       project: config.name,
       author: config.author,
@@ -449,13 +499,18 @@ Write your polished story here...
       chapters: [],
       totalWords: 0,
       totalCharacters: 0,
-      files: {
-        chapters: 0,
-        scenes: 0,
-        characters: 0,
-        notes: 0,
-        shortstories: 0,
-      },
+      files: isBlog
+        ? {
+            posts: 0,
+            notes: 0,
+          }
+        : {
+            chapters: 0,
+            scenes: 0,
+            characters: 0,
+            notes: 0,
+            shortstories: 0,
+          },
     };
 
     // Count files and words for each type

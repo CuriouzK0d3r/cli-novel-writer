@@ -68,6 +68,16 @@
                         <i class="fas fa-folder"></i>
                         Content
                     </h3>
+                    <button
+                        class="sidebar-item"
+                        data-view="posts"
+                        id="posts-sidebar-item"
+                        style="display: none"
+                    >
+                        <i class="fas fa-newspaper"></i>
+                        Posts
+                        <span class="count" id="posts-count">0</span>
+                    </button>
                     <button class="sidebar-item" data-view="chapters">
                         <i class="fas fa-book"></i>
                         Chapters
@@ -319,6 +329,22 @@
                         </div>
                     </header>
                     <div id="chapters-content" class="content-list"></div>
+                </div>
+
+                <div id="posts-view" class="content-view">
+                    <header class="content-header">
+                        <h1><i class="fas fa-newspaper"></i> Posts</h1>
+                        <div class="header-actions">
+                            <button
+                                id="new-post-modal-btn"
+                                class="btn btn-primary"
+                            >
+                                <i class="fas fa-plus"></i>
+                                New Post
+                            </button>
+                        </div>
+                    </header>
+                    <div id="posts-content" class="content-list"></div>
                 </div>
 
                 <div id="scenes-view" class="content-view">
@@ -706,24 +732,32 @@
                 <div class="modal-body">
                     <form id="project-creation-form">
                         <div class="form-group">
-                            <label for="project-name">Project Name</label>
+                            <label for="project-name-input">Project Name</label>
                             <input
                                 type="text"
-                                id="project-name"
+                                id="project-name-input"
                                 class="form-input"
                                 placeholder="My Novel"
                                 required
+                                oninput="document.getElementById('project-name').value=this.value"
                             />
+                            <!-- Hidden field retains original expected ID for JS logic -->
+                            <input type="hidden" id="project-name" />
                         </div>
                         <div class="form-group">
-                            <label for="project-author">Author Name</label>
+                            <label for="project-author-input"
+                                >Author Name</label
+                            >
                             <input
                                 type="text"
-                                id="project-author"
+                                id="project-author-input"
                                 class="form-input"
                                 placeholder="Your Name"
                                 required
+                                oninput="document.getElementById('project-author').value=this.value"
                             />
+                            <!-- Hidden field retains original expected ID for JS logic -->
+                            <input type="hidden" id="project-author" />
                         </div>
                         <div class="form-group">
                             <label for="project-type">Project Type</label>
