@@ -1,0 +1,441 @@
+/* Writers CLI - Enhanced Editor Styles */
+
+/* Enhanced Typography */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap");
+
+:root {
+    /* Enhanced Typography Variables */
+    --editor-font-family: "Crimson Text", Georgia, serif;
+    --editor-font-family-mono: "JetBrains Mono", "SF Mono", Monaco, monospace;
+    --editor-font-size: 16px;
+    --editor-line-height: 1.8;
+    --editor-letter-spacing: 0.01em;
+
+    /* Enhanced Color Palette */
+    --editor-bg-primary: #fefefe;
+    --editor-bg-secondary: #f9f9f9;
+    --editor-text-primary: #2d3748;
+    --editor-text-secondary: #4a5568;
+    --editor-text-muted: #718096;
+    --editor-accent: #667eea;
+    --editor-accent-light: rgba(102, 126, 234, 0.1);
+    --editor-border: #e2e8f0;
+    --editor-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --editor-shadow-focus: 0 8px 24px rgba(102, 126, 234, 0.15);
+
+    /* Writing comfort colors */
+    --editor-selection-bg: rgba(102, 126, 234, 0.2);
+    --editor-cursor-color: #667eea;
+    --editor-gutter-bg: #f7fafc;
+
+    /* Animation variables */
+    --editor-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --editor-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Dark theme enhancements */
+.theme-dark {
+    --editor-bg-primary: #1a202c;
+    --editor-bg-secondary: #2d3748;
+    --editor-text-primary: #f7fafc;
+    --editor-text-secondary: #e2e8f0;
+    --editor-text-muted: #a0aec0;
+    --editor-accent: #90cdf4;
+    --editor-accent-light: rgba(144, 205, 244, 0.1);
+    --editor-border: #4a5568;
+    --editor-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --editor-shadow-focus: 0 8px 24px rgba(144, 205, 244, 0.2);
+    --editor-selection-bg: rgba(144, 205, 244, 0.3);
+    --editor-cursor-color: #90cdf4;
+    --editor-gutter-bg: #2d3748;
+}
+
+/* Enhanced Editor Modal */
+.modal.editor-enhanced .modal-content {
+    background: var(--editor-bg-primary);
+    border-radius: 16px;
+    box-shadow: var(--editor-shadow-focus);
+    border: 1px solid var(--editor-border);
+    backdrop-filter: blur(20px);
+    transition: var(--editor-transition);
+}
+
+/* Enhanced Editor Header */
+.editor-enhanced .modal-header {
+    background: linear-gradient(
+        135deg,
+        var(--editor-bg-primary) 0%,
+        var(--editor-bg-secondary) 100%
+    );
+    border-bottom: 1px solid var(--editor-border);
+    padding: 20px 32px;
+    border-radius: 16px 16px 0 0;
+}
+
+.editor-enhanced #editor-title {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    color: var(--editor-text-primary);
+    font-size: 18px;
+    margin: 0;
+}
+
+/* Enhanced Editor Toolbar */
+.editor-enhanced .editor-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.editor-enhanced .editor-toolbar .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--editor-transition);
+    border: 1px solid var(--editor-border);
+    background: var(--editor-bg-primary);
+    color: var(--editor-text-secondary);
+    cursor: pointer;
+}
+
+.editor-enhanced .editor-toolbar .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--editor-shadow);
+    border-color: var(--editor-accent);
+    color: var(--editor-accent);
+}
+
+.editor-enhanced .editor-toolbar .btn.btn-primary {
+    background: var(--editor-accent);
+    color: white;
+    border-color: var(--editor-accent);
+}
+
+.editor-enhanced .editor-toolbar .btn.btn-primary:hover {
+    background: var(--editor-accent);
+    filter: brightness(1.1);
+}
+
+/* Enhanced Editor Info Bar */
+.editor-enhanced .editor-info {
+    background: var(--editor-gutter-bg);
+    border-bottom: 1px solid var(--editor-border);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    color: var(--editor-text-muted);
+}
+
+.editor-enhanced .editor-info-left,
+.editor-enhanced .editor-info-right {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.editor-enhanced .editor-info span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.editor-enhanced .editor-info i {
+    opacity: 0.7;
+}
+
+/* Enhanced Main Editor Textarea */
+.editor-enhanced .editor-textarea {
+    font-family: var(--editor-font-family) !important;
+    font-size: var(--editor-font-size) !important;
+    line-height: var(--editor-line-height) !important;
+    letter-spacing: var(--editor-letter-spacing);
+    padding: 48px 64px !important;
+    background: var(--editor-bg-primary) !important;
+    color: var(--editor-text-primary) !important;
+    border: none !important;
+    outline: none !important;
+    resize: none !important;
+    transition: var(--editor-transition);
+    selection-background-color: var(--editor-selection-bg);
+    caret-color: var(--editor-cursor-color);
+    word-spacing: 0.05em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Wider writing space: set a comfortable maximum measure and center */
+    max-width: 120ch;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+/* Enhanced Focus State */
+.editor-enhanced .editor-textarea:focus {
+    background: var(--editor-bg-primary) !important;
+    box-shadow: inset 0 0 0 2px var(--editor-accent-light);
+}
+
+/* Selection styling */
+.editor-enhanced .editor-textarea::selection {
+    background: var(--editor-selection-bg);
+    color: inherit;
+}
+
+.editor-enhanced .editor-textarea::-moz-selection {
+    background: var(--editor-selection-bg);
+    color: inherit;
+}
+
+/* Enhanced Typewriter Mode */
+.editor-enhanced .editor-textarea.typewriter-mode {
+    padding-top: 40vh !important;
+    padding-bottom: 50vh !important;
+    transition: var(--editor-transition);
+    background: linear-gradient(
+        180deg,
+        var(--editor-bg-primary) 0%,
+        var(--editor-bg-primary) 40%,
+        rgba(var(--editor-accent), 0.03) 50%,
+        var(--editor-bg-primary) 60%,
+        var(--editor-bg-primary) 100%
+    ) !important;
+}
+
+/* Enhanced Scrollbar */
+.editor-enhanced .editor-textarea::-webkit-scrollbar {
+    width: 12px;
+}
+
+.editor-enhanced .editor-textarea::-webkit-scrollbar-track {
+    background: var(--editor-bg-secondary);
+    border-radius: 6px;
+}
+
+.editor-enhanced .editor-textarea::-webkit-scrollbar-thumb {
+    background: var(--editor-border);
+    border-radius: 6px;
+    border: 2px solid var(--editor-bg-primary);
+    transition: var(--editor-transition);
+}
+
+.editor-enhanced .editor-textarea::-webkit-scrollbar-thumb:hover {
+    background: var(--editor-accent);
+}
+
+/* Enhanced Focus Mode */
+.editor-enhanced .focus-mode-textarea {
+    font-family: var(--editor-font-family) !important;
+    font-size: 18px !important;
+    line-height: 2 !important;
+    letter-spacing: var(--editor-letter-spacing);
+    padding: 80px 20% !important;
+    background: var(--editor-bg-primary) !important;
+    color: var(--editor-text-primary) !important;
+    text-align: left;
+    max-width: none;
+    transition: var(--editor-transition);
+    caret-color: var(--editor-cursor-color);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.editor-enhanced .focus-mode-textarea:focus {
+    background: var(--editor-bg-primary) !important;
+    box-shadow: none;
+    outline: none;
+}
+
+.editor-enhanced .focus-mode-textarea::selection {
+    background: var(--editor-selection-bg);
+}
+
+/* Enhanced Focus Mode Animations */
+.focus-mode.active .focus-mode-textarea {
+    animation: focusEnterEnhanced 0.6s var(--editor-bounce);
+}
+
+@keyframes focusEnterEnhanced {
+    0% {
+        opacity: 0;
+        transform: scale(0.98) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Writing Progress Indicator */
+.editor-enhanced .writing-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--editor-border);
+    overflow: hidden;
+}
+
+.editor-enhanced .writing-progress-bar {
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--editor-accent),
+        rgba(var(--editor-accent), 0.7)
+    );
+    transition: width 0.3s ease;
+    border-radius: 0 3px 3px 0;
+}
+
+/* Typing Animation Effects */
+.editor-enhanced .editor-textarea.typing {
+    border-left: 3px solid transparent;
+    animation: typingPulse 2s ease-in-out infinite;
+}
+
+@keyframes typingPulse {
+    0%,
+    100% {
+        border-left-color: transparent;
+    }
+    50% {
+        border-left-color: var(--editor-accent);
+    }
+}
+
+/* Word Count Badge Enhancement */
+.editor-enhanced .word-count-badge {
+    background: var(--editor-accent-light);
+    color: var(--editor-accent);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(var(--editor-accent), 0.2);
+}
+
+/* Status Indicators */
+.editor-enhanced .status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.editor-enhanced .status-indicator.vim-mode {
+    background: #f0fff4;
+    color: #22543d;
+    border: 1px solid #9ae6b4;
+}
+
+.editor-enhanced .status-indicator.typewriter-mode {
+    background: #fffaf0;
+    color: #744210;
+    border: 1px solid #fbd38d;
+}
+
+.theme-dark .editor-enhanced .status-indicator.vim-mode {
+    background: #1a2e1a;
+    color: #9ae6b4;
+}
+
+.theme-dark .editor-enhanced .status-indicator.typewriter-mode {
+    background: #2d2016;
+    color: #fbd38d;
+}
+
+/* Paragraph Spacing Enhancement */
+.editor-enhanced .editor-textarea {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Zen Mode Enhancements */
+.editor-enhanced.zen-mode .modal-header,
+.editor-enhanced.zen-mode .editor-info {
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--editor-transition);
+}
+
+.editor-enhanced.zen-mode .editor-body {
+    height: 100% !important;
+}
+
+.editor-enhanced.zen-mode .editor-textarea {
+    border-radius: 16px;
+    padding: 10% 15% !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .editor-enhanced .editor-textarea {
+        padding: 32px 24px !important;
+        font-size: 15px !important;
+        /* Constrain to viewport on small screens while keeping comfortable side padding */
+        max-width: calc(100% - 48px) !important;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .editor-enhanced .focus-mode-textarea {
+        padding: 60px 16px !important;
+        font-size: 16px !important;
+        /* Focus mode remains full-width-friendly on smaller screens */
+        max-width: none !important;
+    }
+
+    .editor-enhanced .modal-header {
+        padding: 16px 24px;
+    }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+    .editor-enhanced * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .editor-enhanced .editor-textarea {
+        border: 2px solid var(--editor-text-primary);
+    }
+
+    .editor-enhanced .btn {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .editor-enhanced .modal-header,
+    .editor-enhanced .editor-info,
+    .editor-enhanced .editor-toolbar {
+        display: none !important;
+    }
+
+    .editor-enhanced .editor-textarea {
+        background: white !important;
+        color: black !important;
+        padding: 1in !important;
+        font-size: 12pt !important;
+        line-height: 1.6 !important;
+    }
+}

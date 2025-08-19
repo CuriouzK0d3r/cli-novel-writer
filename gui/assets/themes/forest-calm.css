@@ -1,0 +1,541 @@
+/* Forest Calm Theme - A nature-inspired, peaceful writing environment */
+
+.theme-forest-calm {
+    /* Forest Color Palette */
+    --background-color: #f8faf8;
+    --surface-color: #f2f6f2;
+    --surface-hover: #eaf1ea;
+    --border-color: #d8e5d8;
+    --text-primary: #2d3a2d;
+    --text-secondary: #4a5d4a;
+    --text-muted: #6b7c6b;
+
+    /* Forest accent colors */
+    --primary-color: #4a7c59;
+    --primary-color-rgb: 74, 124, 89;
+    --primary-hover: #3d6b4a;
+    --secondary-color: #6b7c6b;
+    --success-color: #5d8a3a;
+    --warning-color: #b8860b;
+    --error-color: #a0522d;
+    --info-color: #4682b4;
+
+    /* Writing-specific colors */
+    --editor-bg-primary: #fdfefe;
+    --editor-bg-secondary: #f8faf8;
+    --editor-text-primary: #2d3a2d;
+    --editor-text-secondary: #4a5d4a;
+    --editor-text-muted: #6b7c6b;
+    --editor-accent: #4a7c59;
+    --editor-accent-light: rgba(74, 124, 89, 0.1);
+    --editor-border: #d8e5d8;
+    --editor-shadow: 0 4px 12px rgba(45, 58, 45, 0.08);
+    --editor-shadow-focus: 0 8px 24px rgba(74, 124, 89, 0.15);
+    --editor-selection-bg: rgba(74, 124, 89, 0.2);
+    --editor-cursor-color: #4a7c59;
+    --editor-gutter-bg: #f6f9f6;
+
+    /* Natural shadows */
+    --shadow-sm: 0 2px 4px rgba(45, 58, 45, 0.06);
+    --shadow-md: 0 4px 8px rgba(45, 58, 45, 0.08);
+    --shadow-lg: 0 8px 16px rgba(45, 58, 45, 0.12);
+
+    /* Typography for nature theme */
+    --font-family: 'Libre Baskerville', 'Crimson Text', Georgia, serif;
+    --font-family-mono: 'Source Code Pro', 'JetBrains Mono', monospace;
+}
+
+/* Navbar styling for forest theme */
+.theme-forest-calm .navbar {
+    background: linear-gradient(135deg,
+        rgba(248, 250, 248, 0.95) 0%,
+        rgba(242, 246, 242, 0.95) 100%);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(15px) saturate(180%);
+    box-shadow: 0 2px 8px rgba(45, 58, 45, 0.05);
+}
+
+.theme-forest-calm .navbar-brand {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(74, 124, 89, 0.1);
+}
+
+.theme-forest-calm .navbar-brand i {
+    color: #5d8a3a;
+}
+
+.theme-forest-calm .navbar-project {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.theme-forest-calm .navbar-btn {
+    background: rgba(74, 124, 89, 0.08);
+    color: var(--primary-color);
+    border: 1px solid rgba(74, 124, 89, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-forest-calm .navbar-btn:hover {
+    background: rgba(74, 124, 89, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(74, 124, 89, 0.15);
+}
+
+/* Sidebar styling */
+.theme-forest-calm .sidebar {
+    background: linear-gradient(180deg,
+        var(--surface-color) 0%,
+        rgba(248, 250, 248, 0.98) 100%);
+    border-right: 1px solid var(--border-color);
+    box-shadow: inset -1px 0 3px rgba(45, 58, 45, 0.03);
+}
+
+.theme-forest-calm .sidebar-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    position: relative;
+}
+
+.theme-forest-calm .sidebar-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 24px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), transparent);
+    border-radius: 1px;
+}
+
+.theme-forest-calm .sidebar-item {
+    color: var(--text-secondary);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-forest-calm .sidebar-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: linear-gradient(90deg,
+        rgba(74, 124, 89, 0.1),
+        rgba(93, 138, 58, 0.05));
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-forest-calm .sidebar-item:hover {
+    color: var(--primary-color);
+    padding-left: 24px;
+    background: rgba(74, 124, 89, 0.04);
+}
+
+.theme-forest-calm .sidebar-item:hover::before {
+    width: 4px;
+}
+
+.theme-forest-calm .sidebar-item.active {
+    background: rgba(74, 124, 89, 0.08);
+    color: var(--primary-color);
+    font-weight: 500;
+    box-shadow: inset 0 1px 3px rgba(74, 124, 89, 0.1);
+}
+
+.theme-forest-calm .sidebar-item.active::before {
+    width: 4px;
+    background: var(--primary-color);
+}
+
+/* Main content area */
+.theme-forest-calm .main-content {
+    background: var(--background-color);
+    background-image:
+        radial-gradient(circle at 20% 80%, rgba(93, 138, 58, 0.02) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(74, 124, 89, 0.02) 0%, transparent 50%);
+}
+
+/* Cards and surfaces */
+.theme-forest-calm .card,
+.theme-forest-calm .surface {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-forest-calm .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(74, 124, 89, 0.3),
+        transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.theme-forest-calm .card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: rgba(74, 124, 89, 0.25);
+    transform: translateY(-1px);
+}
+
+.theme-forest-calm .card:hover::before {
+    opacity: 1;
+}
+
+/* Buttons */
+.theme-forest-calm .btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-forest-calm .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.theme-forest-calm .btn:hover::before {
+    left: 100%;
+}
+
+.theme-forest-calm .btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #3d6b4a 100%);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(74, 124, 89, 0.2);
+}
+
+.theme-forest-calm .btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #2f5236 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 124, 89, 0.25);
+}
+
+.theme-forest-calm .btn-secondary {
+    background: var(--surface-color);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.theme-forest-calm .btn-secondary:hover {
+    background: var(--surface-hover);
+    color: var(--primary-color);
+    border-color: rgba(74, 124, 89, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Form inputs */
+.theme-forest-calm input,
+.theme-forest-calm textarea,
+.theme-forest-calm select {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.theme-forest-calm input:focus,
+.theme-forest-calm textarea:focus,
+.theme-forest-calm select:focus {
+    border-color: var(--primary-color);
+    box-shadow:
+        0 0 0 3px rgba(74, 124, 89, 0.1),
+        inset 0 1px 3px rgba(74, 124, 89, 0.05);
+    background: var(--background-color);
+}
+
+/* Modal enhancements */
+.theme-forest-calm .modal-content {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    box-shadow:
+        0 20px 40px rgba(45, 58, 45, 0.1),
+        0 8px 16px rgba(45, 58, 45, 0.08);
+    backdrop-filter: blur(20px);
+}
+
+.theme-forest-calm .modal-header {
+    background: linear-gradient(135deg,
+        var(--surface-color) 0%,
+        rgba(248, 250, 248, 0.95) 100%);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.theme-forest-calm .modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(74, 124, 89, 0.2),
+        transparent);
+}
+
+/* Progress bars */
+.theme-forest-calm .progress-bar {
+    background: linear-gradient(90deg,
+        var(--primary-color),
+        #5d8a3a);
+    box-shadow: 0 2px 4px rgba(74, 124, 89, 0.2);
+}
+
+.theme-forest-calm .progress-track {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+}
+
+/* Status badges */
+.theme-forest-calm .badge {
+    background: rgba(74, 124, 89, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(74, 124, 89, 0.15);
+    font-weight: 500;
+}
+
+.theme-forest-calm .badge.success {
+    background: rgba(93, 138, 58, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(93, 138, 58, 0.15);
+}
+
+.theme-forest-calm .badge.warning {
+    background: rgba(184, 134, 11, 0.1);
+    color: var(--warning-color);
+    border: 1px solid rgba(184, 134, 11, 0.15);
+}
+
+.theme-forest-calm .badge.error {
+    background: rgba(160, 82, 45, 0.1);
+    color: var(--error-color);
+    border: 1px solid rgba(160, 82, 45, 0.15);
+}
+
+/* Loading screen */
+.theme-forest-calm .loading-screen {
+    background: linear-gradient(135deg,
+        var(--background-color) 0%,
+        #f6f9f6 100%);
+}
+
+.theme-forest-calm .loading-spinner {
+    border-color: var(--border-color);
+    border-top-color: var(--primary-color);
+}
+
+/* Scrollbars */
+.theme-forest-calm *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.theme-forest-calm *::-webkit-scrollbar-track {
+    background: var(--surface-color);
+    border-radius: 6px;
+}
+
+.theme-forest-calm *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg,
+        rgba(74, 124, 89, 0.3),
+        rgba(74, 124, 89, 0.5));
+    border-radius: 6px;
+    border: 2px solid var(--surface-color);
+    transition: all 0.3s ease;
+}
+
+.theme-forest-calm *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg,
+        rgba(74, 124, 89, 0.5),
+        rgba(74, 124, 89, 0.7));
+}
+
+/* Focus mode enhancements */
+.theme-forest-calm .focus-mode {
+    background: linear-gradient(135deg,
+        var(--background-color) 0%,
+        #f9fbf9 50%,
+        var(--background-color) 100%);
+}
+
+/* Writing-specific enhancements */
+.theme-forest-calm .editor-textarea {
+    background: var(--editor-bg-primary) !important;
+    color: var(--text-primary) !important;
+    text-shadow: 0 1px 2px rgba(45, 58, 45, 0.03);
+}
+
+.theme-forest-calm .editor-textarea::selection {
+    background: rgba(74, 124, 89, 0.2);
+    color: inherit;
+}
+
+.theme-forest-calm .editor-textarea::-moz-selection {
+    background: rgba(74, 124, 89, 0.2);
+    color: inherit;
+}
+
+/* Typewriter mode forest styling */
+.theme-forest-calm .editor-textarea.typewriter-mode {
+    background: linear-gradient(180deg,
+        var(--editor-bg-primary) 0%,
+        var(--editor-bg-primary) 35%,
+        rgba(74, 124, 89, 0.02) 50%,
+        var(--editor-bg-primary) 65%,
+        var(--editor-bg-primary) 100%) !important;
+}
+
+/* Dashboard enhancements */
+.theme-forest-calm .stats-card {
+    background: linear-gradient(135deg,
+        var(--surface-color) 0%,
+        rgba(248, 250, 248, 0.8) 100%);
+    border: 1px solid var(--border-color);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.theme-forest-calm .stats-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg,
+        rgba(74, 124, 89, 0.1),
+        rgba(93, 138, 58, 0.05),
+        rgba(74, 124, 89, 0.1));
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.theme-forest-calm .stats-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(45, 58, 45, 0.1);
+}
+
+.theme-forest-calm .stats-card:hover::before {
+    opacity: 1;
+}
+
+/* Chart and visualization colors */
+.theme-forest-calm .chart-primary {
+    color: var(--primary-color);
+}
+
+.theme-forest-calm .chart-secondary {
+    color: var(--secondary-color);
+}
+
+.theme-forest-calm .chart-success {
+    color: var(--success-color);
+}
+
+/* Animation enhancements */
+.theme-forest-calm .fade-in {
+    animation: forestFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes forestFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(15px) scale(0.95);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* Seasonal forest variations */
+.theme-forest-calm.season-spring {
+    --primary-color: #6ba16b;
+    --success-color: #7cb342;
+    --editor-accent: #6ba16b;
+    --background-color: #f9fdf9;
+    --surface-color: #f4f8f4;
+}
+
+.theme-forest-calm.season-summer {
+    --primary-color: #4a7c59;
+    --success-color: #689f38;
+    --editor-accent: #4a7c59;
+    --background-color: #f8fcf8;
+    --surface-color: #f2f7f2;
+}
+
+.theme-forest-calm.season-autumn {
+    --primary-color: #7d6e4d;
+    --warning-color: #ff8f00;
+    --editor-accent: #7d6e4d;
+    --background-color: #faf9f6;
+    --surface-color: #f5f3ef;
+}
+
+.theme-forest-calm.season-winter {
+    --primary-color: #5a6b5a;
+    --primary-color-rgb: 90, 107, 90;
+    --editor-accent: #5a6b5a;
+    --background-color: #fafcfa;
+    --surface-color: #f4f7f4;
+    --text-primary: #2a352a;
+}
+
+/* Time of day moods */
+.theme-forest-calm.mood-dawn {
+    --background-color: #faf9f7;
+    --surface-color: #f3f1ee;
+    --primary-color: #8b9e8b;
+}
+
+.theme-forest-calm.mood-midday {
+    --background-color: #f9fcf9;
+    --surface-color: #f3f7f3;
+    --primary-color: #4a7c59;
+}
+
+.theme-forest-calm.mood-dusk {
+    --background-color: #f8f9f7;
+    --surface-color: #f1f3f0;
+    --primary-color: #6b7c6b;
+    --text-primary: #323a32;
+}
+
+/* Deep forest mode for serious writing */
+.theme-forest-calm.mood-deep-forest {
+    --background-color: #f6f8f6;
+    --surface-color: #eff2ef;
+    --primary-color: #2d4a2d;
+    --text-primary: #1a2e1a;
+    --editor-accent: #2d4a2d;
+}

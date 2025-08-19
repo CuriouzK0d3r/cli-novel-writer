@@ -1,0 +1,361 @@
+/* Writer Warm Theme - A cozy, comfortable writing environment */
+
+.theme-writer-warm {
+    /* Warm Color Palette */
+    --background-color: #faf8f5;
+    --surface-color: #f5f2ed;
+    --surface-hover: #ede8e0;
+    --border-color: #e6ddd1;
+    --text-primary: #3c3731;
+    --text-secondary: #6b6356;
+    --text-muted: #8a7f72;
+
+    /* Warm accent colors */
+    --primary-color: #c77d3a;
+    --primary-color-rgb: 199, 125, 58;
+    --primary-hover: #b36b2a;
+    --secondary-color: #8a7f72;
+    --success-color: #7d8471;
+    --warning-color: #d4941e;
+    --error-color: #c85a54;
+    --info-color: #6b8cae;
+
+    /* Writing-specific colors */
+    --editor-bg-primary: #fefdfb;
+    --editor-bg-secondary: #f9f6f0;
+    --editor-text-primary: #3c3731;
+    --editor-text-secondary: #6b6356;
+    --editor-text-muted: #8a7f72;
+    --editor-accent: #c77d3a;
+    --editor-accent-light: rgba(199, 125, 58, 0.1);
+    --editor-border: #e6ddd1;
+    --editor-shadow: 0 4px 12px rgba(60, 55, 49, 0.08);
+    --editor-shadow-focus: 0 8px 24px rgba(199, 125, 58, 0.15);
+    --editor-selection-bg: rgba(199, 125, 58, 0.25);
+    --editor-cursor-color: #c77d3a;
+    --editor-gutter-bg: #f7f4ef;
+
+    /* Warm shadows and glows */
+    --shadow-sm: 0 2px 4px rgba(60, 55, 49, 0.06);
+    --shadow-md: 0 4px 8px rgba(60, 55, 49, 0.08);
+    --shadow-lg: 0 8px 16px rgba(60, 55, 49, 0.12);
+
+    /* Typography enhancements for warm theme */
+    --font-family: 'Crimson Text', 'Libre Baskerville', Georgia, serif;
+    --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Navbar styling for warm theme */
+.theme-writer-warm .navbar {
+    background: linear-gradient(135deg, var(--surface-color) 0%, var(--background-color) 100%);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+.theme-writer-warm .navbar-brand {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.theme-writer-warm .navbar-project {
+    color: var(--text-secondary);
+}
+
+.theme-writer-warm .navbar-btn {
+    background: rgba(199, 125, 58, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(199, 125, 58, 0.2);
+}
+
+.theme-writer-warm .navbar-btn:hover {
+    background: rgba(199, 125, 58, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Sidebar styling */
+.theme-writer-warm .sidebar {
+    background: linear-gradient(180deg, var(--surface-color) 0%, var(--background-color) 100%);
+    border-right: 1px solid var(--border-color);
+}
+
+.theme-writer-warm .sidebar-title {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.theme-writer-warm .sidebar-item {
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.theme-writer-warm .sidebar-item:hover {
+    background: rgba(199, 125, 58, 0.08);
+    color: var(--primary-color);
+    padding-left: 20px;
+}
+
+.theme-writer-warm .sidebar-item.active {
+    background: rgba(199, 125, 58, 0.12);
+    color: var(--primary-color);
+    border-right: 3px solid var(--primary-color);
+    font-weight: 500;
+}
+
+/* Main content area */
+.theme-writer-warm .main-content {
+    background: var(--background-color);
+}
+
+/* Cards and surfaces */
+.theme-writer-warm .card,
+.theme-writer-warm .surface {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.theme-writer-warm .card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: rgba(199, 125, 58, 0.3);
+}
+
+/* Buttons */
+.theme-writer-warm .btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+}
+
+.theme-writer-warm .btn-primary {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(199, 125, 58, 0.2);
+}
+
+.theme-writer-warm .btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(199, 125, 58, 0.25);
+}
+
+.theme-writer-warm .btn-secondary {
+    background: var(--surface-color);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.theme-writer-warm .btn-secondary:hover {
+    background: var(--surface-hover);
+    color: var(--primary-color);
+    border-color: rgba(199, 125, 58, 0.3);
+}
+
+/* Form inputs */
+.theme-writer-warm input,
+.theme-writer-warm textarea,
+.theme-writer-warm select {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.theme-writer-warm input:focus,
+.theme-writer-warm textarea:focus,
+.theme-writer-warm select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(199, 125, 58, 0.1);
+}
+
+/* Modal enhancements */
+.theme-writer-warm .modal-content {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 40px rgba(60, 55, 49, 0.15);
+}
+
+.theme-writer-warm .modal-header {
+    background: linear-gradient(135deg, var(--surface-color) 0%, var(--background-color) 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Progress bars */
+.theme-writer-warm .progress-bar {
+    background: linear-gradient(90deg, var(--primary-color), rgba(199, 125, 58, 0.8));
+}
+
+.theme-writer-warm .progress-track {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+}
+
+/* Status badges */
+.theme-writer-warm .badge {
+    background: rgba(199, 125, 58, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(199, 125, 58, 0.2);
+}
+
+.theme-writer-warm .badge.success {
+    background: rgba(125, 132, 113, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(125, 132, 113, 0.2);
+}
+
+.theme-writer-warm .badge.warning {
+    background: rgba(212, 148, 30, 0.1);
+    color: var(--warning-color);
+    border: 1px solid rgba(212, 148, 30, 0.2);
+}
+
+.theme-writer-warm .badge.error {
+    background: rgba(200, 90, 84, 0.1);
+    color: var(--error-color);
+    border: 1px solid rgba(200, 90, 84, 0.2);
+}
+
+/* Loading screen */
+.theme-writer-warm .loading-screen {
+    background: var(--background-color);
+}
+
+.theme-writer-warm .loading-spinner {
+    border-color: var(--border-color);
+    border-top-color: var(--primary-color);
+}
+
+/* Scrollbars */
+.theme-writer-warm *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.theme-writer-warm *::-webkit-scrollbar-track {
+    background: var(--surface-color);
+    border-radius: 6px;
+}
+
+.theme-writer-warm *::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 6px;
+    border: 2px solid var(--surface-color);
+    transition: background 0.3s ease;
+}
+
+.theme-writer-warm *::-webkit-scrollbar-thumb:hover {
+    background: rgba(199, 125, 58, 0.6);
+}
+
+/* Focus mode enhancements */
+.theme-writer-warm .focus-mode {
+    background: linear-gradient(135deg,
+        var(--background-color) 0%,
+        #fcfaf7 50%,
+        var(--background-color) 100%);
+}
+
+/* Writing-specific enhancements */
+.theme-writer-warm .editor-textarea {
+    background: var(--editor-bg-primary) !important;
+    color: var(--text-primary) !important;
+    text-shadow: 0 1px 2px rgba(60, 55, 49, 0.05);
+}
+
+.theme-writer-warm .editor-textarea::selection {
+    background: rgba(199, 125, 58, 0.25);
+    color: inherit;
+}
+
+/* Typewriter mode warm styling */
+.theme-writer-warm .editor-textarea.typewriter-mode {
+    background: linear-gradient(180deg,
+        var(--editor-bg-primary) 0%,
+        var(--editor-bg-primary) 35%,
+        rgba(199, 125, 58, 0.02) 50%,
+        var(--editor-bg-primary) 65%,
+        var(--editor-bg-primary) 100%) !important;
+}
+
+/* Dashboard enhancements */
+.theme-writer-warm .stats-card {
+    background: linear-gradient(135deg, var(--surface-color) 0%, var(--background-color) 100%);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.theme-writer-warm .stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(199, 125, 58, 0.2);
+}
+
+/* Chart and visualization colors */
+.theme-writer-warm .chart-primary {
+    color: var(--primary-color);
+}
+
+.theme-writer-warm .chart-secondary {
+    color: var(--secondary-color);
+}
+
+.theme-writer-warm .chart-success {
+    color: var(--success-color);
+}
+
+/* Animation enhancements */
+.theme-writer-warm .fade-in {
+    animation: warmFadeIn 0.6s ease-out;
+}
+
+@keyframes warmFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Seasonal warmth variations */
+.theme-writer-warm.season-autumn {
+    --primary-color: #d2691e;
+    --primary-color-rgb: 210, 105, 30;
+    --editor-accent: #d2691e;
+    --background-color: #faf9f7;
+    --surface-color: #f5f3f0;
+}
+
+.theme-writer-warm.season-winter {
+    --primary-color: #8b7355;
+    --primary-color-rgb: 139, 115, 85;
+    --editor-accent: #8b7355;
+    --background-color: #fefefe;
+    --surface-color: #f8f6f4;
+}
+
+.theme-writer-warm.season-spring {
+    --primary-color: #9aab5e;
+    --primary-color-rgb: 154, 171, 94;
+    --editor-accent: #9aab5e;
+    --background-color: #fafbf7;
+    --surface-color: #f4f6f0;
+}
+
+/* Coffee house mood */
+.theme-writer-warm.mood-coffeehouse {
+    --background-color: #f9f7f4;
+    --surface-color: #f0ebe3;
+    --primary-color: #8b4513;
+    --editor-accent: #8b4513;
+    --text-primary: #2f1b14;
+}
+
+/* Evening warmth */
+.theme-writer-warm.mood-evening {
+    --background-color: #faf8f5;
+    --surface-color: #f2ede4;
+    --primary-color: #cd853f;
+    --editor-accent: #cd853f;
+    --text-primary: #3e3529;
+}
