@@ -107,15 +107,38 @@ async function showVoiceMenu(transcriber, options) {
 }
 
 async function handleRecord(transcriber, target, options) {
-  const outputFile =
-    target ||
-    `voice_note_${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.md`;
+  // CLI guard: require string paths for target (avoid passing objects)
+  const isStringTarget = typeof target === "string" && target.trim() !== "";
+  if (target && !isStringTarget) {
+    throw new Error(
+      'Invalid target argument: expected a file path string. Please pass a string path for the output (for example "note.wav" to save audio or "note.md" to save the transcription).',
+    );
+  }
 
-  console.log(chalk.blue(`🎤 Recording voice note to: ${outputFile}`));
+  // Determine whether the provided target looks like an audio file (use as audio output)
+  const audioExtRegex = /\.(wav|mp3|m4a|flac|ogg|aac)$/i;
+  const looksLikeAudio = isStringTarget && audioExtRegex.test(target);
+  const audioOutputPath = looksLikeAudio ? target : null;
+
+  // Markdown output (where the transcription text will be saved)
+  const markdownOutput =
+    isStringTarget && !looksLikeAudio
+      ? target
+      : `voice_note_${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.md`;
+
+  console.log(
+    chalk.blue(
+      `🎤 Recording${audioOutputPath ? " audio to" : " voice note to"}: ${
+        audioOutputPath || markdownOutput
+      }`,
+    ),
+  );
   console.log(chalk.yellow("Press Ctrl+C to stop recording"));
 
   try {
-    const result = await transcriber.recordAndTranscribe(null, {
+    // If user provided an audio path (e.g., mynote.wav), record to that file,
+    // otherwise let the transcriber create its own temporary audio file.
+    const result = await transcriber.recordAndTranscribe(audioOutputPath, {
       keepAudio: options.keepAudio || false,
       maxDuration: options.maxDuration || 300,
     });
@@ -125,8 +148,8 @@ async function handleRecord(transcriber, target, options) {
       const timestamp = new Date().toISOString();
       const content = formatTranscription(result.text, timestamp, options);
 
-      // Write to file
-      await fs.writeFile(outputFile, content, "utf8");
+      // Write to file (markdown output)
+      await fs.writeFile(markdownOutput, content, "utf8");
 
       console.log(chalk.green(`\n✅ Voice note saved to: ${outputFile}`));
       console.log(

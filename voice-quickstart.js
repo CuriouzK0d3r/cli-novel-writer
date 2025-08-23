@@ -385,7 +385,7 @@ ${chalk.bold("Settings File:")} .writers-enhanced.json
     "keepAudio": false,
     "autoSave": true,
     "outputFormat": "markdown",
-    "modelSize": "tiny"
+    "modelSize": "base"
   }
 }
 

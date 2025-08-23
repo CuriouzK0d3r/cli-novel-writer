@@ -34,7 +34,7 @@ class VoiceTranscriber {
       // Use Whisper tiny model for faster processing
       this.transcriber = await pipeline(
         "automatic-speech-recognition",
-        "Xenova/whisper-tiny.en",
+        "Xenova/whisper-base.en",
         {
           chunk_length_s: 30,
           stride_length_s: 5,
@@ -60,9 +60,68 @@ class VoiceTranscriber {
       throw new Error("Recording is already in progress");
     }
 
-    // Create output path
-    this.outputPath =
-      outputFile || path.join(process.cwd(), `recording_${Date.now()}.wav`);
+    // Try to coerce a usable output path from the provided value.
+    // Accept strings, objects with .path / .href properties, and URL/Buffer-like values.
+    let resolvedPath = null;
+    try {
+      if (typeof outputFile === "string" && outputFile.trim() !== "") {
+        resolvedPath = outputFile.trim();
+      } else if (outputFile && typeof outputFile === "object") {
+        // common object shapes
+        if (
+          typeof outputFile.path === "string" &&
+          outputFile.path.trim() !== ""
+        ) {
+          resolvedPath = outputFile.path.trim();
+        } else if (
+          typeof outputFile.href === "string" &&
+          outputFile.href.trim() !== ""
+        ) {
+          resolvedPath = outputFile.href.trim();
+        } else if (
+          outputFile instanceof URL &&
+          typeof outputFile.pathname === "string"
+        ) {
+          resolvedPath = outputFile.pathname;
+        } else if (Buffer.isBuffer(outputFile)) {
+          // Buffers are not valid paths; avoid coercing to "[object Object]"
+          resolvedPath = null;
+        } else {
+          // Fallback to String conversion but guard against "[object Object]"
+          const candidate = String(outputFile);
+          if (!/^\[object\s/.test(candidate) && candidate.trim() !== "") {
+            resolvedPath = candidate.trim();
+          } else {
+            resolvedPath = null;
+          }
+        }
+      }
+    } catch (e) {
+      // Defensive: if coercion fails, fall back to generated path below
+      resolvedPath = null;
+    }
+
+    const looksLikeValidPath = (p) =>
+      typeof p === "string" && p.length > 0 && !/^\[object\s/.test(p);
+
+    // Final output path fallback to generated filename if nothing valid provided
+    if (looksLikeValidPath(resolvedPath)) {
+      this.outputPath = resolvedPath;
+    } else if (
+      typeof outputFile === "string" &&
+      looksLikeValidPath(outputFile)
+    ) {
+      this.outputPath = outputFile;
+    } else {
+      this.outputPath = path.join(process.cwd(), `recording_${Date.now()}.wav`);
+      if (outputFile && typeof outputFile === "object") {
+        console.warn(
+          chalk.yellow(
+            "Provided outputFile was an object that couldn't be coerced to a path. Falling back to generated path.",
+          ),
+        );
+      }
+    }
 
     console.log(chalk.blue("🎤 Starting voice recording..."));
     console.log(chalk.gray(`Recording to: ${this.outputPath}`));
@@ -71,6 +130,11 @@ class VoiceTranscriber {
     this.isRecording = true;
 
     try {
+      // Validate the resolved path before passing to wav.FileWriter
+      if (!looksLikeValidPath(this.outputPath)) {
+        throw new Error("Invalid output path for recording");
+      }
+
       // Create WAV file writer
       this.fileWriter = new wav.FileWriter(this.outputPath, {
         channels: 1,
@@ -91,27 +155,56 @@ class VoiceTranscriber {
       });
 
       // Pipe recording to file
-      this.recordingStream.stream().pipe(this.fileWriter);
+      const stream = this.recordingStream.stream();
+      if (!stream || typeof stream.pipe !== "function") {
+        throw new Error("Recording stream is not available or not valid");
+      }
+      stream.pipe(this.fileWriter);
 
       return new Promise((resolve, reject) => {
-        this.recordingStream.stream().on("end", () => {
+        stream.on("end", () => {
           this.isRecording = false;
           console.log(chalk.green("🛑 Recording stopped"));
           resolve(this.outputPath);
         });
 
-        this.recordingStream.stream().on("error", (error) => {
+        stream.on("error", (error) => {
           this.isRecording = false;
+          console.error(
+            chalk.red("Recording stream error:"),
+            error.message || error,
+          );
           reject(error);
         });
 
-        // Handle manual stop
-        process.on("SIGINT", () => {
-          this.stopRecording();
-        });
+        // Handle manual stop (Ctrl+C)
+        const sigintHandler = () => {
+          try {
+            this.stopRecording();
+          } catch (e) {
+            console.error(
+              chalk.red("Error stopping recording on SIGINT:"),
+              e.message || e,
+            );
+          }
+        };
+        process.on("SIGINT", sigintHandler);
       });
     } catch (error) {
       this.isRecording = false;
+      console.error(chalk.red("❌ Recording failed:"), error.message || error);
+      // Ensure file writer is cleaned up on errors
+      try {
+        if (this.fileWriter) {
+          this.fileWriter.end();
+          this.fileWriter = null;
+        }
+      } catch (cleanupErr) {
+        console.warn(
+          chalk.yellow("Warning: failed to clean up file writer"),
+          cleanupErr.message || cleanupErr,
+        );
+      }
       throw error;
     }
   }
