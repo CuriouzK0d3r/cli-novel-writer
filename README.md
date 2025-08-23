@@ -281,12 +281,41 @@ writers write
 writers gui
 ```
 
+## 🤖 Voice Model Management
+
+The Writers CLI supports multiple OpenAI Whisper models with different sizes and accuracy levels:
+
+### Available Models
+- **whisper-tiny.en** (39MB) - Fastest, basic accuracy
+- **whisper-base.en** (74MB) - Good balance of speed/accuracy
+- **whisper-small.en** (244MB) - High accuracy, moderate speed
+- **whisper-medium.en** (769MB) - Excellent accuracy
+- **whisper-large-v3** (1.5GB) - Best accuracy, multilingual
+
+### Model Management via GUI
+1. Open voice transcription interface
+2. Click "🤖 Manage Models" button
+3. Download, switch, or delete models as needed
+4. Models switch instantly without restarting
+
+### Quick Start
+```bash
+# Test model management
+npm run demo:model-management
+
+# Run model management tests  
+npm run test:model-management
+```
+
+See [MODEL_MANAGEMENT.md](MODEL_MANAGEMENT.md) for complete guide.
+
 ## 🏗️ Architecture
 
 ### Voice Transcription Stack
 - **Frontend**: Electron + HTML5 Web Audio API
 - **Backend**: Node.js + OpenAI Whisper (via Transformers.js)
-- **AI Model**: Whisper-tiny (39MB) for fast processing
+- **AI Models**: 9 Whisper models from 39MB to 1.5GB
+- **Model Management**: Download/switch models via GUI
 - **Storage**: Local file system (no cloud dependencies)
 
 ### Writing Tools

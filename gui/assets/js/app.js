@@ -597,20 +597,10 @@ class WritersApp {
   }
 
   setupWelcomeModalListeners() {
-    document
-      .getElementById("create-project-btn")
-      .addEventListener("click", () => {
-        this.hideModal("welcome-modal");
-        this.showProjectCreationModal();
-      });
+    console.log("🎧 Setting up welcome modal listeners");
 
-    document
-      .getElementById("open-project-btn")
-      .addEventListener("click", () => {
-        this.openProject();
-      });
-
-    // Project creation modal
+    const createProjectBtn = document.getElementById("create-project-btn");
+    const openProjectBtn = document.getElementById("open-project-btn");
     const projectCreationForm = document.getElementById(
       "project-creation-form",
     );
@@ -621,17 +611,58 @@ class WritersApp {
       "project-creation-cancel",
     );
 
-    projectCreationClose.addEventListener("click", () =>
-      this.hideModal("project-creation-modal"),
-    );
-    projectCreationCancel.addEventListener("click", () =>
-      this.hideModal("project-creation-modal"),
-    );
-
-    projectCreationForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      this.handleProjectCreationSubmit();
+    console.log("🔍 Welcome modal elements found:", {
+      createProjectBtn: !!createProjectBtn,
+      openProjectBtn: !!openProjectBtn,
+      projectCreationForm: !!projectCreationForm,
+      projectCreationClose: !!projectCreationClose,
+      projectCreationCancel: !!projectCreationCancel,
     });
+
+    if (createProjectBtn) {
+      createProjectBtn.addEventListener("click", () => {
+        console.log("🆕 Create project button clicked");
+        this.hideModal("welcome-modal");
+        this.showProjectCreationModal();
+      });
+    } else {
+      console.error("❌ Create project button not found");
+    }
+
+    if (openProjectBtn) {
+      openProjectBtn.addEventListener("click", () => {
+        console.log("📂 Open project button clicked");
+        this.openProject();
+      });
+    } else {
+      console.error("❌ Open project button not found");
+    }
+
+    if (projectCreationClose) {
+      projectCreationClose.addEventListener("click", () => {
+        console.log("❌ Project creation close button clicked");
+        this.hideModal("project-creation-modal");
+      });
+    }
+
+    if (projectCreationCancel) {
+      projectCreationCancel.addEventListener("click", () => {
+        console.log("🚫 Project creation cancel button clicked");
+        this.hideModal("project-creation-modal");
+      });
+    }
+
+    if (projectCreationForm) {
+      projectCreationForm.addEventListener("submit", (e) => {
+        console.log("📤 Project creation form submitted");
+        e.preventDefault();
+        this.handleProjectCreationSubmit();
+      });
+    } else {
+      console.error(
+        "❌ Project creation form not found - this will prevent project creation",
+      );
+    }
   }
 
   switchView(view) {
@@ -895,7 +926,42 @@ class WritersApp {
   }
 
   showProjectCreationModal() {
-    this.showModal("project-creation-modal");
+    console.log("👋 Opening project creation modal");
+
+    try {
+      this.showModal("project-creation-modal");
+
+      // Clear form fields
+      const nameInput = document.getElementById("project-name-input");
+      const authorInput = document.getElementById("project-author-input");
+      const typeSelect = document.getElementById("project-type");
+      const wordGoalInput = document.getElementById("project-word-goal");
+
+      console.log("📋 Clearing form fields:", {
+        nameInput: !!nameInput,
+        authorInput: !!authorInput,
+        typeSelect: !!typeSelect,
+        wordGoalInput: !!wordGoalInput,
+      });
+
+      if (nameInput) nameInput.value = "";
+      if (authorInput) authorInput.value = "";
+      if (typeSelect) typeSelect.value = "novel";
+      if (wordGoalInput) wordGoalInput.value = "50000";
+
+      // Focus on the project name input
+      setTimeout(() => {
+        if (nameInput) {
+          nameInput.focus();
+          console.log("🎯 Focus set to project name input");
+        } else {
+          console.warn("⚠️ Could not focus: project name input not found");
+        }
+      }, 100);
+    } catch (error) {
+      console.error("❌ Error opening project creation modal:", error);
+      this.showToast("Error opening project creation form", "error");
+    }
   }
 
   showCreateModal(type, title) {
@@ -978,32 +1044,99 @@ class WritersApp {
   }
 
   async handleProjectCreationSubmit() {
-    const name = document.getElementById("project-name").value.trim();
-    const author = document.getElementById("project-author").value.trim();
-    const type = document.getElementById("project-type").value;
-    const wordGoal =
-      parseInt(document.getElementById("project-word-goal").value) || 50000;
-
-    if (!name || !author) {
-      this.showToast("Please fill in all fields", "error");
-      return;
-    }
+    console.log("🚀 Project creation started");
 
     try {
-      const options = { name, author, wordGoal, type };
-      this.currentProject = await ipcRenderer.invoke("init-project", options);
-      // Persist chosen type locally (config from backend may not include it yet)
-      this.currentProject.type = type;
-      this.applyProjectTypeVisibility();
+      const nameElement = document.getElementById("project-name-input");
+      const authorElement = document.getElementById("project-author-input");
+      const typeElement = document.getElementById("project-type");
+      const wordGoalElement = document.getElementById("project-word-goal");
 
-      this.hideModal("project-creation-modal");
-      this.showToast("Project created successfully", "success");
+      console.log("📋 Form elements found:", {
+        nameElement: !!nameElement,
+        authorElement: !!authorElement,
+        typeElement: !!typeElement,
+        wordGoalElement: !!wordGoalElement,
+      });
 
-      // Load the new project
-      await this.loadProject();
-    } catch (error) {
-      console.error("Error creating project:", error);
-      this.showToast(error.message || "Error creating project", "error");
+      if (!nameElement || !authorElement || !typeElement || !wordGoalElement) {
+        throw new Error("Missing form elements");
+      }
+
+      const name = nameElement.value.trim();
+      const author = authorElement.value.trim();
+      const type = typeElement.value;
+      const wordGoal = parseInt(wordGoalElement.value) || 50000;
+
+      console.log("📝 Form values:", { name, author, type, wordGoal });
+
+      if (!name || !author) {
+        console.warn("⚠️ Validation failed: missing name or author");
+        this.showToast("Please fill in all fields", "error");
+        return;
+      }
+
+      // Show loading state
+      const submitButton = document.querySelector(
+        "#project-creation-form button[type='submit']",
+      );
+
+      if (!submitButton) {
+        console.error("❌ Submit button not found");
+        throw new Error("Submit button not found");
+      }
+
+      const originalButtonText = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = "Creating...";
+      console.log("🔄 UI updated to loading state");
+
+      try {
+        const options = { name, author, wordGoal, type };
+        console.log("📤 Sending IPC request with options:", options);
+
+        this.currentProject = await ipcRenderer.invoke("init-project", options);
+        console.log("✅ Project created successfully:", this.currentProject);
+
+        // Persist chosen type locally (config from backend may not include it yet)
+        this.currentProject.type = type;
+        this.applyProjectTypeVisibility();
+
+        console.log("🎭 Hiding modal and showing success");
+        this.hideModal("project-creation-modal");
+        this.showToast("Project created successfully", "success");
+
+        // Load the new project
+        console.log("🔄 Loading new project...");
+        await this.loadProject();
+        console.log("✅ Project loaded successfully");
+      } catch (error) {
+        console.error("❌ Error creating project:", error);
+        console.error("❌ Error details:", {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+        });
+        this.showToast(error.message || "Error creating project", "error");
+      } finally {
+        // Reset button state
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = originalButtonText;
+          console.log("🔄 Button state reset");
+        }
+      }
+    } catch (outerError) {
+      console.error(
+        "💥 Fatal error in handleProjectCreationSubmit:",
+        outerError,
+      );
+      console.error("💥 Fatal error details:", {
+        message: outerError.message,
+        stack: outerError.stack,
+        name: outerError.name,
+      });
+      this.showToast("Fatal error during project creation", "error");
     }
   }
 

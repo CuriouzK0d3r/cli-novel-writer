@@ -436,6 +436,87 @@
                             <option value="1800">30 minutes</option>
                         </select>
                     </div>
+                    <div class="settings-row">
+                        <span class="settings-label">AI Model</span>
+                        <button
+                            id="modelManagerBtn"
+                            class="btn btn-secondary"
+                            onclick="openModelManager()"
+                        >
+                            🤖 Manage Models
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Model Manager Modal -->
+                <div id="modelManagerModal" class="modal hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>🤖 Voice Model Manager</h3>
+                            <button
+                                class="modal-close"
+                                onclick="closeModelManager()"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="current-model-info">
+                                <h4>Current Model</h4>
+                                <div
+                                    id="currentModelDisplay"
+                                    class="model-card current"
+                                >
+                                    <span class="model-name">Loading...</span>
+                                    <span class="model-size">--</span>
+                                    <span class="model-status">--</span>
+                                </div>
+                            </div>
+
+                            <div class="model-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label"
+                                        >Downloaded Models:</span
+                                    >
+                                    <span id="downloadedCount">0</span>/<span
+                                        id="totalCount"
+                                        >0</span
+                                    >
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label"
+                                        >Storage Used:</span
+                                    >
+                                    <span id="storageUsed">0 MB</span>
+                                </div>
+                            </div>
+
+                            <div class="model-list">
+                                <h4>Available Models</h4>
+                                <div id="modelGrid" class="model-grid">
+                                    <!-- Model cards will be populated here -->
+                                </div>
+                            </div>
+
+                            <div
+                                id="modelProgress"
+                                class="progress-section hidden"
+                            >
+                                <div class="progress-info">
+                                    <span id="progressText"
+                                        >Downloading...</span
+                                    >
+                                    <span id="progressPercent">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div
+                                        id="progressFill"
+                                        class="progress-fill"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Recording Controls -->
@@ -1183,5 +1264,8 @@
                 }
             });
         </script>
+
+        <!-- Model Manager Script -->
+        <script src="assets/js/model-manager.js"></script>
     </body>
 </html>

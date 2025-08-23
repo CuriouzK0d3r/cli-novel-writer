@@ -5,6 +5,7 @@ const recorder = require("node-record-lpcm16");
 const wav = require("wav");
 const chalk = require("chalk");
 const AudioProcessor = require("./audio-processor");
+const VoiceModelManager = require("./model-manager");
 
 class VoiceTranscriber {
   constructor() {
@@ -14,38 +15,36 @@ class VoiceTranscriber {
     this.recordingStream = null;
     this.fileWriter = null;
     this.audioProcessor = new AudioProcessor();
+    this.modelManager = new VoiceModelManager();
   }
 
   /**
    * Initialize the Whisper transcription model
    */
-  async initialize() {
-    if (this.transcriber) {
-      return this.transcriber;
-    }
-
-    console.log(
-      chalk.yellow(
-        "🤖 Loading Whisper model (this may take a moment on first run)...",
-      ),
-    );
-
+  async initialize(modelId = null) {
     try {
-      // Use Whisper tiny model for faster processing
-      this.transcriber = await pipeline(
-        "automatic-speech-recognition",
-        "Xenova/whisper-tiny.en",
-        {
-          chunk_length_s: 30,
-          stride_length_s: 5,
-        },
-      );
+      // Initialize the model manager
+      if (!this.modelManager.getCurrentModel().model) {
+        await this.modelManager.initialize();
+      }
 
-      console.log(chalk.green("✅ Whisper model loaded successfully!"));
-      return this.transcriber;
+      // Use specific model if requested
+      if (modelId) {
+        await this.modelManager.switchModel(modelId);
+      }
+
+      // Get current model from manager
+      const currentModel = this.modelManager.getCurrentModel();
+      if (currentModel.model) {
+        this.transcriber = currentModel.model;
+        console.log(chalk.green(`✅ Using model: ${currentModel.id}`));
+        return this.transcriber;
+      }
+
+      throw new Error("No model available");
     } catch (error) {
       console.error(
-        chalk.red("❌ Failed to load Whisper model:"),
+        chalk.red("❌ Failed to initialize Whisper model:"),
         error.message,
       );
       throw error;
@@ -166,6 +165,11 @@ class VoiceTranscriber {
       // Progress callback
       if (options.progress) {
         options.progress(50); // Audio processed
+      }
+
+      // Ensure we have a transcriber
+      if (!this.transcriber) {
+        await this.initialize(options.modelId);
       }
 
       // Transcribe using processed audio data
@@ -358,6 +362,57 @@ class VoiceTranscriber {
   }
 
   /**
+   * Switch to a different model
+   */
+  async switchModel(modelId, options = {}) {
+    try {
+      console.log(chalk.blue(`🔄 Switching transcriber to model: ${modelId}`));
+      await this.modelManager.switchModel(modelId, options);
+      this.transcriber = this.modelManager.getCurrentModel().model;
+      console.log(chalk.green(`✅ Transcriber now using: ${modelId}`));
+      return true;
+    } catch (error) {
+      console.error(chalk.red(`❌ Failed to switch model: ${error.message}`));
+      throw error;
+    }
+  }
+
+  /**
+   * Get available models
+   */
+  getAvailableModels() {
+    return this.modelManager.getAvailableModels();
+  }
+
+  /**
+   * Download a model
+   */
+  async downloadModel(modelId, options = {}) {
+    return await this.modelManager.downloadModel(modelId, options);
+  }
+
+  /**
+   * Get current model info
+   */
+  getCurrentModelInfo() {
+    return this.modelManager.getCurrentModelConfig();
+  }
+
+  /**
+   * Get model download status
+   */
+  getModelDownloadStatus() {
+    return this.modelManager.getDownloadStatus();
+  }
+
+  /**
+   * Get model manager instance for direct access
+   */
+  getModelManager() {
+    return this.modelManager;
+  }
+
+  /**
    * Clean up resources
    */
   cleanup() {
@@ -375,6 +430,11 @@ class VoiceTranscriber {
           error.message,
         );
       }
+    }
+
+    // Clean up model manager
+    if (this.modelManager) {
+      this.modelManager.cleanup();
     }
   }
 }

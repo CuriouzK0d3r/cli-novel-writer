@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writers CLI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        /* Welcome screen */
+        .welcome-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 1.5rem;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: #718096;
+            margin-bottom: 3rem;
+        }
+
+        .welcome-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #718096;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #f7fafc;
+            color: #2d3748;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-small {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Loading and success states */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 2000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #48bb78;
+        }
+
+        .toast.error {
+            background: #f56565;
+        }
+
+        .toast.info {
+            background: #4299e1;
+        }
+
+        /* Hidden state */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Project interface (hidden initially) */
+        .project-interface {
+            display: none;
+            min-height: 100vh;
+            background: #f7fafc;
+            padding: 2rem;
+        }
+
+        .project-interface.show {
+            display: block;
+        }
+
+        .project-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .project-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-meta {
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .welcome-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .welcome-buttons {
+                gap: 0.75rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="welcome-container">
+        <div class="welcome-icon">
+            <i class="fas fa-feather"></i>
+        </div>
+        <h1 class="welcome-title">Writers CLI</h1>
+        <p class="welcome-subtitle">Your powerful writing companion</p>
+
+        <div class="welcome-buttons">
+            <button id="create-project-btn" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Create New Project
+            </button>
+            <button id="open-project-btn" class="btn btn-secondary">
+                <i class="fas fa-folder-open"></i>
+                Open Existing Project
+            </button>
+        </div>
+    </div>
+
+    <!-- Project Creation Modal -->
+    <div id="project-creation-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Project</h3>
+                <button class="modal-close" id="close-creation-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="project-creation-form">
+                <div class="form-group">
+                    <label class="form-label" for="project-name">Project Name</label>
+                    <input type="text" id="project-name" class="form-input" placeholder="My Novel" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="project-author">Author Name</label>
+                    <input type="text" id="project-author" class="form-input" placeholder="Your Name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="project-type">Project Type</label>
+                    <select id="project-type" class="form-input">
+                        <option value="novel">Novel</option>
+                        <option value="short-story">Short Story Collection</option>
+                        <option value="blog">Blog</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="project-word-goal">Word Goal</label>
+                    <input type="number" id="project-word-goal" class="form-input" value="50000" min="1000" step="1000">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="cancel-creation" class="btn btn-secondary btn-small">
+                        Cancel
+                    </button>
+                    <button type="submit" id="create-project-submit" class="btn btn-primary btn-small">
+                        Create Project
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Project Interface (shown after successful creation/opening) -->
+    <div id="project-interface" class="project-interface">
+        <div class="project-header">
+            <h1 class="project-title" id="project-title-display">Project Loaded</h1>
+            <p class="project-meta" id="project-meta-display">Ready to write</p>
+        </div>
+
+        <div style="text-align: center; padding: 4rem;">
+            <p style="font-size: 1.2rem; color: #718096; margin-bottom: 2rem;">
+                🎉 Project successfully created/opened!
+            </p>
+            <button id="back-to-welcome" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Back to Welcome
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Import Electron's ipcRenderer
+        const { ipcRenderer } = require('electron');
+
+        class WritersApp {
+            constructor() {
+                this.currentProject = null;
+                this.init();
+            }
+
+            init() {
+                console.log('Initializing Writers CLI App');
+                this.setupEventListeners();
+                this.showWelcomeScreen();
+            }
+
+            setupEventListeners() {
+                // Welcome screen buttons
+                document.getElementById('create-project-btn').addEventListener('click', () => {
+                    this.showProjectCreationModal();
+                });
+
+                document.getElementById('open-project-btn').addEventListener('click', () => {
+                    this.openProject();
+                });
+
+                // Project creation modal
+                document.getElementById('close-creation-modal').addEventListener('click', () => {
+                    this.hideProjectCreationModal();
+                });
+
+                document.getElementById('cancel-creation').addEventListener('click', () => {
+                    this.hideProjectCreationModal();
+                });
+
+                document.getElementById('project-creation-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleProjectCreation();
+                });
+
+                // Back to welcome button
+                document.getElementById('back-to-welcome').addEventListener('click', () => {
+                    this.showWelcomeScreen();
+                });
+
+                // Close modal when clicking outside
+                document.getElementById('project-creation-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'project-creation-modal') {
+                        this.hideProjectCreationModal();
+                    }
+                });
+
+                // Handle escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.hideProjectCreationModal();
+                    }
+                });
+            }
+
+            showWelcomeScreen() {
+                document.getElementById('welcome-screen').classList.remove('hidden');
+                document.getElementById('project-interface').classList.remove('show');
+                document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }
+
+            showProjectCreationModal() {
+                document.getElementById('project-creation-modal').classList.add('show');
+                // Focus on first input
+                setTimeout(() => {
+                    document.getElementById('project-name').focus();
+                }, 100);
+            }
+
+            hideProjectCreationModal() {
+                document.getElementById('project-creation-modal').classList.remove('show');
+                // Reset form
+                document.getElementById('project-creation-form').reset();
+                document.getElementById('project-word-goal').value = '50000';
+                this.resetSubmitButton();
+            }
+
+            async handleProjectCreation() {
+                console.log('Starting project creation...');
+
+                // Get form data
+                const name = document.getElementById('project-name').value.trim();
+                const author = document.getElementById('project-author').value.trim();
+                const type = document.getElementById('project-type').value;
+                const wordGoal = parseInt(document.getElementById('project-word-goal').value) || 50000;
+
+                // Validate
+                if (!name || !author) {
+                    this.showToast('Please fill in all required fields', 'error');
+                    return;
+                }
+
+                // Show loading state
+                const submitBtn = document.getElementById('create-project-submit');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
+
+                try {
+                    console.log('Calling IPC handler with:', { name, author, type, wordGoal });
+
+                    // Create project via IPC
+                    const project = await ipcRenderer.invoke('init-project', {
+                        name,
+                        author,
+                        type,
+                        wordGoal
+                    });
+
+                    console.log('Project created successfully:', project);
+
+                    this.currentProject = project;
+
+                    // Hide modal and show success
+                    this.hideProjectCreationModal();
+                    this.showToast('Project created successfully!', 'success');
+
+                    // Show project interface
+                    setTimeout(() => {
+                        this.showProjectInterface(project);
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('Error creating project:', error);
+                    this.showToast(error.message || 'Failed to create project', 'error');
+                } finally {
+                    // Reset button state
+                    this.resetSubmitButton();
+                }
+            }
+
+            resetSubmitButton() {
+                const submitBtn = document.getElementById('create-project-submit');
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = 'Create Project';
+            }
+
+            async openProject() {
+                console.log('Opening project...');
+
+                try {
+                    const result = await ipcRenderer.invoke('open-project-dialog');
+
+                    if (result.canceled) {
+                        console.log('Project opening canceled');
+                        return;
+                    }
+
+                    console.log('Project opened:', result.config);
+
+                    this.currentProject = result.config;
+                    this.showToast('Project opened successfully!', 'success');
+
+                    // Show project interface
+                    setTimeout(() => {
+                        this.showProjectInterface(result.config);
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('Error opening project:', error);
+                    this.showToast(error.message || 'Failed to open project', 'error');
+                }
+            }
+
+            showProjectInterface(project) {
+                // Hide welcome screen
+                document.getElementById('welcome-screen').classList.add('hidden');
+
+                // Update project info
+                document.getElementById('project-title-display').textContent = project.name;
+                document.getElementById('project-meta-display').textContent = `By ${project.author} • ${project.type}`;
+
+                // Show project interface
+                document.getElementById('project-interface').classList.add('show');
+                document.body.style.background = '#f7fafc';
+            }
+
+            showToast(message, type = 'info') {
+                // Remove existing toasts
+                const existingToasts = document.querySelectorAll('.toast');
+                existingToasts.forEach(toast => toast.remove());
+
+                // Create new toast
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+
+                document.body.appendChild(toast);
+
+                // Show toast
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 100);
+
+                // Hide toast after 4 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 4000);
+            }
+        }
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new WritersApp();
+        });
+
+        // Handle any unhandled errors
+        window.addEventListener('error', (event) => {
+            console.error('Unhandled error:', event.error);
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+        });
+    </script>
+</body>
+</html>

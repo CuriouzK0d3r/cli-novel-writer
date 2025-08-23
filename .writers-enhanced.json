@@ -53,6 +53,97 @@
       "workDuration": 25,
       "breakDuration": 5,
       "longBreakDuration": 30
+    },
+    "voice": {
+      "enabled": true,
+      "currentModel": "whisper-tiny.en",
+      "maxDuration": 300,
+      "keepAudio": false,
+      "autoSave": true,
+      "outputFormat": "markdown",
+      "availableModels": {
+        "whisper-tiny.en": {
+          "name": "Whisper Tiny (English)",
+          "size": "39MB",
+          "language": "en",
+          "accuracy": "Basic",
+          "speed": "Very Fast",
+          "downloaded": true,
+          "path": "Xenova/whisper-tiny.en"
+        },
+        "whisper-tiny": {
+          "name": "Whisper Tiny (Multilingual)",
+          "size": "39MB",
+          "language": "multilingual",
+          "accuracy": "Basic",
+          "speed": "Very Fast",
+          "downloaded": false,
+          "path": "Xenova/whisper-tiny"
+        },
+        "whisper-base.en": {
+          "name": "Whisper Base (English)",
+          "size": "74MB",
+          "language": "en",
+          "accuracy": "Good",
+          "speed": "Fast",
+          "downloaded": false,
+          "path": "Xenova/whisper-base.en"
+        },
+        "whisper-base": {
+          "name": "Whisper Base (Multilingual)",
+          "size": "74MB",
+          "language": "multilingual",
+          "accuracy": "Good",
+          "speed": "Fast",
+          "downloaded": false,
+          "path": "Xenova/whisper-base"
+        },
+        "whisper-small.en": {
+          "name": "Whisper Small (English)",
+          "size": "244MB",
+          "language": "en",
+          "accuracy": "Very Good",
+          "speed": "Medium",
+          "downloaded": false,
+          "path": "Xenova/whisper-small.en"
+        },
+        "whisper-small": {
+          "name": "Whisper Small (Multilingual)",
+          "size": "244MB",
+          "language": "multilingual",
+          "accuracy": "Very Good",
+          "speed": "Medium",
+          "downloaded": false,
+          "path": "Xenova/whisper-small"
+        },
+        "whisper-medium.en": {
+          "name": "Whisper Medium (English)",
+          "size": "769MB",
+          "language": "en",
+          "accuracy": "Excellent",
+          "speed": "Slow",
+          "downloaded": false,
+          "path": "Xenova/whisper-medium.en"
+        },
+        "whisper-medium": {
+          "name": "Whisper Medium (Multilingual)",
+          "size": "769MB",
+          "language": "multilingual",
+          "accuracy": "Excellent",
+          "speed": "Slow",
+          "downloaded": false,
+          "path": "Xenova/whisper-medium"
+        },
+        "whisper-large-v3": {
+          "name": "Whisper Large v3 (Multilingual)",
+          "size": "1550MB",
+          "language": "multilingual",
+          "accuracy": "Best",
+          "speed": "Very Slow",
+          "downloaded": false,
+          "path": "Xenova/whisper-large-v3"
+        }
+      }
     }
   },
   "ui": {

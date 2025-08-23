@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node bin/writers.js",
-    "gui": "node gui-enhanced-launcher.js",
+    "gui": "electron gui/main.js",
     "gui-classic": "electron gui/main.js",
     "gui-dev": "nodemon --exec 'electron gui/main.js'",
     "test": "jest",
@@ -16,6 +16,10 @@
     "test:voice-editor": "node test-voice-editor-integration.js",
     "demo:voice": "node demo-voice.js",
     "demo:voice-editor": "node voice-editor-demo.js",
+    "demo:model-management": "node demo-model-management.js",
+    "test:model-management": "node test-model-management.js",
+    "test:original": "node test-original-functionality.js",
+    "test:gui-project": "node test-gui-project-creation.js",
     "doctor:voice": "node voice-integration-doctor.js",
     "example:voice": "node example-voice-workflow.js",
     "voice:check": "node bin/writers.js voice check",
@@ -23,7 +27,8 @@
     "build": "pkg --config pkg.config.json bin/writers.js",
     "pack:mac": "electron-packager . \"My Novel\" --platform=darwin --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$' --icon gui-logo.png",
     "pack:mac:arm64": "electron-packager . \"My Novel\" --platform=darwin --arch=arm64 --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$' --icon gui-logo.png",
-    "pack:mac:x64": "electron-packager . \"My Novel\" --platform=darwin --arch=x64 --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$'"
+    "pack:mac:x64": "electron-packager . \"My Novel\" --platform=darwin --arch=x64 --overwrite --out=dist --ignore='^(bin|rust-cli|tests|demo-project|.*\\\\.md|pkg\\\\.config\\\\.json)$'",
+    "gui-debug": "electron gui-fixed-launcher.js"
   },
   "keywords": [
     "writing",
@@ -49,9 +54,11 @@
     "boxen": "^5.1.2",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "electron": "^37.2.4",
     "electron-packager": "^17.1.2",
+    "express": "^4.21.2",
     "extract-zip": "^2.0.1",
     "fs-extra": "^11.1.1",
     "inquirer": "^8.2.6",

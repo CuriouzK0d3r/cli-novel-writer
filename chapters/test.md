@@ -18,19 +18,4 @@ Brief summary of what happens in this chapter.
 
 Write your chapter content here...
 
-gsdfgsdg
-
-fafdsaf
-asfafaf
-f
-a
-faHi there.
-
-f
-a
-af
-
-af
-a
-
-fsfs
+Once upon a time there was a night guarding a kingdom.

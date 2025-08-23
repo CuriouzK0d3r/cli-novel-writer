@@ -8,14 +8,19 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs-extra");
+const express = require("express");
+const cors = require("cors");
 const projectManager = require("../src/utils/project");
 const markdownUtils = require("../src/utils/markdown");
 const VoiceElectronHandlers = require("../src/voice/electron-handlers");
+const VoiceApiHandlers = require("../src/voice/api-handlers");
 
 // Keep a global reference of the window object
 let mainWindow;
 let isQuitting = false;
 let voiceHandlers = null;
+let voiceApiHandlers = null;
+let expressServer = null;
 
 function createWindow() {
   // Create the browser window
@@ -306,8 +311,37 @@ function createMenu() {
   Menu.setApplicationMenu(menu);
 }
 
+// Initialize Express server for voice API
+function initializeExpressServer() {
+  const expressApp = express();
+  const PORT = 3002; // Use different port from collaboration server
+
+  // Middleware
+  expressApp.use(cors());
+  expressApp.use(express.json());
+
+  // Initialize voice API handlers
+  try {
+    voiceApiHandlers = new VoiceApiHandlers();
+    voiceApiHandlers.setupRoutes(expressApp);
+    console.log("Voice API handlers initialized");
+  } catch (error) {
+    console.warn("Failed to initialize voice API handlers:", error.message);
+  }
+
+  // Start server
+  expressServer = expressApp.listen(PORT, "localhost", () => {
+    console.log(`Voice API server running on http://localhost:${PORT}`);
+  });
+
+  return expressServer;
+}
+
 // App event handlers
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+  initializeExpressServer();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -333,6 +367,27 @@ app.on("before-quit", () => {
       console.log("Voice handlers cleaned up");
     } catch (error) {
       console.warn("Error cleaning up voice handlers:", error.message);
+    }
+  }
+
+  // Clean up voice API handlers
+  if (voiceApiHandlers) {
+    try {
+      voiceApiHandlers.cleanup();
+      console.log("Voice API handlers cleaned up");
+    } catch (error) {
+      console.warn("Error cleaning up voice API handlers:", error.message);
+    }
+  }
+
+  // Close Express server
+  if (expressServer) {
+    try {
+      expressServer.close(() => {
+        console.log("Express server closed");
+      });
+    } catch (error) {
+      console.warn("Error closing Express server:", error.message);
     }
   }
 });
