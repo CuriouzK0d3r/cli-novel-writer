@@ -1,0 +1,106 @@
+{
+  "timestamp": "2025-08-23T15:39:20.890Z",
+  "summary": {
+    "total": 18,
+    "passed": 18,
+    "failed": 0,
+    "successRate": "100.0%"
+  },
+  "tests": [
+    {
+      "test": "File exists: gui/assets/js/voice-editor-integration.js",
+      "passed": true,
+      "details": "Found"
+    },
+    {
+      "test": "File exists: gui/assets/css/voice-editor-integration.css",
+      "passed": true,
+      "details": "Found"
+    },
+    {
+      "test": "File exists: src/voice/electron-handlers.js",
+      "passed": true,
+      "details": "Found"
+    },
+    {
+      "test": "File exists: gui/assets/js/voice-transcription.js",
+      "passed": true,
+      "details": "Found"
+    },
+    {
+      "test": "File exists: gui/assets/css/voice-transcription.css",
+      "passed": true,
+      "details": "Found"
+    },
+    {
+      "test": "File exists: gui/project-interface.html",
+      "passed": true,
+      "details": "Found"
+    },
+    {
+      "test": "File exists: gui/main-enhanced.js",
+      "passed": true,
+      "details": "Found"
+    },
+    {
+      "test": "File exists: VOICE_EDITOR_INTEGRATION.md",
+      "passed": true,
+      "details": "Found"
+    },
+    {
+      "test": "File exists: voice-editor-demo.js",
+      "passed": true,
+      "details": "Found"
+    },
+    {
+      "test": "CSS file linked in HTML",
+      "passed": true,
+      "details": "voice-editor-integration.css linked"
+    },
+    {
+      "test": "Required CSS classes present",
+      "passed": true,
+      "details": "6/6 classes found"
+    },
+    {
+      "test": "JavaScript file linked in HTML",
+      "passed": true,
+      "details": "voice-editor-integration.js linked"
+    },
+    {
+      "test": "Required JavaScript methods present",
+      "passed": true,
+      "details": "8/8 methods found"
+    },
+    {
+      "test": "Error handling implemented",
+      "passed": true,
+      "details": "Try-catch blocks found"
+    },
+    {
+      "test": "IPC handlers present",
+      "passed": true,
+      "details": "3/3 handlers found"
+    },
+    {
+      "test": "Async IPC handling",
+      "passed": true,
+      "details": "Async handlers found"
+    },
+    {
+      "test": "Voice config in enhanced launcher",
+      "passed": true,
+      "details": "Voice configuration found"
+    },
+    {
+      "test": "Demo script in package.json",
+      "passed": "node voice-editor-demo.js",
+      "details": "demo:voice-editor script found"
+    }
+  ],
+  "recommendations": [
+    "All integration tests passed successfully",
+    "Consider running the demo script to test functionality",
+    "Test voice dictation with different browsers and audio devices"
+  ]
+}

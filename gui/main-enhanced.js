@@ -36,9 +36,7 @@ global.createWindow = function (...args) {
 // Load enhanced interface
 const originalLoadFile = global.mainWindow?.loadFile;
 if (originalLoadFile) {
-  global.mainWindow.loadFile(
-    path.join(__dirname, "project-interface-enhanced.html"),
-  );
+  global.mainWindow.loadFile(path.join(__dirname, "project-interface.html"));
 }
 
 // Clean up voice handlers on app quit

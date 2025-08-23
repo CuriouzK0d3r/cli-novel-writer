@@ -1,0 +1,547 @@
+/* Voice Editor Integration Styles */
+
+/* Voice Controls Container */
+.voice-controls-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+.btn-voice {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-voice:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-voice:active {
+    transform: translateY(0);
+}
+
+.btn-voice.recording {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    animation: pulse-voice 2s infinite;
+}
+
+.btn-voice.recording:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+@keyframes pulse-voice {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.voice-status {
+    font-size: 0.8rem;
+}
+
+/* Voice Popup */
+.voice-popup {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 320px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.voice-popup.hidden {
+    display: none;
+}
+
+.voice-popup-content {
+    padding: 1.5rem;
+}
+
+.voice-record-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.voice-record-button {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.voice-record-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.voice-record-button:active {
+    transform: scale(0.95);
+}
+
+.voice-record-button.recording {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    animation: pulse-recording 2s infinite;
+}
+
+.voice-record-button.processing {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.voice-record-button.stopped {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.voice-status-text {
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.voice-status-text span {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.voice-timer {
+    font-family: 'Monaco', 'Consolas', monospace;
+    color: var(--text-secondary) !important;
+    font-size: 0.8rem !important;
+    margin-top: 0.25rem;
+}
+
+/* Voice Visualizer */
+.voice-visualizer {
+    margin: 1rem 0;
+    background: var(--background-color);
+    border-radius: 8px;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.voice-visualizer.hidden {
+    display: none;
+}
+
+.voice-visualizer canvas {
+    border-radius: 4px;
+    background: var(--surface-hover);
+}
+
+/* Voice Controls */
+.voice-controls {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.voice-controls .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    min-width: auto;
+}
+
+/* Voice Preview */
+.voice-preview {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.voice-preview.hidden {
+    display: none;
+}
+
+.voice-preview label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.voice-preview-text {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    max-height: 100px;
+    overflow-y: auto;
+    word-wrap: break-word;
+}
+
+.voice-preview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.voice-preview-actions .btn {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Focus Mode Voice Controls */
+.focus-controls .btn-voice {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #059669;
+}
+
+.focus-controls .btn-voice:hover {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #047857;
+}
+
+/* Voice Floating Controls */
+.voice-floating-controls {
+    position: fixed;
+    top: 50%;
+    right: 2rem;
+    transform: translateY(-50%);
+    width: 280px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.voice-floating-controls.hidden {
+    display: none;
+}
+
+.voice-floating-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.voice-floating-content .voice-record-button {
+    width: 70px;
+    height: 70px;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.voice-floating-info {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.voice-floating-info span {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.voice-floating-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.voice-floating-actions .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+}
+
+/* Voice Settings Modal */
+.voice-settings-modal .modal-content {
+    max-width: 500px;
+}
+
+.voice-settings-modal .setting-group {
+    margin-bottom: 1.5rem;
+}
+
+.voice-settings-modal .setting-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+.voice-settings-modal .setting-group input[type="checkbox"] {
+    margin-right: 0.5rem;
+    transform: scale(1.1);
+    accent-color: var(--primary-color);
+}
+
+.voice-settings-modal .setting-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--background-color);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+/* Voice Toast Notifications */
+.voice-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1100;
+    min-width: 250px;
+    max-width: 400px;
+    animation: slide-in-toast 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.voice-toast.success {
+    border-left: 4px solid #10b981;
+}
+
+.voice-toast.error {
+    border-left: 4px solid #ef4444;
+}
+
+.voice-toast.warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.voice-toast.info {
+    border-left: 4px solid #3b82f6;
+}
+
+.voice-toast-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.voice-toast-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.voice-toast.success .voice-toast-icon {
+    color: #10b981;
+}
+
+.voice-toast.error .voice-toast-icon {
+    color: #ef4444;
+}
+
+.voice-toast.warning .voice-toast-icon {
+    color: #f59e0b;
+}
+
+.voice-toast.info .voice-toast-icon {
+    color: #3b82f6;
+}
+
+.voice-toast-message {
+    flex: 1;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+@keyframes slide-in-toast {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .voice-popup {
+        width: 280px;
+        right: -1rem;
+    }
+
+    .voice-floating-controls {
+        right: 1rem;
+        width: 240px;
+    }
+
+    .voice-floating-controls .voice-record-button {
+        width: 60px;
+        height: 60px;
+        font-size: 1rem;
+    }
+
+    .voice-toast {
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .voice-controls-container {
+        margin-left: 0.5rem;
+    }
+
+    .btn-voice {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    .voice-popup {
+        width: 260px;
+        right: -2rem;
+    }
+
+    .voice-popup-content {
+        padding: 1rem;
+    }
+
+    .voice-record-button {
+        width: 70px;
+        height: 70px;
+        font-size: 1.25rem;
+    }
+}
+
+/* Dark theme adjustments */
+.theme-dark .voice-popup {
+    background: var(--surface-hover);
+    border-color: var(--border-color);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .voice-floating-controls {
+    background: var(--surface-hover);
+    border-color: var(--border-color);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+.theme-dark .voice-preview-text {
+    background: var(--surface-color);
+}
+
+.theme-dark .voice-visualizer {
+    background: var(--surface-color);
+}
+
+.theme-dark .voice-visualizer canvas {
+    background: var(--background-color);
+}
+
+.theme-dark .voice-toast {
+    background: var(--surface-hover);
+    border-color: var(--border-color);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Accessibility */
+.voice-record-button:focus,
+.btn-voice:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.voice-record-button:focus-visible,
+.btn-voice:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .voice-record-button,
+    .btn-voice {
+        border: 2px solid currentColor;
+    }
+
+    .voice-popup,
+    .voice-floating-controls {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .voice-record-button,
+    .btn-voice {
+        transition: none;
+        animation: none;
+    }
+
+    .voice-toast {
+        animation: none;
+    }
+
+    @keyframes pulse-recording {
+        0%, 100% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes pulse-voice {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+    }
+}
+
+/* Print styles */
+@media print {
+    .voice-controls-container,
+    .voice-popup,
+    .voice-floating-controls,
+    .voice-toast {
+        display: none !important;
+    }
+}

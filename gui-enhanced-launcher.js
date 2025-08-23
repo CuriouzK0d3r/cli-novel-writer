@@ -9,6 +9,7 @@
  * - Real-time collaboration features
  * - Enhanced export capabilities
  * - Smart writing tools
+ * - Voice dictation integration
  */
 
 const { spawn } = require("child_process");
@@ -141,6 +142,15 @@ ${chalk.blue("🎯 Loading enhanced interface...")}
           focus: {
             enabled: true,
             modes: ["typewriter", "zen", "immersive"],
+          },
+          voice: {
+            enabled: true,
+            autoInsert: true,
+            insertMode: "cursor",
+            showVisualizer: true,
+            autoSave: true,
+            language: "en-US",
+            maxRecordingTime: 300000,
           },
           pomodoro: {
             enabled: true,
