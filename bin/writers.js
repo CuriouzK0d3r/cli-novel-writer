@@ -20,6 +20,7 @@ const guiCommand = require("../src/commands/gui");
 const storyCommand = require("../src/commands/story");
 const workflowCommand = require("../src/commands/workflow");
 const simplifyCommand = require("../src/commands/simplify");
+const voiceCommand = require("../src/commands/voice");
 
 const program = new Command();
 
@@ -213,6 +214,24 @@ program
   .command("simplify")
   .description("Convert complex project to simplified short story workflow")
   .action(simplifyCommand);
+
+program
+  .command("voice")
+  .description("Voice transcription tools")
+  .argument(
+    "[action]",
+    "Action to perform (record, transcribe, live, batch, check)",
+  )
+  .argument("[target]", "Target file or audio file path")
+  .option("-o, --output <path>", "Output file path")
+  .option("--keep-audio", "Keep audio files after transcription")
+  .option(
+    "--max-duration <seconds>",
+    "Maximum recording duration in seconds",
+    "300",
+  )
+  .option("--no-preview", "Skip transcription preview")
+  .action(voiceCommand);
 
 // Handle unknown commands
 program.on("command:*", () => {

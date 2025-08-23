@@ -672,6 +672,9 @@ class WritersApp {
       case "export":
         // Export view is static
         break;
+      case "voice-transcription":
+        // Voice transcription view is handled by VoiceTranscriptionManager
+        break;
     }
   }
 
@@ -1251,6 +1254,9 @@ class WritersApp {
         break;
       case "statistics":
         this.switchView("statistics");
+        break;
+      case "voice-transcription":
+        this.switchView("voice-transcription");
         break;
       case "word-count":
         // Show current word count in toast

@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="assets/css/styles.css" />
         <link rel="stylesheet" href="assets/css/editor-enhancements.css" />
         <link rel="stylesheet" href="assets/css/theme-selector.css" />
+        <link rel="stylesheet" href="assets/css/voice-transcription.css" />
         <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -114,6 +115,13 @@
                         <i class="fas fa-tools"></i>
                         Tools
                     </h3>
+                    <button
+                        class="sidebar-item"
+                        data-view="voice-transcription"
+                    >
+                        <i class="fas fa-microphone"></i>
+                        Voice Transcription
+                    </button>
                     <button class="sidebar-item" data-view="statistics">
                         <i class="fas fa-chart-bar"></i>
                         Statistics
@@ -503,6 +511,322 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Voice Transcription View -->
+                <div id="voice-transcription-view" class="content-view">
+                    <header class="content-header">
+                        <h1>
+                            <i class="fas fa-microphone"></i> Voice
+                            Transcription
+                        </h1>
+                        <div class="header-actions">
+                            <button
+                                id="voice-help-btn"
+                                class="btn btn-secondary"
+                            >
+                                <i class="fas fa-question-circle"></i>
+                                Help
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="content-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Voice Recording Card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>
+                                            <i class="fas fa-record-vinyl"></i>
+                                            Voice Recording
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Recording Controls -->
+                                        <div class="voice-recording-controls">
+                                            <div
+                                                class="record-button-container"
+                                            >
+                                                <button
+                                                    id="voice-record-btn"
+                                                    class="voice-record-button"
+                                                >
+                                                    <i
+                                                        class="fas fa-microphone"
+                                                    ></i>
+                                                </button>
+                                                <div class="record-status">
+                                                    <span
+                                                        id="record-status-text"
+                                                        >Ready to Record</span
+                                                    >
+                                                    <div
+                                                        id="record-timer"
+                                                        class="record-timer"
+                                                    >
+                                                        00:00
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Audio Visualizer -->
+                                            <div
+                                                id="voice-visualizer"
+                                                class="audio-visualizer"
+                                            >
+                                                <canvas
+                                                    id="visualizer-canvas"
+                                                    width="400"
+                                                    height="100"
+                                                ></canvas>
+                                            </div>
+
+                                            <!-- Control Buttons -->
+                                            <div class="voice-control-buttons">
+                                                <button
+                                                    id="voice-pause-btn"
+                                                    class="btn btn-secondary"
+                                                    style="display: none"
+                                                >
+                                                    <i class="fas fa-pause"></i>
+                                                    Pause
+                                                </button>
+                                                <button
+                                                    id="voice-stop-btn"
+                                                    class="btn btn-danger"
+                                                    style="display: none"
+                                                >
+                                                    <i class="fas fa-stop"></i>
+                                                    Stop
+                                                </button>
+                                                <button
+                                                    id="voice-clear-btn"
+                                                    class="btn btn-secondary"
+                                                >
+                                                    <i class="fas fa-trash"></i>
+                                                    Clear
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- File Upload -->
+                                        <div class="voice-file-upload">
+                                            <div
+                                                class="file-drop-zone"
+                                                id="voice-drop-zone"
+                                            >
+                                                <i
+                                                    class="fas fa-file-audio"
+                                                ></i>
+                                                <p>
+                                                    Drop audio files here or
+                                                    click to browse
+                                                </p>
+                                                <p class="file-hint">
+                                                    Supports WAV, MP3, M4A,
+                                                    FLAC, OGG, WebM
+                                                </p>
+                                                <input
+                                                    type="file"
+                                                    id="voice-file-input"
+                                                    accept=".wav,.mp3,.m4a,.flac,.ogg,.webm"
+                                                    multiple
+                                                    style="display: none"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <!-- Progress Bar -->
+                                        <div
+                                            id="voice-progress"
+                                            class="voice-progress"
+                                            style="display: none"
+                                        >
+                                            <div class="progress-bar">
+                                                <div
+                                                    id="voice-progress-fill"
+                                                    class="progress-fill"
+                                                ></div>
+                                            </div>
+                                            <div class="progress-text">
+                                                <span id="voice-progress-text"
+                                                    >Processing...</span
+                                                >
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Transcription Results -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>
+                                            <i class="fas fa-file-text"></i>
+                                            Transcription
+                                        </h3>
+                                        <div class="card-actions">
+                                            <span
+                                                id="voice-word-count"
+                                                class="word-count"
+                                                >Words: 0</span
+                                            >
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div
+                                            id="voice-transcription-output"
+                                            class="transcription-output"
+                                            contenteditable="true"
+                                        >
+                                            <p class="placeholder-text">
+                                                Your transcribed text will
+                                                appear here...
+                                            </p>
+                                        </div>
+
+                                        <div class="transcription-actions">
+                                            <button
+                                                id="voice-save-btn"
+                                                class="btn btn-primary"
+                                                disabled
+                                            >
+                                                <i class="fas fa-save"></i> Save
+                                                as Markdown
+                                            </button>
+                                            <button
+                                                id="voice-copy-btn"
+                                                class="btn btn-secondary"
+                                                disabled
+                                            >
+                                                <i class="fas fa-copy"></i> Copy
+                                                to Clipboard
+                                            </button>
+                                            <button
+                                                id="voice-append-btn"
+                                                class="btn btn-secondary"
+                                                disabled
+                                            >
+                                                <i class="fas fa-plus"></i>
+                                                Append to File
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <!-- Voice Settings -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>
+                                            <i class="fas fa-cog"></i> Settings
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="setting-item">
+                                            <label for="voice-keep-audio">
+                                                <input
+                                                    type="checkbox"
+                                                    id="voice-keep-audio"
+                                                />
+                                                Keep audio files
+                                            </label>
+                                        </div>
+                                        <div class="setting-item">
+                                            <label for="voice-auto-save">
+                                                <input
+                                                    type="checkbox"
+                                                    id="voice-auto-save"
+                                                    checked
+                                                />
+                                                Auto-save transcriptions
+                                            </label>
+                                        </div>
+                                        <div class="setting-item">
+                                            <label for="voice-max-duration"
+                                                >Max recording duration:</label
+                                            >
+                                            <select id="voice-max-duration">
+                                                <option value="60">
+                                                    1 minute
+                                                </option>
+                                                <option value="180">
+                                                    3 minutes
+                                                </option>
+                                                <option value="300" selected>
+                                                    5 minutes
+                                                </option>
+                                                <option value="600">
+                                                    10 minutes
+                                                </option>
+                                                <option value="1800">
+                                                    30 minutes
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- System Status -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>
+                                            <i class="fas fa-heartbeat"></i>
+                                            System Status
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="status-item">
+                                            <i class="fas fa-microphone"></i>
+                                            <span>Microphone:</span>
+                                            <span
+                                                id="voice-mic-status"
+                                                class="status-unknown"
+                                                >Checking...</span
+                                            >
+                                        </div>
+                                        <div class="status-item">
+                                            <i class="fas fa-robot"></i>
+                                            <span>AI Model:</span>
+                                            <span
+                                                id="voice-model-status"
+                                                class="status-unknown"
+                                                >Loading...</span
+                                            >
+                                        </div>
+                                        <div class="status-item">
+                                            <i class="fas fa-wifi"></i>
+                                            <span>Mode:</span>
+                                            <span class="status-ready"
+                                                >Offline</span
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recent Transcriptions -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>
+                                            <i class="fas fa-history"></i>
+                                            Recent
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div
+                                            id="voice-recent-list"
+                                            class="recent-list"
+                                        >
+                                            <p class="no-items">
+                                                No recent transcriptions
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
 
@@ -807,6 +1131,7 @@
         <!-- Scripts -->
         <script src="assets/js/theme-selector.js"></script>
         <script src="assets/js/editor-enhancements.js"></script>
+        <script src="assets/js/voice-transcription.js"></script>
         <script src="assets/js/app.js"></script>
     </body>
 </html>

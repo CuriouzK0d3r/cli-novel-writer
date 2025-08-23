@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Transcription Test - Writers CLI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            /* Light Theme Colors */
+            --primary-color: #6366f1;
+            --primary-color-rgb: 99, 102, 241;
+            --primary-hover: #4f46e5;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #06b6d4;
+
+            --background-color: #ffffff;
+            --surface-color: #f8fafc;
+            --surface-hover: #f1f5f9;
+            --border-color: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-family-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Voice Recording Controls */
+        .voice-recording-controls {
+            text-align: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .record-button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .voice-record-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .voice-record-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .voice-record-button.recording {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            animation: pulse-recording 2s infinite;
+        }
+
+        .voice-record-button.processing {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes pulse-recording {
+            0% { transform: scale(1); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 12px 24px rgba(16, 185, 129, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .record-status {
+            text-align: center;
+        }
+
+        .record-status span {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .record-timer {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-family: var(--font-family-mono);
+            font-weight: 500;
+        }
+
+        /* Audio Visualizer */
+        .audio-visualizer {
+            width: 100%;
+            max-width: 500px;
+            margin: 2rem auto;
+            background: var(--surface-color);
+            border-radius: 8px;
+            padding: 1rem;
+            display: none;
+        }
+
+        .audio-visualizer.active {
+            display: block;
+        }
+
+        #visualizer-canvas {
+            width: 100%;
+            height: 100px;
+            border-radius: 4px;
+            background: var(--background-color);
+        }
+
+        /* Control Buttons */
+        .voice-control-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* File Upload */
+        .voice-file-upload {
+            margin-top: 3rem;
+        }
+
+        .file-drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--surface-color);
+        }
+
+        .file-drop-zone:hover {
+            border-color: var(--primary-color);
+            background: var(--surface-hover);
+        }
+
+        .file-drop-zone.dragover {
+            border-color: var(--primary-color);
+            background: var(--surface-hover);
+            transform: scale(1.02);
+        }
+
+        .file-drop-zone i {
+            font-size: 3rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .file-drop-zone p {
+            margin: 0.5rem 0;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .file-hint {
+            font-size: 0.875rem;
+            color: var(--text-secondary) !important;
+            font-weight: normal !important;
+        }
+
+        /* Transcription Output */
+        .transcription-output {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            background: var(--surface-color);
+            font-family: var(--font-family-mono);
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .transcription-output:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .transcription-output .placeholder-text {
+            color: var(--text-secondary);
+            font-style: italic;
+            margin: 0;
+            text-align: center;
+            padding-top: 4rem;
+        }
+
+        .transcription-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .word-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        /* Status Items */
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .status-item i {
+            margin-right: 0.75rem;
+            width: 16px;
+            color: var(--text-secondary);
+        }
+
+        .status-item span:first-of-type {
+            flex: 1;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .status-ready {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .status-error {
+            color: var(--error-color);
+            font-weight: 600;
+        }
+
+        .status-unknown {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .status-loading {
+            color: var(--warning-color);
+            font-weight: 500;
+        }
+
+        /* Settings */
+        .setting-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-item label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .setting-item input[type="checkbox"] {
+            margin-right: 0.75rem;
+            transform: scale(1.2);
+            accent-color: var(--primary-color);
+        }
+
+        .setting-item select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--background-color);
+            color: var(--text-primary);
+            margin-top: 0.5rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            min-width: 300px;
+            animation: slide-in 0.3s ease;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info-color);
+        }
+
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Progress */
+        .voice-progress {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: var(--surface-color);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-microphone"></i> Voice Transcription Test</h1>
+            <p>Test the voice transcription functionality for Writers CLI</p>
+        </div>
+
+        <div class="grid">
+            <div class="main-panel">
+                <!-- Voice Recording Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-record-vinyl"></i> Voice Recording</h3>
+                    </div>
+
+                    <!-- Recording Controls -->
+                    <div class="voice-recording-controls">
+                        <div class="record-button-container">
+                            <button id="voice-record-btn" class="voice-record-button">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <div class="record-status">
+                                <span id="record-status-text">Ready to Record</span>
+                                <div id="record-timer" class="record-timer">00:00</div>
+                            </div>
+                        </div>
+
+                        <!-- Audio Visualizer -->
+                        <div id="voice-visualizer" class="audio-visualizer">
+                            <canvas id="visualizer-canvas" width="400" height="100"></canvas>
+                        </div>
+
+                        <!-- Control Buttons -->
+                        <div class="voice-control-buttons">
+                            <button id="voice-pause-btn" class="btn btn-secondary" style="display: none">
+                                <i class="fas fa-pause"></i> Pause
+                            </button>
+                            <button id="voice-stop-btn" class="btn btn-danger" style="display: none">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                            <button id="voice-clear-btn" class="btn btn-secondary">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="voice-file-upload">
+                        <div class="file-drop-zone" id="voice-drop-zone">
+                            <i class="fas fa-file-audio"></i>
+                            <p>Drop audio files here or click to browse</p>
+                            <p class="file-hint">Supports WAV, MP3, M4A, FLAC, OGG</p>
+                            <input type="file" id="voice-file-input" accept=".wav,.mp3,.m4a,.flac,.ogg" multiple style="display: none">
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div id="voice-progress" class="voice-progress">
+                        <div class="progress-bar">
+                            <div id="voice-progress-fill" class="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="voice-progress-text">Processing...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transcription Results -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-file-text"></i> Transcription</h3>
+                        <span id="voice-word-count" class="word-count">Words: 0</span>
+                    </div>
+
+                    <div id="voice-transcription-output" class="transcription-output" contenteditable="true">
+                        <p class="placeholder-text">Your transcribed text will appear here...</p>
+                    </div>
+
+                    <div class="transcription-actions">
+                        <button id="voice-save-btn" class="btn btn-primary" disabled>
+                            <i class="fas fa-save"></i> Save as Markdown
+                        </button>
+                        <button id="voice-copy-btn" class="btn btn-secondary" disabled>
+                            <i class="fas fa-copy"></i> Copy to Clipboard
+                        </button>
+                        <button id="voice-append-btn" class="btn btn-secondary" disabled>
+                            <i class="fas fa-plus"></i> Append to File
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <!-- Voice Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-cog"></i> Settings</h3>
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="voice-keep-audio">
+                            <input type="checkbox" id="voice-keep-audio"> Keep audio files
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label for="voice-auto-save">
+                            <input type="checkbox" id="voice-auto-save" checked> Auto-save transcriptions
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label for="voice-max-duration">Max recording duration:</label>
+                        <select id="voice-max-duration">
+                            <option value="60">1 minute</option>
+                            <option value="180">3 minutes</option>
+                            <option value="300" selected>5 minutes</option>
+                            <option value="600">10 minutes</option>
+                            <option value="1800">30 minutes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-heartbeat"></i> System Status</h3>
+                    </div>
+
+                    <div class="status-item">
+                        <i class="fas fa-microphone"></i>
+                        <span>Microphone:</span>
+                        <span id="voice-mic-status" class="status-unknown">Checking...</span>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Model:</span>
+                        <span id="voice-model-status" class="status-unknown">Browser Mode</span>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-wifi"></i>
+                        <span>Mode:</span>
+                        <span class="status-ready">Test Mode</span>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-info-circle"></i> Instructions</h3>
+                    </div>
+
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
+                        This is a test interface for voice transcription. In Electron mode, it would connect to the AI transcription service.
+                        Currently showing browser compatibility and UI functionality.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple test implementation
+        class VoiceTranscriptionTest {
+            constructor() {
+                this.isRecording = false;
+                this.mediaRecorder = null;
+                this.stream = null;
+                this.startTime = null;
+                this.timer = null;
+
+                this.initializeElements();
+                this.bindEvents();
+                this.checkBrowserSupport();
+            }
+
+            initializeElements() {
+                this.recordBtn = document.getElementById('voice-record-btn');
+                this.statusText = document.getElementById('record-status-text');
+                this.timerDisplay = document.getElementById('record-timer');
+                this.micStatus = document.getElementById('voice-mic-status');
+                this.transcriptionOutput = document.getElementById('voice-transcription-output');
+                this.wordCount = document.getElementById('voice-word-count');
+                this.dropZone = document.getElementById('voice-drop-zone');
+                this.fileInput = document.getElementById('voice-file-input');
+            }
+
+            bindEvents() {
+                this.recordBtn?.addEventListener('click', () => this.toggleRecording());
+                this.dropZone?.addEventListener('click', () => this.fileInput?.click());
+                this.dropZone?.addEventListener('dragover', (e) => this.handleDragOver(e));
+                this.dropZone?.addEventListener('drop', (e) => this.handleDrop(e));
+                this.fileInput?.addEventListener('change', (e) => this.handleFileSelect(e));
+
+                document.getElementById('voice-clear-btn')?.addEventListener('click', () => this.clearTranscription());
+                document.getElementById('voice-copy-btn')?.addEventListener('click', () => this.copyToClipboard());
+
+                this.transcriptionOutput?.addEventListener('input', () => this.updateWordCount());
+            }
+
+            async checkBrowserSupport() {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        stream.getTracks().forEach(track => track.stop());
+                        this.micStatus.textContent = 'Available';
+                        this.micStatus.className = 'status-ready';
+                    } catch (error) {
+                        this.micStatus.textContent = 'Permission denied';
+                        this.micStatus.className = 'status-error';
+                    }
+                } else {
+                    this.micStatus.textContent = 'Not supported';
+                    this.micStatus.className = 'status-error';
+                }
+            }
+
+            async toggleRecording() {
+                if (!this.isRecording) {
+                    await this.startRecording();
+                } else {
+                    await this.stopRecording();
+                }
+            }
+
+            async startRecording() {
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        audio: { echoCancellation: true, noiseSuppression: true }
+                    });
+
+                    this.mediaRecorder = new MediaRecorder(this.stream);
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        // In real implementation, this would be sent for transcription
+                        console.log('Audio data available:', event.data.size, 'bytes');
+                    };
+
+                    this.mediaRecorder.onstop = () => {
+                        this.simulateTranscription();
+                    };
+
+                    this.mediaRecorder.start(1000);
+                    this.isRecording = true;
+                    this.startTime = Date.now();
+
+                    this.updateRecordingUI(true);
+                    this.startTimer();
+
+                    this.showToast('Recording started (simulated)', 'success');
+                } catch (error) {
+                    this.showToast('Failed to start recording: ' + error.message, 'error');
+                }
+            }
+
+            async stopRecording() {
+                if (this.mediaRecorder) {
+                    this.mediaRecorder.stop();
+                }
+
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                }
+
+                this.isRecording = false;
+                this.updateRecordingUI(false);
+                this.stopTimer();
+
+                this.showToast('Processing recording...', 'info');
+            }
+
+            simulateTranscription() {
+                // Simulate transcription process
+                const sampleTexts = [
+                    "This is a test of the voice transcription system. The audio quality seems good and the system is responding well.",
+                    "Writers CLI voice transcription is working correctly. This is a demonstration of the offline speech-to-text functionality.",
+                    "Hello world! This is a test recording to verify that the voice transcription interface is working properly in the GUI."
+                ];
+
+                const randomText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
+
+                setTimeout(() => {
+                    this.displayTranscription(randomText);
+                    this.showToast('Transcription complete (simulated)', 'success');
+                }, 2000);
+            }
+
+            displayTranscription(text) {
+                this.transcriptionOutput.textContent = text;
+                this.transcriptionOutput.classList.remove('placeholder-text');
+                this.updateWordCount();
+                this.enableTranscriptionControls(true);
+            }
+
+            updateWordCount() {
+                const text = this.transcriptionOutput?.textContent || '';
+                const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+                this.wordCount.textContent = `Words: ${words.length}`;
+            }
+
+            clearTranscription() {
+                this.transcriptionOutput.innerHTML = '<p class="placeholder-text">Your transcribed text will appear here...</p>';
+                this.updateWordCount();
+                this.enableTranscriptionControls(false);
+                this.showToast('Transcription cleared', 'info');
+            }
+
+            async copyToClipboard() {
+                const text = this.transcriptionOutput?.textContent;
+                if (!text || text.includes('Your transcribed text')) return;
+
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.showToast('Copied to clipboard!', 'success');
+                } catch (error) {
+                    this.showToast('Error copying to clipboard', 'error');
+                }
+            }
+
+            enableTranscriptionControls(enabled) {
+                ['voice-save-btn', 'voice-copy-btn', 'voice-append-btn'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) btn.disabled = !enabled;
+                });
+            }
+
+            updateRecordingUI(recording) {
+                if (!this.recordBtn) return;
+
+                if (recording) {
+                    this.recordBtn.classList.add('recording');
+                    this.recordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    this.statusText.textContent = 'Recording...';
+                    document.getElementById('voice-pause-btn').style.display = 'inline-block';
+                    document.getElementById('voice-stop-btn').style.display = 'inline-block';
+                } else {
+                    this.recordBtn.classList.remove('recording');
+                    this.recordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                    this.statusText.textContent = 'Ready to Record';
+                    document.getElementById('voice-pause-btn').style.display = 'none';
+                    document.getElementById('voice-stop-btn').style.display = 'none';
+                }
+            }
+
+            startTimer() {
+                this.timer = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    this.timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            stopTimer() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+                this.timerDisplay.textContent = '00:00';
+            }
+
+            handleDragOver(event) {
+                event.preventDefault();
+                this.dropZone.classList.add('dragover');
+            }
+
+            handleDrop(event) {
+                event.preventDefault();
+                this.dropZone.classList.remove('dragover');
+                this.showToast('File drop simulated - would transcribe in full version', 'info');
+            }
+
+            handleFileSelect(event) {
+                const files = Array.from(event.target.files);
+                if (files.length > 0) {
+                    this.showToast(`Selected ${files.length} file(s) - would transcribe in full version`, 'info');
+                }
+            }
+
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-info-circle" style="margin-right: 0.5rem;"></i>
+                        ${message}
+                    </div>
+                `;
+
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new VoiceTranscriptionTest();
+        });
+    </script>
+</body>
+</html>

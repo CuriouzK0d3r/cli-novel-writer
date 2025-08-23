@@ -10,10 +10,12 @@ const path = require("path");
 const fs = require("fs-extra");
 const projectManager = require("../src/utils/project");
 const markdownUtils = require("../src/utils/markdown");
+const VoiceElectronHandlers = require("../src/voice/electron-handlers");
 
 // Keep a global reference of the window object
 let mainWindow;
 let isQuitting = false;
+let voiceHandlers = null;
 
 function createWindow() {
   // Create the browser window
@@ -60,6 +62,14 @@ function createWindow() {
 
   // Create application menu
   createMenu();
+
+  // Initialize voice transcription handlers
+  try {
+    voiceHandlers = new VoiceElectronHandlers();
+    console.log("Voice transcription handlers initialized");
+  } catch (error) {
+    console.warn("Failed to initialize voice transcription:", error.message);
+  }
 
   // Handle external links
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -218,6 +228,14 @@ function createMenu() {
         },
         { type: "separator" },
         {
+          label: "Voice Transcription",
+          accelerator: "CmdOrCtrl+Shift+V",
+          click: () => {
+            mainWindow.webContents.send("menu-action", "voice-transcription");
+          },
+        },
+        { type: "separator" },
+        {
           label: "Backup Project",
           click: () => {
             mainWindow.webContents.send("menu-action", "backup");
@@ -307,6 +325,16 @@ app.on("activate", () => {
 
 app.on("before-quit", () => {
   isQuitting = true;
+
+  // Clean up voice handlers
+  if (voiceHandlers) {
+    try {
+      voiceHandlers.cleanup();
+      console.log("Voice handlers cleaned up");
+    } catch (error) {
+      console.warn("Error cleaning up voice handlers:", error.message);
+    }
+  }
 });
 
 // IPC handlers for communication with renderer process

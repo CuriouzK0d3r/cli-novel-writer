@@ -1,0 +1,1187 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Voice Transcription - Writers CLI</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 16px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                color: white;
+                padding: 24px 32px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 28px;
+                margin-bottom: 8px;
+                font-weight: 700;
+            }
+
+            .header p {
+                opacity: 0.9;
+                font-size: 16px;
+            }
+
+            .main-content {
+                padding: 32px;
+            }
+
+            .status-bar {
+                background: #f8fafc;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 24px;
+                border-left: 4px solid #10b981;
+                display: none;
+            }
+
+            .status-bar.error {
+                border-left-color: #ef4444;
+                background: #fef2f2;
+            }
+
+            .status-bar.warning {
+                border-left-color: #f59e0b;
+                background: #fffbeb;
+            }
+
+            .recording-controls {
+                text-align: center;
+                margin-bottom: 32px;
+            }
+
+            .record-button {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                border: none;
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 20px;
+            }
+
+            .record-button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 12px 24px rgba(239, 68, 68, 0.4);
+            }
+
+            .record-button.recording {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                animation: pulse 2s infinite;
+            }
+
+            .record-button.stopped {
+                background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            .recording-status {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .recording-timer {
+                font-size: 16px;
+                color: #6b7280;
+                margin-bottom: 16px;
+            }
+
+            .audio-visualizer {
+                width: 100%;
+                height: 60px;
+                background: #f1f5f9;
+                border-radius: 8px;
+                margin: 16px 0;
+                display: none;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .audio-visualizer.active {
+                display: block;
+            }
+
+            .visualizer-bar {
+                position: absolute;
+                bottom: 0;
+                width: 4px;
+                background: linear-gradient(180deg, #4f46e5 0%, #7c3aed 100%);
+                border-radius: 2px 2px 0 0;
+                transition: height 0.1s ease;
+            }
+
+            .control-buttons {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+                margin: 20px 0;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                color: white;
+            }
+
+            .btn-secondary {
+                background: #f1f5f9;
+                color: #475569;
+                border: 1px solid #e2e8f0;
+            }
+
+            .btn-danger {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                color: white;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+
+            .btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .transcription-section {
+                margin-top: 32px;
+            }
+
+            .section-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #1e293b;
+                margin-bottom: 16px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .transcription-output {
+                background: #f8fafc;
+                border: 2px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 20px;
+                min-height: 150px;
+                font-size: 16px;
+                line-height: 1.6;
+                color: #334155;
+                white-space: pre-wrap;
+                font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+            }
+
+            .transcription-output.empty {
+                color: #94a3b8;
+                font-style: italic;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .file-controls {
+                margin-top: 20px;
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .file-input {
+                margin-bottom: 20px;
+            }
+
+            .file-input label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #374151;
+            }
+
+            .file-input input[type="file"] {
+                width: 100%;
+                padding: 12px;
+                border: 2px dashed #d1d5db;
+                border-radius: 8px;
+                background: #f9fafb;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .file-input input[type="file"]:hover {
+                border-color: #4f46e5;
+                background: #f0f4ff;
+            }
+
+            .word-count {
+                margin-top: 12px;
+                font-size: 14px;
+                color: #6b7280;
+                text-align: right;
+            }
+
+            .settings-panel {
+                background: #f8fafc;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 24px;
+            }
+
+            .settings-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 16px;
+            }
+
+            .settings-row:last-child {
+                margin-bottom: 0;
+            }
+
+            .settings-label {
+                font-weight: 600;
+                color: #374151;
+            }
+
+            .toggle-switch {
+                position: relative;
+                width: 50px;
+                height: 24px;
+                background: #d1d5db;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: background 0.2s ease;
+            }
+
+            .toggle-switch.active {
+                background: #4f46e5;
+            }
+
+            .toggle-switch::after {
+                content: "";
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 20px;
+                height: 20px;
+                background: white;
+                border-radius: 50%;
+                transition: transform 0.2s ease;
+            }
+
+            .toggle-switch.active::after {
+                transform: translateX(26px);
+            }
+
+            .loading-spinner {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 2px solid #f3f3f3;
+                border-top: 2px solid #4f46e5;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 8px;
+                background: #e2e8f0;
+                border-radius: 4px;
+                overflow: hidden;
+                margin: 16px 0;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                width: 0%;
+                transition: width 0.3s ease;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    margin: 10px;
+                }
+
+                .main-content {
+                    padding: 20px;
+                }
+
+                .control-buttons {
+                    flex-wrap: wrap;
+                }
+
+                .file-controls {
+                    flex-direction: column;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎤 Voice Transcription</h1>
+                <p>Record your voice and convert it to text using AI</p>
+            </div>
+
+            <div class="main-content">
+                <!-- Status Bar -->
+                <div id="statusBar" class="status-bar">
+                    <span id="statusText">Ready to record</span>
+                </div>
+
+                <!-- Settings Panel -->
+                <div class="settings-panel">
+                    <div class="settings-row">
+                        <span class="settings-label">Keep Audio Files</span>
+                        <div
+                            id="keepAudioToggle"
+                            class="toggle-switch"
+                            onclick="toggleSetting('keepAudio')"
+                        ></div>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-label"
+                            >Auto-save Transcriptions</span
+                        >
+                        <div
+                            id="autoSaveToggle"
+                            class="toggle-switch active"
+                            onclick="toggleSetting('autoSave')"
+                        ></div>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-label"
+                            >Max Recording Duration (minutes)</span
+                        >
+                        <select
+                            id="maxDuration"
+                            onchange="updateSetting('maxDuration', this.value)"
+                        >
+                            <option value="60">1 minute</option>
+                            <option value="180">3 minutes</option>
+                            <option value="300" selected>5 minutes</option>
+                            <option value="600">10 minutes</option>
+                            <option value="1800">30 minutes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Recording Controls -->
+                <div class="recording-controls">
+                    <button
+                        id="recordButton"
+                        class="record-button"
+                        onclick="toggleRecording()"
+                    >
+                        🎤
+                    </button>
+                    <div id="recordingStatus" class="recording-status">
+                        Ready to Record
+                    </div>
+                    <div id="recordingTimer" class="recording-timer">00:00</div>
+
+                    <div id="audioVisualizer" class="audio-visualizer">
+                        <!-- Visualizer bars will be added dynamically -->
+                    </div>
+
+                    <div class="control-buttons">
+                        <button
+                            id="pauseBtn"
+                            class="btn btn-secondary hidden"
+                            onclick="pauseRecording()"
+                        >
+                            ⏸️ Pause
+                        </button>
+                        <button
+                            id="stopBtn"
+                            class="btn btn-danger hidden"
+                            onclick="stopRecording()"
+                        >
+                            ⏹️ Stop
+                        </button>
+                        <button
+                            id="clearBtn"
+                            class="btn btn-secondary"
+                            onclick="clearTranscription()"
+                        >
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="progressContainer" class="hidden">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <div style="text-align: center; margin-top: 8px">
+                        <span id="progressText">Processing...</span>
+                    </div>
+                </div>
+
+                <!-- File Upload for Transcription -->
+                <div class="file-input">
+                    <label for="audioFile"
+                        >Or upload an audio file to transcribe:</label
+                    >
+                    <input
+                        type="file"
+                        id="audioFile"
+                        accept=".wav,.mp3,.m4a,.flac,.ogg,.webm"
+                        onchange="transcribeFile(this.files[0])"
+                    />
+                </div>
+
+                <!-- Transcription Output -->
+                <div class="transcription-section">
+                    <h2 class="section-title">
+                        📝 Transcription Output
+                        <span
+                            id="loadingSpinner"
+                            class="loading-spinner hidden"
+                        ></span>
+                    </h2>
+                    <div
+                        id="transcriptionOutput"
+                        class="transcription-output empty"
+                    >
+                        Click the record button above to start voice
+                        transcription, or upload an audio file.
+                    </div>
+                    <div id="wordCount" class="word-count">Words: 0</div>
+
+                    <div class="file-controls">
+                        <button
+                            id="saveBtn"
+                            class="btn btn-primary"
+                            onclick="saveTranscription()"
+                            disabled
+                        >
+                            💾 Save as Markdown
+                        </button>
+                        <button
+                            id="copyBtn"
+                            class="btn btn-secondary"
+                            onclick="copyTranscription()"
+                            disabled
+                        >
+                            📋 Copy to Clipboard
+                        </button>
+                        <button
+                            id="appendBtn"
+                            class="btn btn-secondary"
+                            onclick="appendToFile()"
+                            disabled
+                        >
+                            ➕ Append to File
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Voice Transcription Interface JavaScript
+            const { ipcRenderer } = require("electron");
+
+            let isRecording = false;
+            let recordingTimer = null;
+            let startTime = null;
+            let mediaRecorder = null;
+            let audioChunks = [];
+            let stream = null;
+            let visualizerInterval = null;
+            let audioContext = null;
+            let analyser = null;
+
+            // Settings
+            let settings = {
+                keepAudio: false,
+                autoSave: true,
+                maxDuration: 300, // 5 minutes
+            };
+
+            // Initialize the interface
+            document.addEventListener("DOMContentLoaded", async () => {
+                showStatus(
+                    "Initializing voice transcription system...",
+                    "warning",
+                );
+
+                // Initialize the AI model first
+                await initializeVoiceSystem();
+
+                // Then check microphone permissions
+                await checkMicrophonePermission();
+                setupVisualizerBars();
+            });
+
+            // Initialize the voice transcription system
+            async function initializeVoiceSystem() {
+                try {
+                    if (window.require) {
+                        const { ipcRenderer } = window.require("electron");
+
+                        showStatus("Loading AI model...", "warning");
+                        const result =
+                            await ipcRenderer.invoke("voice-initialize");
+
+                        if (result.success) {
+                            showStatus(
+                                "AI model loaded successfully!",
+                                "success",
+                            );
+                        } else {
+                            showStatus(
+                                `AI model failed to load: ${result.error}`,
+                                "error",
+                            );
+                            console.error(
+                                "Voice initialization failed:",
+                                result.error,
+                            );
+                        }
+                    } else {
+                        showStatus(
+                            "Voice transcription only available in desktop app",
+                            "warning",
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error initializing voice system:", error);
+                    showStatus(
+                        "Failed to initialize voice system: " + error.message,
+                        "error",
+                    );
+                }
+            }
+
+            // Check microphone permission
+            async function checkMicrophonePermission() {
+                try {
+                    if (
+                        !navigator.mediaDevices ||
+                        !navigator.mediaDevices.getUserMedia
+                    ) {
+                        showStatus(
+                            "Microphone not available in this browser",
+                            "error",
+                        );
+                        return false;
+                    }
+
+                    const permission = await navigator.permissions.query({
+                        name: "microphone",
+                    });
+                    if (permission.state === "denied") {
+                        showStatus(
+                            "Microphone permission denied. Please allow microphone access.",
+                            "error",
+                        );
+                        return false;
+                    }
+
+                    showStatus("Ready to record", "success");
+                    return true;
+                } catch (error) {
+                    console.error(
+                        "Error checking microphone permission:",
+                        error,
+                    );
+                    showStatus("Error checking microphone permission", "error");
+                    return false;
+                }
+            }
+
+            // Setup visualizer bars
+            function setupVisualizerBars() {
+                const visualizer = document.getElementById("audioVisualizer");
+                visualizer.innerHTML = "";
+
+                for (let i = 0; i < 50; i++) {
+                    const bar = document.createElement("div");
+                    bar.className = "visualizer-bar";
+                    bar.style.left = `${i * 6}px`;
+                    visualizer.appendChild(bar);
+                }
+            }
+
+            // Toggle recording
+            async function toggleRecording() {
+                if (!isRecording) {
+                    await startRecording();
+                } else {
+                    await stopRecording();
+                }
+            }
+
+            // Start recording
+            async function startRecording() {
+                try {
+                    if (!(await checkMicrophonePermission())) {
+                        return;
+                    }
+
+                    // Request microphone access
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true,
+                            sampleRate: 16000,
+                        },
+                    });
+
+                    // Setup audio context for visualization
+                    audioContext = new (window.AudioContext ||
+                        window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    source.connect(analyser);
+                    analyser.fftSize = 256;
+
+                    // Setup MediaRecorder
+                    audioChunks = [];
+                    mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: "audio/webm;codecs=opus",
+                    });
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, {
+                            type: "audio/webm",
+                        });
+                        await processRecording(audioBlob);
+                    };
+
+                    // Start recording
+                    mediaRecorder.start(1000);
+                    isRecording = true;
+                    startTime = Date.now();
+
+                    // Update UI
+                    updateRecordingUI(true);
+                    startTimer();
+                    startVisualizer();
+
+                    // Auto-stop after max duration
+                    setTimeout(() => {
+                        if (isRecording) {
+                            stopRecording();
+                        }
+                    }, settings.maxDuration * 1000);
+
+                    showStatus("Recording...", "success");
+                } catch (error) {
+                    console.error("Error starting recording:", error);
+                    showStatus(
+                        "Failed to start recording: " + error.message,
+                        "error",
+                    );
+                    isRecording = false;
+                    updateRecordingUI(false);
+                }
+            }
+
+            // Stop recording
+            async function stopRecording() {
+                if (!isRecording || !mediaRecorder) {
+                    return;
+                }
+
+                try {
+                    mediaRecorder.stop();
+                    isRecording = false;
+
+                    // Stop tracks
+                    if (stream) {
+                        stream.getTracks().forEach((track) => track.stop());
+                        stream = null;
+                    }
+
+                    // Close audio context
+                    if (audioContext) {
+                        audioContext.close();
+                        audioContext = null;
+                    }
+
+                    // Update UI
+                    updateRecordingUI(false);
+                    stopTimer();
+                    stopVisualizer();
+
+                    showStatus("Processing recording...", "warning");
+                } catch (error) {
+                    console.error("Error stopping recording:", error);
+                    showStatus(
+                        "Error stopping recording: " + error.message,
+                        "error",
+                    );
+                }
+            }
+
+            // Pause recording
+            function pauseRecording() {
+                if (mediaRecorder && mediaRecorder.state === "recording") {
+                    mediaRecorder.pause();
+                    document.getElementById("pauseBtn").textContent =
+                        "▶️ Resume";
+                    document.getElementById("pauseBtn").onclick =
+                        resumeRecording;
+                    showStatus("Recording paused", "warning");
+                }
+            }
+
+            // Resume recording
+            function resumeRecording() {
+                if (mediaRecorder && mediaRecorder.state === "paused") {
+                    mediaRecorder.resume();
+                    document.getElementById("pauseBtn").textContent =
+                        "⏸️ Pause";
+                    document.getElementById("pauseBtn").onclick =
+                        pauseRecording;
+                    showStatus("Recording resumed", "success");
+                }
+            }
+
+            // Process recording
+            async function processRecording(audioBlob) {
+                try {
+                    showProgress(0, "Converting audio...");
+
+                    // Convert to WAV for better transcription
+                    const wavBlob = await convertToWav(audioBlob);
+                    showProgress(25, "Preparing for transcription...");
+
+                    // Save audio file temporarily
+                    const audioFile = await saveAudioBlob(wavBlob);
+                    showProgress(50, "Transcribing...");
+
+                    // Send to main process for transcription
+                    const result = await ipcRenderer.invoke(
+                        "transcribe-audio",
+                        {
+                            audioPath: audioFile,
+                            keepAudio: settings.keepAudio,
+                        },
+                    );
+
+                    showProgress(100, "Complete!");
+                    setTimeout(hideProgress, 1000);
+
+                    if (result.success) {
+                        displayTranscription(result.text);
+                        showStatus("Transcription complete!", "success");
+
+                        if (settings.autoSave) {
+                            await saveTranscription();
+                        }
+                    } else {
+                        showStatus(
+                            "Transcription failed: " + result.error,
+                            "error",
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error processing recording:", error);
+                    showStatus(
+                        "Error processing recording: " + error.message,
+                        "error",
+                    );
+                    hideProgress();
+                }
+            }
+
+            // Transcribe uploaded file
+            async function transcribeFile(file) {
+                if (!file) return;
+
+                try {
+                    showProgress(0, "Processing file...");
+                    showStatus("Transcribing uploaded file...", "warning");
+
+                    const result = await ipcRenderer.invoke("transcribe-file", {
+                        filePath: file.path,
+                        keepAudio: settings.keepAudio,
+                    });
+
+                    showProgress(100, "Complete!");
+                    setTimeout(hideProgress, 1000);
+
+                    if (result.success) {
+                        displayTranscription(result.text);
+                        showStatus("File transcription complete!", "success");
+
+                        if (settings.autoSave) {
+                            await saveTranscription();
+                        }
+                    } else {
+                        showStatus(
+                            "File transcription failed: " + result.error,
+                            "error",
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error transcribing file:", error);
+                    showStatus(
+                        "Error transcribing file: " + error.message,
+                        "error",
+                    );
+                    hideProgress();
+                }
+            }
+
+            // Convert audio blob to WAV
+            async function convertToWav(audioBlob) {
+                // For now, return the original blob
+                // In a full implementation, you might want to convert to WAV format
+                return audioBlob;
+            }
+
+            // Save audio blob to temporary file
+            async function saveAudioBlob(audioBlob) {
+                const arrayBuffer = await audioBlob.arrayBuffer();
+                const result = await ipcRenderer.invoke("save-temp-audio", {
+                    audioData: Array.from(new Uint8Array(arrayBuffer)),
+                });
+                return result.filePath;
+            }
+
+            // Display transcription
+            function displayTranscription(text) {
+                const output = document.getElementById("transcriptionOutput");
+                output.textContent = text;
+                output.classList.remove("empty");
+
+                updateWordCount(text);
+                enableTranscriptionControls(true);
+            }
+
+            // Update word count
+            function updateWordCount(text) {
+                const words = text
+                    .trim()
+                    .split(/\s+/)
+                    .filter((word) => word.length > 0);
+                document.getElementById("wordCount").textContent =
+                    `Words: ${words.length}`;
+            }
+
+            // Clear transcription
+            function clearTranscription() {
+                const output = document.getElementById("transcriptionOutput");
+                output.textContent =
+                    "Click the record button above to start voice transcription, or upload an audio file.";
+                output.classList.add("empty");
+
+                updateWordCount("");
+                enableTranscriptionControls(false);
+                showStatus("Ready to record", "success");
+            }
+
+            // Enable/disable transcription controls
+            function enableTranscriptionControls(enabled) {
+                document.getElementById("saveBtn").disabled = !enabled;
+                document.getElementById("copyBtn").disabled = !enabled;
+                document.getElementById("appendBtn").disabled = !enabled;
+            }
+
+            // Save transcription
+            async function saveTranscription() {
+                const text = document.getElementById(
+                    "transcriptionOutput",
+                ).textContent;
+                if (!text || text.includes("Click the record button")) {
+                    return;
+                }
+
+                try {
+                    const result = await ipcRenderer.invoke(
+                        "save-transcription",
+                        {
+                            text: text,
+                            timestamp: new Date().toISOString(),
+                        },
+                    );
+
+                    if (result.success) {
+                        showStatus(`Saved to: ${result.filePath}`, "success");
+                    } else {
+                        showStatus("Error saving transcription", "error");
+                    }
+                } catch (error) {
+                    console.error("Error saving transcription:", error);
+                    showStatus("Error saving transcription", "error");
+                }
+            }
+
+            // Copy to clipboard
+            async function copyTranscription() {
+                const text = document.getElementById(
+                    "transcriptionOutput",
+                ).textContent;
+                if (!text || text.includes("Click the record button")) {
+                    return;
+                }
+
+                try {
+                    await navigator.clipboard.writeText(text);
+                    showStatus("Copied to clipboard!", "success");
+                } catch (error) {
+                    console.error("Error copying to clipboard:", error);
+                    showStatus("Error copying to clipboard", "error");
+                }
+            }
+
+            // Append to existing file
+            async function appendToFile() {
+                const text = document.getElementById(
+                    "transcriptionOutput",
+                ).textContent;
+                if (!text || text.includes("Click the record button")) {
+                    return;
+                }
+
+                try {
+                    const result = await ipcRenderer.invoke(
+                        "append-transcription",
+                        {
+                            text: text,
+                            timestamp: new Date().toISOString(),
+                        },
+                    );
+
+                    if (result.success) {
+                        showStatus(
+                            `Appended to: ${result.filePath}`,
+                            "success",
+                        );
+                    } else {
+                        showStatus("Error appending to file", "error");
+                    }
+                } catch (error) {
+                    console.error("Error appending to file:", error);
+                    showStatus("Error appending to file", "error");
+                }
+            }
+
+            // Update recording UI
+            function updateRecordingUI(recording) {
+                const recordButton = document.getElementById("recordButton");
+                const recordingStatus =
+                    document.getElementById("recordingStatus");
+                const pauseBtn = document.getElementById("pauseBtn");
+                const stopBtn = document.getElementById("stopBtn");
+                const visualizer = document.getElementById("audioVisualizer");
+
+                if (recording) {
+                    recordButton.classList.add("recording");
+                    recordButton.textContent = "🛑";
+                    recordingStatus.textContent = "Recording...";
+                    pauseBtn.classList.remove("hidden");
+                    stopBtn.classList.remove("hidden");
+                    visualizer.classList.add("active");
+                } else {
+                    recordButton.classList.remove("recording");
+                    recordButton.classList.add("stopped");
+                    recordButton.textContent = "🎤";
+                    recordingStatus.textContent = "Ready to Record";
+                    pauseBtn.classList.add("hidden");
+                    stopBtn.classList.add("hidden");
+                    visualizer.classList.remove("active");
+
+                    // Reset button after a delay
+                    setTimeout(() => {
+                        recordButton.classList.remove("stopped");
+                    }, 1000);
+                }
+            }
+
+            // Start timer
+            function startTimer() {
+                recordingTimer = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    document.getElementById("recordingTimer").textContent =
+                        `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+                }, 1000);
+            }
+
+            // Stop timer
+            function stopTimer() {
+                if (recordingTimer) {
+                    clearInterval(recordingTimer);
+                    recordingTimer = null;
+                }
+                document.getElementById("recordingTimer").textContent = "00:00";
+            }
+
+            // Start visualizer
+            function startVisualizer() {
+                if (!analyser) return;
+
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                const bars = document.querySelectorAll(".visualizer-bar");
+
+                visualizerInterval = setInterval(() => {
+                    analyser.getByteFrequencyData(dataArray);
+
+                    for (let i = 0; i < bars.length; i++) {
+                        const value = dataArray[i * 2] || 0;
+                        const height = (value / 255) * 60;
+                        bars[i].style.height = `${Math.max(2, height)}px`;
+                    }
+                }, 50);
+            }
+
+            // Stop visualizer
+            function stopVisualizer() {
+                if (visualizerInterval) {
+                    clearInterval(visualizerInterval);
+                    visualizerInterval = null;
+                }
+
+                const bars = document.querySelectorAll(".visualizer-bar");
+                bars.forEach((bar) => {
+                    bar.style.height = "2px";
+                });
+            }
+
+            // Show status
+            function showStatus(message, type = "info") {
+                const statusBar = document.getElementById("statusBar");
+                const statusText = document.getElementById("statusText");
+
+                statusText.textContent = message;
+                statusBar.className = `status-bar ${type}`;
+                statusBar.style.display = "block";
+
+                if (type === "success") {
+                    setTimeout(() => {
+                        statusBar.style.display = "none";
+                    }, 3000);
+                }
+            }
+
+            // Show progress
+            function showProgress(percent, text) {
+                const container = document.getElementById("progressContainer");
+                const fill = document.getElementById("progressFill");
+                const progressText = document.getElementById("progressText");
+
+                container.classList.remove("hidden");
+                fill.style.width = `${percent}%`;
+                progressText.textContent = text;
+            }
+
+            // Hide progress
+            function hideProgress() {
+                document
+                    .getElementById("progressContainer")
+                    .classList.add("hidden");
+            }
+
+            // Toggle setting
+            function toggleSetting(settingName) {
+                settings[settingName] = !settings[settingName];
+                document
+                    .getElementById(settingName + "Toggle")
+                    .classList.toggle("active", settings[settingName]);
+            }
+
+            // Update setting
+            function updateSetting(settingName, value) {
+                if (settingName === "maxDuration") {
+                    settings[settingName] = parseInt(value);
+                } else {
+                    settings[settingName] = value;
+                }
+            }
+
+            // Handle window close
+            window.addEventListener("beforeunload", () => {
+                if (isRecording) {
+                    stopRecording();
+                }
+            });
+        </script>
+    </body>
+</html>
