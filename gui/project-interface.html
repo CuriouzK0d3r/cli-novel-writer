@@ -875,11 +875,18 @@
                             >ESC: Normal | i: Insert | h/j/k/l: Navigate</span
                         >
                     </div>
-                    <textarea
-                        id="editor-textarea"
-                        class="editor-textarea"
-                        placeholder="Start writing..."
-                    ></textarea>
+                    <div class="editor-textarea-wrapper">
+                        <textarea
+                            id="editor-textarea"
+                            class="editor-textarea"
+                            placeholder="Start writing..."
+                        ></textarea>
+                        <div
+                            id="typewriter-overlay"
+                            class="typewriter-overlay"
+                            style="display: none"
+                        ></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -917,11 +924,18 @@
                     </button>
                 </div>
             </div>
-            <textarea
-                id="focus-mode-textarea"
-                class="focus-mode-textarea"
-                placeholder="Enter focus mode and start writing..."
-            ></textarea>
+            <div class="focus-textarea-wrapper">
+                <textarea
+                    id="focus-mode-textarea"
+                    class="focus-mode-textarea"
+                    placeholder="Enter focus mode and start writing..."
+                ></textarea>
+                <div
+                    id="focus-typewriter-overlay"
+                    class="typewriter-overlay"
+                    style="display: none"
+                ></div>
+            </div>
         </div>
 
         <!-- Create Content Modal -->

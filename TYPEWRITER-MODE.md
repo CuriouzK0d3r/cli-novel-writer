@@ -4,14 +4,15 @@ Typewriter mode is a focus-enhancing feature in the Writers CLI GUI that keeps y
 
 ## What is Typewriter Mode?
 
-Typewriter mode automatically scrolls the editor so that the line you're currently writing on remains vertically centered in the editor window. As you type, move your cursor, or navigate through your document, the view adjusts to keep the active line in the center of your screen.
+Typewriter mode automatically scrolls the editor so that the line you're currently writing on remains vertically centered in the editor window. Additionally, it dims all lines except the current line and one line before/after to help you focus on the immediate context. As you type, move your cursor, or navigate through your document, the view adjusts to keep the active line in the center of your screen with proper focus highlighting.
 
 ## Benefits
 
-- **Enhanced Focus**: Keep your attention on the current line without visual distractions
+- **Enhanced Focus**: Keep your attention on the current line with automatic line dimming that reduces visual distractions
+- **Contextual Awareness**: Only the current line and one line before/after remain fully visible, providing just enough context
 - **Reduced Eye Strain**: No need to track your cursor position across different parts of the screen
 - **Consistent Writing Position**: Your writing area stays in the same visual location
-- **Immersive Experience**: Creates a more natural, typewriter-like writing flow
+- **Immersive Experience**: Creates a more natural, typewriter-like writing flow with focus-driven dimming
 
 ## How to Enable/Disable Typewriter Mode
 
@@ -30,6 +31,8 @@ When typewriter mode is active, you'll see:
 - **Status Indicator**: A centered align icon with "TYPEWRITER" text in the editor info bar
 - **Enhanced Padding**: The editor adds extra padding at the top and bottom for proper centering
 - **Smooth Scrolling**: The editor scrolls smoothly to center your current line
+- **Line Dimming**: All lines except the current line ±1 are dimmed with reduced opacity and subtle blur
+- **Toast Notification**: "Typewriter mode enabled - lines dimmed except current ±1"
 
 ## How It Works
 
@@ -38,7 +41,9 @@ Typewriter mode works by:
 1. **Monitoring Cursor Position**: Tracks where your text cursor is located
 2. **Calculating Line Position**: Determines which line contains your cursor
 3. **Auto-Scrolling**: Adjusts the editor's scroll position to center that line
-4. **Responsive Updates**: Updates the view as you type, click, or use keyboard navigation
+4. **Line Dimming**: Creates an overlay that dims lines outside the focus range (current ±1 line)
+5. **Real-time Updates**: Updates both scrolling and dimming as you type, click, or use keyboard navigation
+6. **Visual Focus**: Maintains smooth transitions between focused and dimmed states
 
 ## Technical Details
 
@@ -48,6 +53,15 @@ Typewriter mode activates on:
 - **Typing**: As you add or delete text
 - **Cursor Movement**: When you click or use arrow keys to move
 - **Line Changes**: When you press Enter to create new lines
+
+### Line Dimming System
+
+The line dimming feature uses an overlay approach:
+- **Overlay Layer**: A transparent div positioned over the textarea
+- **Focus Range**: Current line plus one line before and after (±1) remain fully visible
+- **Dimming Effect**: Other lines get 20-25% opacity with subtle blur effect
+- **Theme Adaptation**: Different dimming intensities for light and dark themes
+- **Performance**: Optimized updates that don't interfere with typing performance
 
 ### Scroll Calculation
 
@@ -121,12 +135,15 @@ The feature calculates the optimal scroll position by:
 - May not work perfectly with extremely long lines that wrap
 - Optimal experience requires documents with regular line breaks
 - Very small editor windows may not provide ideal centering
+- Line dimming overlay requires modern browser support for CSS overlays
+- Best visual experience achieved with documents that have regular paragraph breaks
 
 ## Keyboard Shortcuts
 
 Currently, typewriter mode can only be toggled via the toolbar button. Future versions may include:
 - `Ctrl/Cmd + T`: Toggle typewriter mode
 - Integration with Vim command mode
+- Customizable focus range (±2, ±3 lines instead of just ±1)
 
 ## Configuration
 
@@ -134,6 +151,9 @@ Typewriter mode currently uses these default settings:
 - **Debounce Delay**: 10ms for responsive scrolling
 - **Scroll Behavior**: Smooth scrolling enabled
 - **Padding**: 50vh top and bottom padding when active
+- **Focus Range**: ±1 line (current line plus one before and after)
+- **Dimming Opacity**: 20% for light theme, 25% for dark theme
+- **Transition Speed**: 0.3s for smooth opacity changes
 
 Future versions may include customizable settings for these parameters.
 
@@ -158,11 +178,13 @@ Typewriter mode works seamlessly with:
 ## Future Enhancements
 
 Planned improvements include:
+- **Customizable Focus Range**: Choose how many lines before/after to keep visible (±1, ±2, ±3)
 - **Customizable Center Position**: Choose where the active line appears (top third, center, etc.)
 - **Focus Line Highlighting**: Subtle highlighting of the current line
 - **Keyboard Shortcuts**: Quick toggle options
 - **Smart Centering**: Better handling of wrapped lines and code blocks
-- **Configuration Options**: User-customizable scroll behavior and timing
+- **Configuration Options**: User-customizable scroll behavior, timing, and dimming intensity
+- **Advanced Dimming**: Gradient dimming effects and paragraph-aware dimming
 
 ---
 

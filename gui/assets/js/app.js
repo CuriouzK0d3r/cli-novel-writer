@@ -17,12 +17,15 @@ class WritersApp {
     // Typewriter mode state
     this.typewriterEnabled = false;
     this.typewriterScrollTimeout = null;
+    this.typewriterOverlay = null;
+    this.typewriterFocusLines = 1; // Number of lines before/after cursor to keep in focus
 
     // Focus mode state
     this.focusModeActive = false;
     this.focusModeElement = null;
     this.focusTypewriterEnabled = false;
     this.focusTypewriterScrollTimeout = null;
+    this.focusTypewriterOverlay = null;
     this.originalContent = null;
     this.focusAutoSaveTimeout = null;
 
@@ -32,6 +35,31 @@ class WritersApp {
   async init() {
     this.setupGlobalKeyboardShortcuts();
     this.setupEventListeners();
+
+    // Debug: global click tracer for focus typewriter button
+    if (!window.__focusTypewriterDebugInstalled) {
+      document.addEventListener(
+        "click",
+        (e) => {
+          if (e.target && e.target.id === "focus-typewriter-toggle-btn") {
+            const btn = e.target;
+            const rect = btn.getBoundingClientRect();
+            const styles = window.getComputedStyle(btn);
+            console.log("[FocusTypewriter][Debug] Raw click detected", {
+              rect,
+              display: styles.display,
+              visibility: styles.visibility,
+              opacity: styles.opacity,
+              pointerEvents: styles.pointerEvents,
+              zIndex: styles.zIndex,
+            });
+          }
+        },
+        true,
+      );
+      window.__focusTypewriterDebugInstalled = true;
+    }
+
     try {
       await this.loadProject();
       this.hideLoading();
@@ -540,6 +568,19 @@ class WritersApp {
       "focus-typewriter-toggle-btn",
     );
 
+    // Defensive: raise header z-index & pointer events (in case an overlay covers it)
+    const focusHeader = document.querySelector(".focus-mode-header");
+    if (focusHeader) {
+      if (!focusHeader.style.zIndex) focusHeader.style.zIndex = "10001";
+      if (
+        !focusHeader.style.position ||
+        focusHeader.style.position === "static"
+      ) {
+        focusHeader.style.position = "relative";
+      }
+      focusHeader.style.pointerEvents = "auto";
+    }
+
     focusExitBtn.addEventListener("click", () => {
       this.exitFocusMode();
     });
@@ -548,9 +589,30 @@ class WritersApp {
       this.saveFocusMode();
     });
 
-    focusTypewriterBtn.addEventListener("click", () => {
-      this.toggleFocusTypewriterMode();
-    });
+    if (focusTypewriterBtn) {
+      // Attach listener with debug logging
+      focusTypewriterBtn.addEventListener("click", (ev) => {
+        console.log("[FocusTypewriter][Debug] Button click handler firing", {
+          enabled: this.focusTypewriterEnabled,
+          focusModeActive: this.focusModeActive,
+        });
+        this.toggleFocusTypewriterMode();
+      });
+
+      // If the button is visually present but potentially blocked, report its metrics
+      const btnRect = focusTypewriterBtn.getBoundingClientRect();
+      const btnStyles = window.getComputedStyle(focusTypewriterBtn);
+      console.log("[FocusTypewriter][Debug] Init button metrics", {
+        rect: btnRect,
+        display: btnStyles.display,
+        visibility: btnStyles.visibility,
+        opacity: btnStyles.opacity,
+        pointerEvents: btnStyles.pointerEvents,
+        zIndex: btnStyles.zIndex,
+      });
+    } else {
+      console.warn("[FocusTypewriter] Toggle button not found during setup.");
+    }
 
     // Focus mode keyboard shortcuts and stats
     const focusTextarea = document.getElementById("focus-mode-textarea");
@@ -562,9 +624,15 @@ class WritersApp {
     // Focus mode keyboard shortcuts
     focusTextarea.addEventListener("keydown", (e) => {
       // Save shortcut in focus mode
-      if (e.ctrlKey && e.key === "s") {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
         this.saveFocusMode();
+        return;
+      }
+      // Typewriter toggle inside focus mode (match main editor)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "t") {
+        e.preventDefault();
+        this.toggleFocusTypewriterMode();
       }
     });
 
@@ -1717,7 +1785,10 @@ class WritersApp {
     if (this.editorElement) {
       if (this.typewriterEnabled) {
         this.setupTypewriterMode();
-        this.showToast("Typewriter mode enabled", "info");
+        this.showToast(
+          "Typewriter mode enabled - lines dimmed except current ±1",
+          "info",
+        );
         // Enable debug mode temporarily
         window.WritersDebug = true;
         console.log(
@@ -1754,20 +1825,30 @@ class WritersApp {
     if (!this.editorElement) return;
 
     this.editorElement.classList.add("typewriter-mode");
+    this.editorElement.classList.add("with-overlay");
     this.updateTypewriterIndicator();
+
+    // Create and setup the overlay for line dimming
+    this.createTypewriterOverlay();
 
     // Create stable bound handlers so we can remove them later
     if (!this._onTypewriterScroll) {
       this._onTypewriterScroll = this.handleTypewriterScroll.bind(this);
     }
+    if (!this._onTypewriterUpdate) {
+      this._onTypewriterUpdate = this.updateTypewriterOverlay.bind(this);
+    }
 
-    // Add scroll event listener for centering
+    // Add scroll event listener for centering and dimming
     this.editorElement.addEventListener("keyup", this._onTypewriterScroll);
     this.editorElement.addEventListener("click", this._onTypewriterScroll);
+    this.editorElement.addEventListener("input", this._onTypewriterUpdate);
+    this.editorElement.addEventListener("scroll", this._onTypewriterUpdate);
 
-    // Initial center
+    // Initial center and overlay update
     setTimeout(() => {
       this.centerCurrentLine();
+      this.updateTypewriterOverlay();
     }, 100);
   }
 
@@ -1775,6 +1856,7 @@ class WritersApp {
     if (!this.editorElement) return;
 
     this.editorElement.classList.remove("typewriter-mode");
+    this.editorElement.classList.remove("with-overlay");
     this.updateTypewriterIndicator();
 
     // Remove scroll event listeners using the stored handler
@@ -1783,6 +1865,17 @@ class WritersApp {
       this.editorElement.removeEventListener("click", this._onTypewriterScroll);
       this._onTypewriterScroll = null;
     }
+    if (this._onTypewriterUpdate) {
+      this.editorElement.removeEventListener("input", this._onTypewriterUpdate);
+      this.editorElement.removeEventListener(
+        "scroll",
+        this._onTypewriterUpdate,
+      );
+      this._onTypewriterUpdate = null;
+    }
+
+    // Remove overlay
+    this.removeTypewriterOverlay();
 
     // Clear any pending timeouts
     if (this.typewriterScrollTimeout) {
@@ -1801,6 +1894,7 @@ class WritersApp {
 
     this.typewriterScrollTimeout = setTimeout(() => {
       this.centerCurrentLine();
+      this.updateTypewriterOverlay();
     }, 10);
   }
 
@@ -1858,6 +1952,72 @@ class WritersApp {
       top: finalScrollTop,
       behavior: "smooth",
     });
+  }
+
+  // Typewriter overlay methods for line dimming
+  createTypewriterOverlay() {
+    this.typewriterOverlay = document.getElementById("typewriter-overlay");
+    if (!this.typewriterOverlay) return;
+
+    // Show the overlay
+    this.typewriterOverlay.style.display = "block";
+
+    // Copy styles from textarea to overlay
+    const textareaStyles = window.getComputedStyle(this.editorElement);
+    this.typewriterOverlay.style.fontFamily = textareaStyles.fontFamily;
+    this.typewriterOverlay.style.fontSize = textareaStyles.fontSize;
+    this.typewriterOverlay.style.lineHeight = textareaStyles.lineHeight;
+    this.typewriterOverlay.style.padding = textareaStyles.padding;
+    this.typewriterOverlay.style.paddingTop = textareaStyles.paddingTop;
+    this.typewriterOverlay.style.paddingBottom = textareaStyles.paddingBottom;
+  }
+
+  removeTypewriterOverlay() {
+    if (this.typewriterOverlay) {
+      this.typewriterOverlay.style.display = "none";
+      this.typewriterOverlay.innerHTML = "";
+    }
+  }
+
+  updateTypewriterOverlay() {
+    if (
+      !this.typewriterEnabled ||
+      !this.typewriterOverlay ||
+      !this.editorElement
+    )
+      return;
+
+    const textarea = this.editorElement;
+    const cursorPosition = textarea.selectionStart;
+    const text = textarea.value;
+    const lines = text.split("\n");
+
+    // Calculate current line
+    const textBeforeCursor = text.substring(0, cursorPosition);
+    const currentLineIndex = textBeforeCursor.split("\n").length - 1;
+
+    // Create overlay content
+    let overlayHTML = "";
+    lines.forEach((line, index) => {
+      const shouldDim =
+        Math.abs(index - currentLineIndex) > this.typewriterFocusLines;
+      const className = shouldDim ? "dimmed" : "focused";
+
+      // Use &nbsp; for empty lines to maintain line height
+      const lineContent = line.length === 0 ? "&nbsp;" : this.escapeHtml(line);
+      overlayHTML += `<div class="typewriter-overlay-line ${className}">${lineContent}</div>`;
+    });
+
+    this.typewriterOverlay.innerHTML = overlayHTML;
+
+    // Sync scroll position (translate overlay instead of scrolling it)
+    this.typewriterOverlay.style.transform = `translateY(-${textarea.scrollTop}px)`;
+  }
+
+  escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   // Debug helper for typewriter mode
@@ -1981,29 +2141,68 @@ class WritersApp {
       this.scheduleAutoSave();
     }
 
+    // Clean up typewriter mode before clearing element (fix ordering)
+    this.disableFocusTypewriterMode();
+
     // Hide focus mode
     focusMode.classList.remove("active");
     this.focusModeActive = false;
     this.focusModeElement = null;
 
-    // Clean up typewriter mode for focus
-    this.disableFocusTypewriterMode();
-
     this.showToast("Exited focus mode", "info");
   }
 
   toggleFocusTypewriterMode() {
+    // Guard: must be in focus mode for focus-specific typewriter behavior
+    if (!this.focusModeActive) {
+      console.warn(
+        "[FocusTypewriter] Toggle requested while focus mode inactive.",
+      );
+      this.showToast(
+        "Enter Focus Mode first to use typewriter centering",
+        "warning",
+      );
+      return;
+    }
+
+    const previous = this.focusTypewriterEnabled;
     this.focusTypewriterEnabled = !this.focusTypewriterEnabled;
+
+    // Extra diagnostics: check button + overlay state
+    const btn = document.getElementById("focus-typewriter-toggle-btn");
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      const styles = window.getComputedStyle(btn);
+      console.log("[FocusTypewriter] Toggle:", {
+        previous,
+        now: this.focusTypewriterEnabled,
+        focusModeActive: this.focusModeActive,
+        hasElement: !!this.focusModeElement,
+        btnRect: rect,
+        btnPointerEvents: styles.pointerEvents,
+        btnOpacity: styles.opacity,
+        btnZ: styles.zIndex,
+      });
+    } else {
+      console.log("[FocusTypewriter] Toggle (button missing in DOM)");
+    }
+
     this.updateFocusTypewriterButton();
 
-    if (this.focusModeActive) {
-      if (this.focusTypewriterEnabled) {
-        this.setupFocusTypewriterMode();
-        this.showToast("Focus typewriter mode enabled", "info");
-      } else {
-        this.disableFocusTypewriterMode();
-        this.showToast("Focus typewriter mode disabled", "info");
-      }
+    if (this.focusTypewriterEnabled) {
+      this.setupFocusTypewriterMode();
+      console.log(
+        "[FocusTypewriter] Enabled. Overlay present?",
+        !!this.focusTypewriterOverlay,
+      );
+      this.showToast(
+        "Focus typewriter mode enabled - lines dimmed except current ±1",
+        "info",
+      );
+    } else {
+      this.disableFocusTypewriterMode();
+      console.log("[FocusTypewriter] Disabled");
+      this.showToast("Focus typewriter mode disabled", "info");
     }
   }
 
@@ -2026,17 +2225,31 @@ class WritersApp {
   }
 
   setupFocusTypewriterMode() {
-    if (!this.focusModeElement) return;
+    if (!this.focusModeElement) {
+      console.log(
+        "[FocusTypewriter] setupFocusTypewriterMode aborted - no element",
+      );
+      return;
+    }
+    console.log("[FocusTypewriter] setupFocusTypewriterMode start");
 
     this.focusModeElement.classList.add("typewriter-mode");
+    this.focusModeElement.classList.add("with-overlay");
+
+    // Create and setup the overlay for line dimming
+    this.createFocusTypewriterOverlay();
 
     // Create stable bound handlers so we can remove them later
     if (!this._onFocusTypewriterScroll) {
       this._onFocusTypewriterScroll =
         this.handleFocusTypewriterScroll.bind(this);
     }
+    if (!this._onFocusTypewriterUpdate) {
+      this._onFocusTypewriterUpdate =
+        this.updateFocusTypewriterOverlay.bind(this);
+    }
 
-    // Add scroll event listeners
+    // Add scroll event listener for centering and dimming
     this.focusModeElement.addEventListener(
       "keyup",
       this._onFocusTypewriterScroll,
@@ -2045,17 +2258,32 @@ class WritersApp {
       "click",
       this._onFocusTypewriterScroll,
     );
+    this.focusModeElement.addEventListener(
+      "input",
+      this._onFocusTypewriterUpdate,
+    );
+    this.focusModeElement.addEventListener(
+      "scroll",
+      this._onFocusTypewriterUpdate,
+    );
 
-    // Initial center
+    // Initial center and overlay update
     setTimeout(() => {
       this.centerFocusLine();
+      this.updateFocusTypewriterOverlay();
     }, 100);
   }
 
   disableFocusTypewriterMode() {
+    console.log(
+      "[FocusTypewriter] disableFocusTypewriterMode called (has element?",
+      !!this.focusModeElement,
+      ")",
+    );
     if (!this.focusModeElement) return;
 
     this.focusModeElement.classList.remove("typewriter-mode");
+    this.focusModeElement.classList.remove("with-overlay");
 
     // Remove event listeners using the stored handler
     if (this._onFocusTypewriterScroll) {
@@ -2069,6 +2297,20 @@ class WritersApp {
       );
       this._onFocusTypewriterScroll = null;
     }
+    if (this._onFocusTypewriterUpdate) {
+      this.focusModeElement.removeEventListener(
+        "input",
+        this._onFocusTypewriterUpdate,
+      );
+      this.focusModeElement.removeEventListener(
+        "scroll",
+        this._onFocusTypewriterUpdate,
+      );
+      this._onFocusTypewriterUpdate = null;
+    }
+
+    // Remove overlay
+    this.removeFocusTypewriterOverlay();
 
     // Clear any pending timeouts
     if (this.focusTypewriterScrollTimeout) {
@@ -2087,6 +2329,7 @@ class WritersApp {
 
     this.focusTypewriterScrollTimeout = setTimeout(() => {
       this.centerFocusLine();
+      this.updateFocusTypewriterOverlay();
     }, 10);
   }
 
@@ -2151,6 +2394,70 @@ class WritersApp {
     });
   }
 
+  // Focus mode typewriter overlay methods for line dimming
+  createFocusTypewriterOverlay() {
+    this.focusTypewriterOverlay = document.getElementById(
+      "focus-typewriter-overlay",
+    );
+    if (!this.focusTypewriterOverlay) return;
+
+    // Show the overlay
+    this.focusTypewriterOverlay.style.display = "block";
+
+    // Copy styles from textarea to overlay
+    const textareaStyles = window.getComputedStyle(this.focusModeElement);
+    this.focusTypewriterOverlay.style.fontFamily = textareaStyles.fontFamily;
+    this.focusTypewriterOverlay.style.fontSize = textareaStyles.fontSize;
+    this.focusTypewriterOverlay.style.lineHeight = textareaStyles.lineHeight;
+    this.focusTypewriterOverlay.style.padding = textareaStyles.padding;
+    this.focusTypewriterOverlay.style.paddingTop = textareaStyles.paddingTop;
+    this.focusTypewriterOverlay.style.paddingBottom =
+      textareaStyles.paddingBottom;
+  }
+
+  removeFocusTypewriterOverlay() {
+    if (this.focusTypewriterOverlay) {
+      this.focusTypewriterOverlay.style.display = "none";
+      this.focusTypewriterOverlay.innerHTML = "";
+    }
+  }
+
+  updateFocusTypewriterOverlay() {
+    if (
+      !this.focusTypewriterEnabled ||
+      !this.focusTypewriterOverlay ||
+      !this.focusModeElement
+    )
+      return;
+
+    const textarea = this.focusModeElement;
+    const cursorPosition = textarea.selectionStart;
+    const text = textarea.value;
+    const lines = text.split("\n");
+
+    // Calculate current line
+    const textBeforeCursor = text.substring(0, cursorPosition);
+    const currentLineIndex = textBeforeCursor.split("\n").length - 1;
+
+    // Create overlay content
+    let overlayHTML = "";
+    lines.forEach((line, index) => {
+      const shouldDim =
+        Math.abs(index - currentLineIndex) > this.typewriterFocusLines;
+      const className = shouldDim ? "dimmed" : "focused";
+
+      // Use &nbsp; for empty lines to maintain line height
+      const lineContent = line.length === 0 ? "&nbsp;" : this.escapeHtml(line);
+      overlayHTML += `<div class="typewriter-overlay-line ${className}">${lineContent}</div>`;
+    });
+
+    this.focusTypewriterOverlay.innerHTML = overlayHTML;
+
+    // Sync scroll position (translate overlay instead of scrolling it)
+    this.focusTypewriterOverlay.style.transform = `translateY(-${textarea.scrollTop}px)`;
+  }
+
+  // Vim keybinding methods
   updateFocusStats() {
     if (!this.focusModeActive) return;
 
