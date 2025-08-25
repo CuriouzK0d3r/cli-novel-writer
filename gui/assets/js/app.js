@@ -1526,12 +1526,38 @@ class WritersApp {
         break;
 
       case "u":
-        // Undo (if supported)
+        // Undo (map 'u' in normal mode to trigger undo)
         if (e.ctrlKey || e.metaKey) {
           // Let browser handle Ctrl+Z/Cmd+Z
           return;
         }
         e.preventDefault();
+        // Attempt browser/native undo first (works in Electron renderer)
+        try {
+          document.execCommand("undo");
+        } catch (err) {
+          // Fallback: if there's a custom undo implementation, call it
+          if (
+            this.editorElement &&
+            typeof this.editorElement.undo === "function"
+          ) {
+            try {
+              this.editorElement.undo();
+            } catch (e) {
+              // ignore
+            }
+          }
+        }
+        // Update UI and schedule a save to keep state consistent
+        if (typeof this.updateEditorStats === "function") {
+          this.updateEditorStats();
+        }
+        if (typeof this.scheduleAutoSave === "function") {
+          this.scheduleAutoSave();
+        }
+        if (typeof this.showToast === "function") {
+          this.showToast("Undo", "info");
+        }
         break;
 
       default:
