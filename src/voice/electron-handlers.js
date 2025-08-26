@@ -7,6 +7,12 @@ const VoiceTranscriber = require("./transcriber");
 class VoiceElectronHandlers {
   constructor() {
     this.transcriber = new VoiceTranscriber();
+    this.availableModels = [
+      { id: "Xenova/whisper-tiny", label: "Whisper Tiny (fastest, lowest accuracy)" },
+      { id: "Xenova/whisper-base.en", label: "Whisper Base EN (default)" },
+      { id: "Xenova/whisper-base", label: "Whisper Base (multi-lingual)" },
+      { id: "Xenova/whisper-small", label: "Whisper Small (slower, better accuracy)" },
+    ];
     this.setupHandlers();
   }
 
@@ -15,9 +21,59 @@ class VoiceElectronHandlers {
     ipcMain.handle("voice-initialize", async () => {
       try {
         await this.transcriber.initialize();
-        return { success: true };
+        return { success: true, model: this.transcriber.getCurrentModel() };
       } catch (error) {
         console.error("Voice initialization failed:", error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    // Get available models
+    ipcMain.handle("voice-get-models", async () => {
+      try {
+        return {
+          success: true,
+          models: this.availableModels,
+          current: this.transcriber.getCurrentModel(),
+        };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    // Set active model
+    ipcMain.handle("voice-set-model", async (event, { modelId }) => {
+      try {
+        await this.transcriber.setModel(modelId);
+        return { success: true, model: this.transcriber.getCurrentModel() };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    // Choose local model directory (expects model.json etc.)
+    ipcMain.handle("voice-select-local-model", async () => {
+      try {
+        const result = await dialog.showOpenDialog({
+          title: "Select Local Whisper Model Directory",
+          properties: ["openDirectory"],
+        });
+        if (result.canceled || result.filePaths.length === 0) {
+          return { success: false, error: "No directory selected" };
+        }
+        const dir = result.filePaths[0];
+        // Basic validation: check for at least one .json or .onnx file
+        const files = await fs.readdir(dir);
+        if (!files.some((f) => /model|config/i.test(f))) {
+          return { success: false, error: "Directory doesn't appear to contain a model" };
+        }
+        await this.transcriber.setModel(dir);
+        // Add to available list (dedupe)
+        if (!this.availableModels.find((m) => m.id === dir)) {
+          this.availableModels.push({ id: dir, label: `Local: ${path.basename(dir)}` });
+        }
+        return { success: true, model: dir };
+      } catch (error) {
         return { success: false, error: error.message };
       }
     });
@@ -354,6 +410,9 @@ class VoiceElectronHandlers {
     ipcMain.removeHandler("get-audio-devices");
     ipcMain.removeHandler("convert-audio");
     ipcMain.removeHandler("cleanup-voice-files");
+  ipcMain.removeHandler("voice-get-models");
+  ipcMain.removeHandler("voice-set-model");
+  ipcMain.removeHandler("voice-select-local-model");
   }
 }
 

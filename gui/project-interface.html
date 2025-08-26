@@ -725,6 +725,18 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="setting-item">
+                                            <label for="voice-model-select">AI Model:</label>
+                                            <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
+                                                <select id="voice-model-select" style="flex:1; max-width: 260px;">
+                                                    <option value="">Loading models...</option>
+                                                </select>
+                                                <button id="voice-model-local-btn" class="btn btn-secondary" style="padding:6px 10px; font-size:12px;">
+                                                    <i class="fas fa-folder-open"></i>
+                                                </button>
+                                            </div>
+                                            <small id="voice-model-hint" style="display:block; margin-top:6px; color:#666;">Select a Whisper model. Larger models improve accuracy but are slower.</small>
+                                        </div>
+                                        <div class="setting-item">
                                             <label for="voice-keep-audio">
                                                 <input
                                                     type="checkbox"

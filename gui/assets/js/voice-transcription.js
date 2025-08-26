@@ -65,6 +65,8 @@ class VoiceTranscriptionManager {
     this.keepAudioCheckbox = document.getElementById("voice-keep-audio");
     this.autoSaveCheckbox = document.getElementById("voice-auto-save");
     this.maxDurationSelect = document.getElementById("voice-max-duration");
+  this.modelSelect = document.getElementById("voice-model-select");
+  this.localModelBtn = document.getElementById("voice-model-local-btn");
 
     // Recent list
     this.recentList = document.getElementById("voice-recent-list");
@@ -98,6 +100,8 @@ class VoiceTranscriptionManager {
     this.maxDurationSelect?.addEventListener("change", (e) => {
       this.settings.maxDuration = parseInt(e.target.value);
     });
+  this.modelSelect?.addEventListener("change", (e) => this.changeModel(e.target.value));
+  this.localModelBtn?.addEventListener("click", () => this.selectLocalModel());
 
     // Transcription editing
     this.transcriptionOutput?.addEventListener("input", () =>
@@ -121,7 +125,9 @@ class VoiceTranscriptionManager {
         const result = await ipcRenderer.invoke("voice-initialize");
 
         if (result.success) {
-          this.updateModelStatus("ready", "AI model ready");
+          this.currentModel = result.model;
+          this.updateModelStatus("ready", `Model ready`);
+          await this.loadAvailableModels();
         } else {
           this.updateModelStatus("error", "AI model failed to load");
           console.error("Voice initialization failed:", result.error);
@@ -136,6 +142,76 @@ class VoiceTranscriptionManager {
 
     // Also check system status
     await this.checkSystemStatus();
+  }
+
+  async loadAvailableModels() {
+    if (!window.require || !this.modelSelect) return;
+    try {
+      const { ipcRenderer } = window.require("electron");
+      const res = await ipcRenderer.invoke("voice-get-models");
+      if (!res.success) return;
+      this.modelSelect.innerHTML = "";
+      res.models.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.textContent = m.label;
+        if (m.id === res.current) opt.selected = true;
+        this.modelSelect.appendChild(opt);
+      });
+      if (![...this.modelSelect.options].some(o => o.value === res.current)) {
+        const opt = document.createElement("option");
+        opt.value = res.current;
+        opt.textContent = `Current: ${res.current}`;
+        opt.selected = true;
+        this.modelSelect.appendChild(opt);
+      }
+    } catch (e) {
+      console.error("Failed to load models", e);
+    }
+  }
+
+  async changeModel(modelId) {
+    if (!modelId || !window.require) return;
+    try {
+      this.updateModelStatus("loading", "Switching model...");
+      const { ipcRenderer } = window.require("electron");
+      const res = await ipcRenderer.invoke("voice-set-model", { modelId });
+      if (res.success) {
+        this.currentModel = res.model;
+        this.updateModelStatus("ready", "Model ready");
+        this.showToast(`Model set: ${res.model}`, "success");
+      } else {
+        this.updateModelStatus("error", "Model error");
+        this.showToast(`Model switch failed: ${res.error}`, "error");
+      }
+    } catch (e) {
+      this.updateModelStatus("error", "Model error");
+      this.showToast(`Model switch error: ${e.message}`, "error");
+    }
+  }
+
+  async selectLocalModel() {
+    if (!window.require) return;
+    try {
+      this.updateModelStatus("loading", "Selecting local model...");
+      const { ipcRenderer } = window.require("electron");
+      const res = await ipcRenderer.invoke("voice-select-local-model");
+      if (res.success) {
+        this.currentModel = res.model;
+        this.showToast("Local model loaded", "success");
+        await this.loadAvailableModels();
+        if (this.modelSelect) this.modelSelect.value = res.model;
+        this.updateModelStatus("ready", "Model ready");
+      } else if (res.error && res.error !== "No directory selected") {
+        this.updateModelStatus("error", "Local model error");
+        this.showToast(`Local model error: ${res.error}`, "error");
+      } else {
+        this.updateModelStatus("ready", "Model unchanged");
+      }
+    } catch (e) {
+      this.updateModelStatus("error", "Local model error");
+      this.showToast(`Local model load failed: ${e.message}`, "error");
+    }
   }
 
   async checkSystemStatus() {

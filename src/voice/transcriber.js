@@ -7,49 +7,97 @@ const chalk = require("chalk");
 const AudioProcessor = require("./audio-processor");
 
 class VoiceTranscriber {
-  constructor() {
+  constructor(options = {}) {
     this.transcriber = null;
     this.isRecording = false;
     this.outputPath = null;
     this.recordingStream = null;
     this.fileWriter = null;
     this.audioProcessor = new AudioProcessor();
+    this.modelId = options.modelId || "Xenova/whisper-base.en"; // default
+    this.modelLoading = null; // promise guard
   }
 
   /**
    * Initialize the Whisper transcription model
    */
-  async initialize() {
-    if (this.transcriber) {
+  async initialize(modelOverride = null) {
+    if (modelOverride && modelOverride !== this.modelId) {
+      await this.setModel(modelOverride);
+    } else if (this.transcriber) {
       return this.transcriber;
+    }
+
+    // If a load is already in progress, await it (avoid duplicate downloads)
+    if (this.modelLoading) {
+      return this.modelLoading;
     }
 
     console.log(
       chalk.yellow(
-        "🤖 Loading Whisper model (this may take a moment on first run)...",
+        `🤖 Loading Whisper model "${this.modelId}" (this may take a moment on first run)...`,
       ),
     );
 
-    try {
-      // Use Whisper tiny model for faster processing
-      this.transcriber = await pipeline(
-        "automatic-speech-recognition",
-        "Xenova/whisper-base.en",
-        {
-          chunk_length_s: 30,
-          stride_length_s: 5,
-        },
-      );
+    this.modelLoading = (async () => {
+      try {
+        this.transcriber = await pipeline(
+          "automatic-speech-recognition",
+          this.modelId,
+          {
+            chunk_length_s: 30,
+            stride_length_s: 5,
+          },
+        );
+        console.log(
+          chalk.green(`✅ Whisper model loaded successfully: ${this.modelId}`),
+        );
+        return this.transcriber;
+      } catch (error) {
+        console.error(
+          chalk.red("❌ Failed to load Whisper model:"),
+          error.message,
+        );
+        // Reset model on failure so we can retry later
+        this.transcriber = null;
+        throw error;
+      } finally {
+        this.modelLoading = null;
+      }
+    })();
 
-      console.log(chalk.green("✅ Whisper model loaded successfully!"));
-      return this.transcriber;
-    } catch (error) {
-      console.error(
-        chalk.red("❌ Failed to load Whisper model:"),
-        error.message,
-      );
-      throw error;
+    return this.modelLoading;
+  }
+
+  /**
+   * Change the active model (accepts Hugging Face repo ID or local directory)
+   * @param {string} modelId
+   */
+  async setModel(modelId) {
+    if (!modelId || typeof modelId !== "string") {
+      throw new Error("Model identifier must be a non-empty string");
     }
+
+    if (modelId === this.modelId && this.transcriber) {
+      return this.transcriber;
+    }
+
+    // Attempt graceful disposal of previous pipeline if possible
+    if (this.transcriber && typeof this.transcriber.dispose === "function") {
+      try {
+        this.transcriber.dispose();
+      } catch (_) {
+        // ignore
+      }
+    }
+
+    this.transcriber = null;
+    this.modelId = modelId;
+    return this.initialize();
+  }
+
+  getCurrentModel() {
+    return this.modelId;
   }
 
   /**
@@ -243,7 +291,7 @@ class VoiceTranscriber {
     console.log(chalk.blue("🎯 Processing audio file..."));
 
     try {
-      await this.initialize();
+  await this.initialize();
 
       // Validate audio file first
       const validation = this.audioProcessor.validateAudioFile(audioPath);
@@ -262,7 +310,7 @@ class VoiceTranscriber {
       }
 
       // Transcribe using processed audio data
-      const result = await this.transcriber(audioData);
+  const result = await this.transcriber(audioData);
 
       if (options.progress) {
         options.progress(100); // Transcription complete
@@ -372,7 +420,7 @@ class VoiceTranscriber {
       includeTimestamps = false,
     } = options;
 
-    await this.initialize();
+  await this.initialize();
 
     const results = [];
 
